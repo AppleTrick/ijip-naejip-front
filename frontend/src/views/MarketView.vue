@@ -81,7 +81,7 @@ const goToAnalysis = () => {
 <template>
   <div class="flex-1 relative overflow-hidden flex h-full">
     <!-- Left Sidebar (Property Details) -->
-    <div v-if="selectedProperty" class="w-full md:w-[480px] bg-white border-r border-gray-200 h-full z-30 shadow-2xl overflow-y-auto flex flex-col animate-slide-in-left absolute md:relative">
+    <div v-if="selectedProperty" class="absolute top-24 left-4 bottom-4 w-full md:w-[420px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl z-30 overflow-hidden flex flex-col animate-slide-in-left border border-white/50">
       <!-- Header Image Placeholder -->
       <div class="h-64 bg-gray-200 relative group">
         <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
@@ -91,7 +91,7 @@ const goToAnalysis = () => {
           <X class="w-5 h-5" />
         </button>
         <div class="absolute bottom-4 left-4">
-          <span class="px-3 py-1 rounded-lg bg-lime-500 text-white text-xs font-bold shadow-sm">{{ selectedProperty.type }}</span>
+          <span class="px-3 py-1 rounded-lg bg-[#4A70A9] text-white text-xs font-bold shadow-sm">{{ selectedProperty.type }}</span>
         </div>
       </div>
 
@@ -103,7 +103,7 @@ const goToAnalysis = () => {
             <button 
               @click="isInComparison(selectedProperty.id) ? removeFromComparison(selectedProperty.id) : addToComparison(selectedProperty)"
               class="p-2 rounded-full transition-colors"
-              :class="isInComparison(selectedProperty.id) ? 'bg-lime-100 text-lime-600 hover:bg-lime-200' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+              :class="isInComparison(selectedProperty.id) ? 'bg-[#8FABD4]/30 text-[#4A70A9] hover:bg-[#8FABD4]/50' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
               :title="isInComparison(selectedProperty.id) ? '비교함에서 제거' : '비교함에 추가'"
             >
               <component :is="isInComparison(selectedProperty.id) ? Check : Plus" class="w-6 h-6" />
@@ -115,9 +115,9 @@ const goToAnalysis = () => {
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="bg-lime-50 p-4 rounded-2xl border border-lime-100">
-            <p class="text-sm text-lime-700 font-semibold mb-1">매매가</p>
-            <p class="text-xl font-bold text-lime-900">{{ selectedProperty.price }}</p>
+          <div class="bg-[#EFECE3] p-5 rounded-2xl border border-[#8FABD4]">
+            <p class="text-sm text-[#4A70A9] font-bold mb-1">매매가</p>
+            <p class="text-3xl font-[800] text-[#4A70A9] tracking-tight">{{ selectedProperty.price }}</p>
           </div>
           <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
             <p class="text-sm text-gray-500 mb-1">관리비</p>
@@ -144,12 +144,12 @@ const goToAnalysis = () => {
         </div>
 
         <!-- Safety Check CTA -->
-        <div class="bg-lime-50 rounded-2xl p-6 border border-lime-100 mb-6">
-          <h3 class="font-bold text-lime-800 mb-2 flex items-center">
-            <ShieldCheck class="w-5 h-5 mr-2" />
+        <div class="bg-[#EFECE3] rounded-2xl p-6 border border-[#8FABD4] mb-6">
+          <h3 class="font-bold text-[#4A70A9] mb-2 flex items-center text-lg">
+            <ShieldCheck class="w-6 h-6 mr-2 text-[#4A70A9]" />
             이 매물, 안전할까요?
           </h3>
-          <p class="text-sm text-lime-700 mb-4 leading-relaxed">
+          <p class="text-sm text-[#4A70A9]/80 mb-4 leading-relaxed">
             등기부등본 AI 분석을 통해<br>전세 사기 위험도를 무료로 확인하세요.
           </p>
           <BaseButton @click="goToAnalysis" full-width class="py-3">

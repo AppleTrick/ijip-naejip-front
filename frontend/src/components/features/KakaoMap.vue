@@ -33,9 +33,8 @@ const renderMarkers = (items: Property[] | undefined) => {
     const content = document.createElement('div')
     content.className = 'custom-overlay-marker'
     content.innerHTML = `
-      <div class="px-3 py-1.5 bg-white border-2 border-lime-500 rounded-full shadow-lg flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110 hover:bg-lime-50">
-        <span class="text-lime-700 font-extrabold text-sm whitespace-nowrap">${item.price}</span>
-        <div class="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-r-2 border-b-2 border-lime-500 transform rotate-45"></div>
+      <div class="px-4 py-2 bg-white border-2 border-[#4A70A9] rounded-[50px] shadow-[0_4px_10px_rgba(74,112,169,0.2)] flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110">
+        <span class="text-[#4A70A9] font-extrabold text-sm whitespace-nowrap font-['Pretendard']">${item.price}</span>
       </div>
     `
     
