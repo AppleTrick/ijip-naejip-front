@@ -115,12 +115,12 @@ const analyze = async () => {
       <!-- Header -->
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-          <ShieldCheck class="w-6 h-6 text-lime-500 mr-2" />
+          <ShieldCheck class="w-6 h-6 text-primary mr-2" />
           안전도 정밀 분석
         </h2>
         <p class="text-gray-500 text-sm mt-2">
           등기부등본과 시세 정보를 입력하면<br>
-          <span class="font-semibold text-lime-600">빅데이터 AI</span>가 전세 사기 위험을 진단합니다.
+          <span class="font-semibold text-primary">빅데이터 AI</span>가 전세 사기 위험을 진단합니다.
         </p>
       </div>
 
@@ -178,8 +178,8 @@ const analyze = async () => {
             <div class="grid grid-cols-2 gap-4">
               <label class="relative cursor-pointer group">
                 <input type="radio" v-model="form.isViolation" :value="false" class="peer sr-only" name="violation">
-                <div class="p-4 text-center rounded-xl border-2 border-gray-200 peer-checked:border-lime-500 peer-checked:bg-lime-50 transition-all h-full flex flex-col items-center justify-center hover:border-lime-200">
-                  <div class="w-10 h-10 rounded-full bg-lime-100 text-lime-600 flex items-center justify-center mb-2">
+                <div class="p-4 text-center rounded-xl border-2 border-gray-200 peer-checked:border-primary peer-checked:bg-secondary/10 transition-all h-full flex flex-col items-center justify-center hover:border-secondary/30">
+                  <div class="w-10 h-10 rounded-full bg-secondary/20 text-primary flex items-center justify-center mb-2">
                     <Check class="w-6 h-6" />
                   </div>
                   <span class="text-sm font-bold text-gray-900">없음 (깨끗함)</span>
@@ -204,7 +204,7 @@ const analyze = async () => {
           <div>
             <label class="block text-sm font-semibold text-gray-700 mb-2">주용도 (용도지역)</label>
             <div class="relative">
-              <select v-model="form.usage" class="w-full p-3 pl-4 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-lime-500 focus:border-lime-500 outline-none transition-all bg-white appearance-none">
+              <select v-model="form.usage" class="w-full p-3 pl-4 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all bg-white appearance-none">
                 <option value="residential">🏡 단독/다가구/다세대/아파트 (주거용)</option>
                 <option value="neighborhood">🏪 제1·2종 근린생활시설 (상가/사무실)</option>
                 <option value="office">🏢 오피스텔 (주거용/업무용)</option>
@@ -229,7 +229,7 @@ const analyze = async () => {
       <!-- Result Card -->
       <div v-if="result" class="animate-fade-in p-6 rounded-2xl bg-white border-2 shadow-lg transition-all duration-500"
         :class="{
-          'border-lime-500 bg-lime-50/30': result.safetyGrade === 'SAFE',
+          'border-primary bg-secondary/10/30': result.safetyGrade === 'SAFE',
           'border-yellow-400 bg-yellow-50/30': result.safetyGrade === 'WARNING',
           'border-red-500 bg-red-50/30': result.safetyGrade === 'DANGER'
         }"
@@ -238,7 +238,7 @@ const analyze = async () => {
         <div class="flex items-center gap-4 mb-6">
           <div class="w-16 h-16 rounded-full flex items-center justify-center shadow-sm"
             :class="{
-              'bg-lime-100 text-lime-600': result.safetyGrade === 'SAFE',
+              'bg-secondary/20 text-primary': result.safetyGrade === 'SAFE',
               'bg-yellow-100 text-yellow-600': result.safetyGrade === 'WARNING',
               'bg-red-100 text-red-600': result.safetyGrade === 'DANGER'
             }"
@@ -252,7 +252,7 @@ const analyze = async () => {
             <h4 class="text-sm font-bold text-gray-500 mb-1">AI 안전 진단 결과</h4>
             <span class="text-2xl font-black"
               :class="{
-                'text-lime-700': result.safetyGrade === 'SAFE',
+                'text-primary': result.safetyGrade === 'SAFE',
                 'text-yellow-700': result.safetyGrade === 'WARNING',
                 'text-red-700': result.safetyGrade === 'DANGER'
               }"
@@ -273,7 +273,7 @@ const analyze = async () => {
             <span class="text-xs font-bold text-gray-500">깡통전세 위험도 (부채비율)</span>
             <span class="text-lg font-bold font-mono" 
               :class="{
-                'text-lime-600': result.debtRatio < 70,
+                'text-primary': result.debtRatio < 70,
                 'text-yellow-600': result.debtRatio >= 70 && result.debtRatio < 80,
                 'text-red-600': result.debtRatio >= 80
               }"
@@ -282,7 +282,7 @@ const analyze = async () => {
           
           <div class="h-3 bg-gray-200 rounded-full overflow-hidden relative">
             <!-- Safe Zone -->
-            <div class="absolute top-0 bottom-0 left-0 w-[70%] border-r border-white/50 bg-lime-200/50"></div>
+            <div class="absolute top-0 bottom-0 left-0 w-[70%] border-r border-white/50 bg-secondary/30/50"></div>
             <!-- Warning Zone -->
             <div class="absolute top-0 bottom-0 left-[70%] w-[10%] border-r border-white/50 bg-yellow-200/50"></div>
             <!-- Danger Zone -->
@@ -292,7 +292,7 @@ const analyze = async () => {
             <div class="h-full transition-all duration-1000 ease-out rounded-full shadow-sm"
               :style="{ width: `${Math.min(result.debtRatio, 100)}%` }"
               :class="{
-                'bg-lime-500': result.debtRatio < 70,
+                'bg-secondary/100': result.debtRatio < 70,
                 'bg-yellow-500': result.debtRatio >= 70 && result.debtRatio < 80,
                 'bg-red-500': result.debtRatio >= 80
               }"

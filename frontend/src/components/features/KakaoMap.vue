@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+
 import type { Property } from '../../stores/safehome'
 
 const props = defineProps<{
@@ -33,8 +34,8 @@ const renderMarkers = (items: Property[] | undefined) => {
     const content = document.createElement('div')
     content.className = 'custom-overlay-marker'
     content.innerHTML = `
-      <div class="px-4 py-2 bg-white border-2 border-[#4A70A9] rounded-[50px] shadow-[0_4px_10px_rgba(74,112,169,0.2)] flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110">
-        <span class="text-[#4A70A9] font-extrabold text-sm whitespace-nowrap font-['Pretendard']">${item.price}</span>
+      <div class="px-4 py-2 bg-white border-2 border-[#E84545] rounded-[50px] shadow-[0_4px_10px_rgba(232,69,69,0.3)] flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110">
+        <span class="text-[#E84545] font-extrabold text-sm whitespace-nowrap font-['Pretendard']">${item.price}</span>
       </div>
     `
     

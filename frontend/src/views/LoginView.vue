@@ -13,13 +13,13 @@ const handleLogin = () => {
 </script>
 
 <template>
-  <div class="min-h-full flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg">
+  <div class="min-h-full flex items-center justify-center bg-[#F5F5F5] px-4 py-12 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border-2 border-[#E84545]/20">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-[#E84545]">
           로그인
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-2 text-center text-sm text-[#6B7280]">
           서비스 이용을 위해 로그인해주세요
         </p>
       </div>
@@ -47,15 +47,15 @@ const handleLogin = () => {
               id="remember-me"
               name="remember-me"
               type="checkbox"
-              class="h-4 w-4 text-lime-600 focus:ring-lime-500 border-gray-300 rounded"
+              class="h-4 w-4 text-[#E84545] focus:ring-[#E84545] border-[#9CA3AF] rounded"
             >
-            <label for="remember-me" class="ml-2 block text-sm text-gray-900">
+            <label for="remember-me" class="ml-2 block text-sm text-[#2B2E4A] font-medium">
               로그인 유지
             </label>
           </div>
 
           <div class="text-sm">
-            <a href="#" class="font-medium text-lime-600 hover:text-lime-500">
+            <a href="#" class="font-medium text-[#E84545] hover:text-[#D63939]">
               비밀번호를 잊으셨나요?
             </a>
           </div>

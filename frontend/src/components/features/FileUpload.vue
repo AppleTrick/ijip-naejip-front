@@ -29,7 +29,7 @@ const handleFileUpload = (event: Event) => {
 </script>
 
 <template>
-  <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-lime-400 transition-colors cursor-pointer relative">
+  <div class="border-2 border-dashed border-gray-700 rounded-xl p-6 text-center hover:border-primary transition-colors cursor-pointer relative">
     <input 
       type="file" 
       accept=".pdf,.jpg,.png" 

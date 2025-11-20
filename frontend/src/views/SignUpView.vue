@@ -20,13 +20,13 @@ const handleSignUp = () => {
 </script>
 
 <template>
-  <div class="min-h-full flex items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-lg">
+  <div class="min-h-full flex items-center justify-center bg-[#F5F5F5] px-4 py-12 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border-2 border-[#E84545]/20">
       <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
+        <h2 class="mt-6 text-center text-3xl font-extrabold text-[#E84545]">
           회원가입
         </h2>
-        <p class="mt-2 text-center text-sm text-gray-600">
+        <p class="mt-2 text-center text-sm text-[#6B7280]">
           SafeHome과 함께 안전한 집을 찾아보세요
         </p>
       </div>
@@ -72,9 +72,9 @@ const handleSignUp = () => {
             가입하기
           </BaseButton>
           
-          <div class="text-center text-sm text-gray-600">
+          <div class="text-center text-sm text-[#6B7280]">
             이미 계정이 있으신가요? 
-            <a href="#" @click.prevent="router.push('/login')" class="font-medium text-lime-600 hover:text-lime-500">
+            <a href="#" @click.prevent="router.push('/login')" class="font-medium text-[#E84545] hover:text-[#D63939]">
               로그인하기
             </a>
           </div>

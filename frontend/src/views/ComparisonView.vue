@@ -104,7 +104,7 @@ const sortedComparisonList = computed(() => {
         <div class="w-full lg:w-64 flex-shrink-0 space-y-6">
           <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <div class="flex items-center mb-4">
-              <Filter class="w-5 h-5 text-lime-600 mr-2" />
+              <Filter class="w-5 h-5 text-primary mr-2" />
               <h3 class="font-bold text-gray-900">필터링 기준</h3>
             </div>
             
@@ -113,7 +113,7 @@ const sortedComparisonList = computed(() => {
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-2">가격 범위</label>
                 <div class="flex items-center space-x-2">
-                  <input type="range" class="w-full accent-lime-500" min="0" max="20" step="1">
+                  <input type="range" class="w-full accent-primary" min="0" max="20" step="1">
                 </div>
                 <div class="flex justify-between text-xs text-gray-500 mt-1">
                   <span>최소</span>
@@ -125,15 +125,15 @@ const sortedComparisonList = computed(() => {
                 <label class="block text-sm font-medium text-gray-700 mb-2">면적</label>
                 <div class="space-y-2">
                   <label class="flex items-center">
-                    <input type="checkbox" class="rounded text-lime-500 focus:ring-lime-500 border-gray-300">
+                    <input type="checkbox" class="rounded text-primary focus:ring-primary border-gray-300">
                     <span class="ml-2 text-sm text-gray-600">20평대</span>
                   </label>
                   <label class="flex items-center">
-                    <input type="checkbox" class="rounded text-lime-500 focus:ring-lime-500 border-gray-300">
+                    <input type="checkbox" class="rounded text-primary focus:ring-primary border-gray-300">
                     <span class="ml-2 text-sm text-gray-600">30평대</span>
                   </label>
                   <label class="flex items-center">
-                    <input type="checkbox" class="rounded text-lime-500 focus:ring-lime-500 border-gray-300">
+                    <input type="checkbox" class="rounded text-primary focus:ring-primary border-gray-300">
                     <span class="ml-2 text-sm text-gray-600">40평대 이상</span>
                   </label>
                 </div>
@@ -143,15 +143,15 @@ const sortedComparisonList = computed(() => {
                 <label class="block text-sm font-medium text-gray-700 mb-2">층수</label>
                 <div class="space-y-2">
                   <label class="flex items-center">
-                    <input type="checkbox" class="rounded text-lime-500 focus:ring-lime-500 border-gray-300">
+                    <input type="checkbox" class="rounded text-primary focus:ring-primary border-gray-300">
                     <span class="ml-2 text-sm text-gray-600">1층</span>
                   </label>
                   <label class="flex items-center">
-                    <input type="checkbox" class="rounded text-lime-500 focus:ring-lime-500 border-gray-300">
+                    <input type="checkbox" class="rounded text-primary focus:ring-primary border-gray-300">
                     <span class="ml-2 text-sm text-gray-600">저층 (2~5층)</span>
                   </label>
                   <label class="flex items-center">
-                    <input type="checkbox" class="rounded text-lime-500 focus:ring-lime-500 border-gray-300">
+                    <input type="checkbox" class="rounded text-primary focus:ring-primary border-gray-300">
                     <span class="ml-2 text-sm text-gray-600">고층 (6층 이상)</span>
                   </label>
                 </div>
@@ -173,8 +173,8 @@ const sortedComparisonList = computed(() => {
           <div class="space-y-6">
             <!-- My House Card (Top) -->
             <div v-if="myHouse" class="w-full">
-              <div class="bg-lime-50 rounded-2xl shadow-md border-2 border-lime-500 overflow-hidden flex flex-col sm:flex-row relative">
-                <div class="absolute top-0 left-0 bg-lime-500 text-white px-3 py-1 text-xs font-bold rounded-br-lg z-10">
+              <div class="bg-secondary/10 rounded-2xl shadow-md border-2 border-primary overflow-hidden flex flex-col sm:flex-row relative">
+                <div class="absolute top-0 left-0 bg-secondary/100 text-white px-3 py-1 text-xs font-bold rounded-br-lg z-10">
                   내 집 (기준)
                 </div>
                 
@@ -195,15 +195,15 @@ const sortedComparisonList = computed(() => {
                   </div>
 
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div class="bg-white p-3 rounded-lg border border-lime-100">
+                    <div class="bg-white p-3 rounded-lg border border-secondary/20">
                       <p class="text-xs text-gray-500">매매가</p>
                       <p class="font-bold text-gray-900">{{ myHouse.price }}</p>
                     </div>
-                    <div class="bg-white p-3 rounded-lg border border-lime-100">
+                    <div class="bg-white p-3 rounded-lg border border-secondary/20">
                       <p class="text-xs text-gray-500">면적</p>
                       <p class="font-bold text-gray-900">{{ myHouse.area }}</p>
                     </div>
-                    <div class="bg-white p-3 rounded-lg border border-lime-100">
+                    <div class="bg-white p-3 rounded-lg border border-secondary/20">
                       <p class="text-xs text-gray-500">층수</p>
                       <p class="font-bold text-gray-900">{{ myHouse.floor }}</p>
                     </div>

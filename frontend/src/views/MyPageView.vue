@@ -38,40 +38,40 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <div class="min-h-full bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-full bg-[#F5F5F5] py-12 px-4 sm:px-6 lg:px-8">
     <div class="max-w-3xl mx-auto space-y-6">
       <!-- Header -->
-      <div class="bg-white shadow rounded-2xl p-6">
-        <h1 class="text-2xl font-bold text-gray-900">내 정보</h1>
-        <p class="mt-1 text-sm text-gray-500">계정 정보를 확인하고 관리할 수 있습니다.</p>
+      <div class="bg-white shadow-xl rounded-2xl p-6 border-2 border-[#E84545]/20">
+        <h1 class="text-2xl font-bold text-[#E84545]">내 정보</h1>
+        <p class="mt-1 text-sm text-[#6B7280]">계정 정보를 확인하고 관리할 수 있습니다.</p>
       </div>
 
       <!-- Profile Card -->
-      <div class="bg-white shadow rounded-2xl overflow-hidden">
+      <div class="bg-white shadow-xl rounded-2xl overflow-hidden border-2 border-[#903749]/30">
         <div class="p-6 space-y-6">
           <div class="flex items-center space-x-4">
-            <div class="h-16 w-16 rounded-full bg-lime-100 flex items-center justify-center text-2xl font-bold text-lime-600">
+            <div class="h-16 w-16 rounded-full bg-[#903749]/20 flex items-center justify-center text-2xl font-bold text-[#E84545]">
               {{ user.name[0] }}
             </div>
             <div>
-              <h2 class="text-xl font-bold text-gray-900">{{ user.name }}</h2>
-              <p class="text-gray-500">{{ user.email }}</p>
+              <h2 class="text-xl font-bold text-[#E84545]">{{ user.name }}</h2>
+              <p class="text-[#6B7280]">{{ user.email }}</p>
             </div>
           </div>
 
-          <div class="border-t border-gray-100 pt-6">
+          <div class="border-t border-[#903749]/20 pt-6">
             <dl class="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
               <div>
-                <dt class="text-sm font-medium text-gray-500">이름</dt>
-                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ user.name }}</dd>
+                <dt class="text-sm font-medium text-[#6B7280]">이름</dt>
+                <dd class="mt-1 text-sm text-[#2B2E4A] font-semibold">{{ user.name }}</dd>
               </div>
               <div>
-                <dt class="text-sm font-medium text-gray-500">이메일</dt>
-                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ user.email }}</dd>
+                <dt class="text-sm font-medium text-[#6B7280]">이메일</dt>
+                <dd class="mt-1 text-sm text-[#2B2E4A] font-semibold">{{ user.email }}</dd>
               </div>
               <div>
-                <dt class="text-sm font-medium text-gray-500">가입일</dt>
-                <dd class="mt-1 text-sm text-gray-900 font-semibold">{{ user.joinDate }}</dd>
+                <dt class="text-sm font-medium text-[#6B7280]">가입일</dt>
+                <dd class="mt-1 text-sm text-[#2B2E4A] font-semibold">{{ user.joinDate }}</dd>
               </div>
             </dl>
           </div>
@@ -79,38 +79,38 @@ const handleLogout = () => {
       </div>
 
         <!-- My House Section -->
-        <div class="bg-white shadow rounded-2xl overflow-hidden">
+        <div class="bg-white shadow-xl rounded-2xl overflow-hidden border-2 border-[#903749]/30">
           <div class="p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">내 집 관리</h2>
+            <h2 class="text-xl font-bold text-[#E84545] mb-4">내 집 관리</h2>
             
-            <div v-if="myHouse" class="bg-lime-50 rounded-xl p-6 border border-lime-100">
+            <div v-if="myHouse" class="bg-[#903749]/10 rounded-xl p-6 border-2 border-[#903749]/30">
               <div class="flex justify-between items-start mb-4">
                 <div>
-                  <h3 class="text-lg font-bold text-gray-900">{{ myHouse.name }}</h3>
-                  <p class="text-gray-600 text-sm">{{ myHouse.address }}</p>
+                  <h3 class="text-lg font-bold text-[#E84545]">{{ myHouse.name }}</h3>
+                  <p class="text-[#6B7280] text-sm">{{ myHouse.address }}</p>
                 </div>
-                <button @click="setMyHouse(null)" class="text-gray-400 hover:text-red-500 transition-colors">
+                <button @click="setMyHouse(null)" class="text-[#9CA3AF] hover:text-[#E84545] transition-colors">
                   <Trash2 class="w-5 h-5" />
                 </button>
               </div>
               <div class="grid grid-cols-3 gap-4">
-                <div class="bg-white p-3 rounded-lg">
-                  <p class="text-xs text-gray-500 mb-1">매매가</p>
-                  <p class="font-bold text-gray-900">{{ myHouse.price }}</p>
+                <div class="bg-white p-3 rounded-lg border border-[#903749]/20">
+                  <p class="text-xs text-[#6B7280] mb-1">매매가</p>
+                  <p class="font-bold text-[#E84545]">{{ myHouse.price }}</p>
                 </div>
-                <div class="bg-white p-3 rounded-lg">
-                  <p class="text-xs text-gray-500 mb-1">면적</p>
-                  <p class="font-bold text-gray-900">{{ myHouse.area }}</p>
+                <div class="bg-white p-3 rounded-lg border border-[#903749]/20">
+                  <p class="text-xs text-[#6B7280] mb-1">면적</p>
+                  <p class="font-bold text-[#E84545]">{{ myHouse.area }}</p>
                 </div>
-                <div class="bg-white p-3 rounded-lg">
-                  <p class="text-xs text-gray-500 mb-1">층수</p>
-                  <p class="font-bold text-gray-900">{{ myHouse.floor }}</p>
+                <div class="bg-white p-3 rounded-lg border border-[#903749]/20">
+                  <p class="text-xs text-[#6B7280] mb-1">층수</p>
+                  <p class="font-bold text-[#E84545]">{{ myHouse.floor }}</p>
                 </div>
               </div>
             </div>
 
             <div v-else class="space-y-4">
-              <p class="text-sm text-gray-500 mb-4">내 집을 등록하고 관심 매물과 비교해보세요.</p>
+              <p class="text-sm text-[#6B7280] mb-4">내 집을 등록하고 관심 매물과 비교해보세요.</p>
               <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <BaseInput v-model="newHouse.name" label="별칭 (예: 우리집)" placeholder="우리집" />
                 <BaseInput v-model="newHouse.address" label="주소" placeholder="서울시 강남구 역삼동" />
@@ -127,7 +127,7 @@ const handleLogout = () => {
           </div>
         </div>
         
-        <div class="bg-gray-50 px-6 py-4 flex justify-end rounded-2xl shadow mt-6">
+        <div class="bg-white px-6 py-4 flex justify-end rounded-2xl shadow-xl border-2 border-[#E84545]/20 mt-6">
           <BaseButton
             variant="danger"
             size="md"

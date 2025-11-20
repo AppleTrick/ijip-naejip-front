@@ -20,13 +20,13 @@ const baseClasses = 'inline-flex items-center justify-center rounded-lg font-bol
 const variantClasses = computed(() => {
   switch (props.variant) {
     case 'primary':
-      return 'bg-[#4A70A9] hover:bg-[#3D5D8F] text-white shadow-lg shadow-[#4A70A9]/30 focus:ring-[#4A70A9]'
+      return 'bg-[#E84545] hover:bg-[#D63939] text-white shadow-lg shadow-[#E84545]/30 focus:ring-[#E84545]'
     case 'secondary':
-      return 'bg-gray-100 hover:bg-gray-200 text-gray-900 focus:ring-gray-500'
+      return 'bg-[#903749] hover:bg-[#7A2F3E] text-white shadow-md shadow-[#903749]/20 focus:ring-[#903749]'
     case 'outline':
-      return 'bg-white border-2 border-gray-200 hover:border-[#4A70A9] hover:text-[#4A70A9] text-gray-500 focus:ring-[#4A70A9]'
+      return 'bg-white border-2 border-[#E5E7EB] hover:border-[#E84545] hover:text-[#E84545] text-[#6B7280] focus:ring-[#E84545]'
     case 'danger':
-      return 'bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/30 focus:ring-red-500'
+      return 'bg-[#E84545] hover:bg-[#D63939] text-white shadow-lg shadow-[#E84545]/30 focus:ring-[#E84545]'
     default:
       return ''
   }

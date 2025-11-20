@@ -17,15 +17,15 @@ const closeMenu = () => {
 </script>
 
 <template>
-  <nav class="bg-white/80 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 h-16 flex-none transition-all duration-300">
+  <nav class="bg-white/90 backdrop-blur-md border-b border-[#E5E7EB] sticky top-0 z-50 h-16 flex-none transition-all duration-300 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
       <div class="flex justify-between items-center h-full">
         <!-- Logo -->
         <div class="flex items-center cursor-pointer group" @click="router.push('/')">
-          <div class="bg-lime-100 p-1.5 rounded-lg mr-2.5 group-hover:bg-lime-200 transition-colors">
-            <Home class="h-5 w-5 text-lime-600" />
+          <div class="bg-[#903749]/15 p-1.5 rounded-lg mr-2.5 group-hover:bg-[#903749]/25 transition-colors">
+            <Home class="h-5 w-5 text-[#E84545]" />
           </div>
-          <span class="text-xl font-bold tracking-tight text-gray-900 group-hover:text-lime-700 transition-colors">SafeHome</span>
+          <span class="text-xl font-bold tracking-tight text-[#2B2E4A] group-hover:text-[#E84545] transition-colors">SafeHome</span>
         </div>
         
         <!-- Desktop Menu -->
@@ -34,33 +34,33 @@ const closeMenu = () => {
           <div class="flex items-center space-x-1">
             <router-link 
               to="/" 
-              class="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all" 
-              active-class="bg-lime-50 text-lime-700 font-bold"
+              class="px-4 py-2 rounded-full text-sm font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] transition-all" 
+              active-class="bg-[#903749]/15 text-[#E84545] font-bold"
             >
               매물 지도
             </router-link>
             <router-link 
               to="/analysis" 
-              class="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all" 
-              active-class="bg-lime-50 text-lime-700 font-bold"
+              class="px-4 py-2 rounded-full text-sm font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] transition-all" 
+              active-class="bg-[#903749]/15 text-[#E84545] font-bold"
             >
               안전도 분석
             </router-link>
             <router-link 
               to="/comparison" 
-              class="px-4 py-2 rounded-full text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all" 
-              active-class="bg-lime-50 text-lime-700 font-bold"
+              class="px-4 py-2 rounded-full text-sm font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] transition-all" 
+              active-class="bg-[#903749]/15 text-[#E84545] font-bold"
             >
               집 비교하기
             </router-link>
           </div>
 
           <!-- Divider -->
-          <div class="h-6 w-px bg-gray-200 mx-6"></div>
+          <div class="h-6 w-px bg-[#E5E7EB] mx-6"></div>
 
           <!-- Auth & User -->
           <div class="flex items-center space-x-4">
-            <router-link to="/mypage" class="text-gray-500 hover:text-gray-900 transition-colors p-2 hover:bg-gray-100 rounded-full" title="마이페이지">
+            <router-link to="/mypage" class="text-[#6B7280] hover:text-[#E84545] transition-colors p-2 hover:bg-[#F3F4F6] rounded-full" title="마이페이지">
               <User class="h-5 w-5" />
             </router-link>
             <div class="flex items-center space-x-2">
@@ -86,7 +86,7 @@ const closeMenu = () => {
 
         <!-- Mobile Menu Button -->
         <div class="md:hidden flex items-center">
-          <button @click="toggleMenu" class="text-gray-500 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors">
+          <button @click="toggleMenu" class="text-[#6B7280] hover:text-[#E84545] p-2 rounded-lg hover:bg-[#F3F4F6] transition-colors">
             <Menu v-if="!isMenuOpen" class="h-6 w-6" />
             <X v-else class="h-6 w-6" />
           </button>
@@ -95,40 +95,40 @@ const closeMenu = () => {
     </div>
 
     <!-- Mobile Menu Dropdown -->
-    <div v-if="isMenuOpen" class="md:hidden absolute top-16 left-0 w-full bg-white border-b border-gray-200 shadow-lg animate-fade-in-down">
+    <div v-if="isMenuOpen" class="md:hidden absolute top-16 left-0 w-full bg-white border-b border-[#E5E7EB] shadow-lg animate-fade-in-down">
       <div class="px-4 pt-2 pb-4 space-y-1">
         <router-link 
           to="/" 
-          class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-          active-class="bg-lime-50 text-lime-700 font-bold"
+          class="block px-4 py-3 rounded-xl text-base font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] transition-colors"
+          active-class="bg-[#903749]/15 text-[#E84545] font-bold"
           @click="closeMenu"
         >
           매물 지도
         </router-link>
         <router-link 
           to="/analysis" 
-          class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-          active-class="bg-lime-50 text-lime-700 font-bold"
+          class="block px-4 py-3 rounded-xl text-base font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] transition-colors"
+          active-class="bg-[#903749]/15 text-[#E84545] font-bold"
           @click="closeMenu"
         >
           안전도 분석
         </router-link>
         <router-link 
           to="/comparison" 
-          class="block px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 transition-colors"
-          active-class="bg-lime-50 text-lime-700 font-bold"
+          class="block px-4 py-3 rounded-xl text-base font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] transition-colors"
+          active-class="bg-[#903749]/15 text-[#E84545] font-bold"
           @click="closeMenu"
         >
           집 비교하기
         </router-link>
         
-        <div class="border-t border-gray-100 my-3 pt-3">
+        <div class="border-t border-[#E5E7EB] my-3 pt-3">
           <router-link 
             to="/mypage"
-            class="w-full text-left px-4 py-3 rounded-xl text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50 flex items-center transition-colors"
+            class="w-full text-left px-4 py-3 rounded-xl text-base font-medium text-[#6B7280] hover:text-[#2B2E4A] hover:bg-[#F3F4F6] flex items-center transition-colors"
             @click="closeMenu"
           >
-            <User class="h-5 w-5 mr-3 text-gray-400" />
+            <User class="h-5 w-5 mr-3 text-[#9CA3AF]" />
             마이페이지
           </router-link>
           <div class="mt-4 grid grid-cols-2 gap-3 px-1">

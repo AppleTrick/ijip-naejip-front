@@ -83,7 +83,7 @@ const goToAnalysis = () => {
     <!-- Left Sidebar (Property Details) -->
     <div v-if="selectedProperty" class="absolute top-24 left-4 bottom-4 w-full md:w-[420px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl z-30 overflow-hidden flex flex-col animate-slide-in-left border border-white/50">
       <!-- Header Image Placeholder -->
-      <div class="h-64 bg-gray-200 relative group">
+      <div class="h-64 bg-[#E5E7EB] relative group">
         <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
              alt="Property" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
         <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -91,7 +91,7 @@ const goToAnalysis = () => {
           <X class="w-5 h-5" />
         </button>
         <div class="absolute bottom-4 left-4">
-          <span class="px-3 py-1 rounded-lg bg-[#4A70A9] text-white text-xs font-bold shadow-sm">{{ selectedProperty.type }}</span>
+          <span class="px-3 py-1 rounded-lg bg-[#E84545] text-white text-xs font-bold shadow-sm">{{ selectedProperty.type }}</span>
         </div>
       </div>
 
@@ -99,57 +99,57 @@ const goToAnalysis = () => {
       <div class="p-6 flex-1">
         <div class="mb-6">
           <div class="flex justify-between items-start mb-1">
-            <h2 class="text-2xl font-bold text-gray-900">{{ selectedProperty.name }}</h2>
+            <h2 class="text-2xl font-bold text-[#E84545]">{{ selectedProperty.name }}</h2>
             <button 
               @click="isInComparison(selectedProperty.id) ? removeFromComparison(selectedProperty.id) : addToComparison(selectedProperty)"
               class="p-2 rounded-full transition-colors"
-              :class="isInComparison(selectedProperty.id) ? 'bg-[#8FABD4]/30 text-[#4A70A9] hover:bg-[#8FABD4]/50' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+              :class="isInComparison(selectedProperty.id) ? 'bg-[#903749]/20 text-[#E84545] hover:bg-[#903749]/30' : 'bg-[#F3F4F6] text-[#9CA3AF] hover:bg-[#E5E7EB]'"
               :title="isInComparison(selectedProperty.id) ? '비교함에서 제거' : '비교함에 추가'"
             >
               <component :is="isInComparison(selectedProperty.id) ? Check : Plus" class="w-6 h-6" />
             </button>
           </div>
-          <p class="text-gray-500 flex items-center text-sm">
+          <p class="text-[#6B7280] flex items-center text-sm">
             <span class="mr-2">📍</span> {{ selectedProperty.address }}
           </p>
         </div>
 
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="bg-[#EFECE3] p-5 rounded-2xl border border-[#8FABD4]">
-            <p class="text-sm text-[#4A70A9] font-bold mb-1">매매가</p>
-            <p class="text-3xl font-[800] text-[#4A70A9] tracking-tight">{{ selectedProperty.price }}</p>
+          <div class="bg-gradient-to-br from-[#E84545]/10 to-[#903749]/10 p-5 rounded-2xl border-2 border-[#E84545]/30">
+            <p class="text-sm text-[#903749] font-bold mb-1">매매가</p>
+            <p class="text-3xl font-[800] text-[#E84545] tracking-tight">{{ selectedProperty.price }}</p>
           </div>
-          <div class="bg-gray-50 p-4 rounded-2xl border border-gray-100">
-            <p class="text-sm text-gray-500 mb-1">관리비</p>
-            <p class="text-lg font-bold text-gray-700">{{ selectedProperty.maintenanceFee }}</p>
+          <div class="bg-[#F3F4F6] p-4 rounded-2xl border border-[#903749]/20">
+            <p class="text-sm text-[#6B7280] mb-1">관리비</p>
+            <p class="text-lg font-bold text-[#2B2E4A]">{{ selectedProperty.maintenanceFee }}</p>
           </div>
         </div>
 
         <!-- Info Grid -->
         <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p class="text-xs text-gray-500 mb-1">공급/전용면적</p>
-            <p class="font-bold text-gray-900">{{ selectedProperty.area }}</p>
+          <div class="p-4 bg-[#F3F4F6] rounded-xl border border-[#903749]/20">
+            <p class="text-xs text-[#6B7280] mb-1">공급/전용면적</p>
+            <p class="font-bold text-[#E84545]">{{ selectedProperty.area }}</p>
           </div>
-          <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
-            <p class="text-xs text-gray-500 mb-1">해당층/총층</p>
-            <p class="font-bold text-gray-900">{{ selectedProperty.floor }}</p>
+          <div class="p-4 bg-[#F3F4F6] rounded-xl border border-[#903749]/20">
+            <p class="text-xs text-[#6B7280] mb-1">해당층/총층</p>
+            <p class="font-bold text-[#E84545]">{{ selectedProperty.floor }}</p>
           </div>
-          <div class="p-4 bg-gray-50 rounded-xl border border-gray-100 col-span-2">
-            <p class="text-xs text-gray-500 mb-1">상세설명</p>
-            <p class="text-gray-600 text-sm leading-relaxed bg-gray-50 p-4 rounded-xl">
+          <div class="p-4 bg-[#F3F4F6] rounded-xl border border-[#903749]/20 col-span-2">
+            <p class="text-xs text-[#6B7280] mb-1">상세설명</p>
+            <p class="text-[#2B2E4A] text-sm leading-relaxed bg-white p-4 rounded-xl">
               {{ selectedProperty.description }}
             </p>
           </div>
         </div>
 
         <!-- Safety Check CTA -->
-        <div class="bg-[#EFECE3] rounded-2xl p-6 border border-[#8FABD4] mb-6">
-          <h3 class="font-bold text-[#4A70A9] mb-2 flex items-center text-lg">
-            <ShieldCheck class="w-6 h-6 mr-2 text-[#4A70A9]" />
+        <div class="bg-gradient-to-br from-[#53354A]/10 to-[#903749]/10 rounded-2xl p-6 border-2 border-[#903749]/30 mb-6">
+          <h3 class="font-bold text-[#E84545] mb-2 flex items-center text-lg">
+            <ShieldCheck class="w-6 h-6 mr-2 text-[#E84545]" />
             이 매물, 안전할까요?
           </h3>
-          <p class="text-sm text-[#4A70A9]/80 mb-4 leading-relaxed">
+          <p class="text-sm text-[#2B2E4A] mb-4 leading-relaxed">
             등기부등본 AI 분석을 통해<br>전세 사기 위험도를 무료로 확인하세요.
           </p>
           <BaseButton @click="goToAnalysis" full-width class="py-3">
