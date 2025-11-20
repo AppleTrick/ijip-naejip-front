@@ -1,14 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Search, Filter, ChevronDown } from 'lucide-vue-next'
 
-const emit = defineEmits(['search', 'filter'])
+const emit = defineEmits<{
+  (e: 'search', query: string): void
+  (e: 'filter', filters: any): void
+}>()
 
-const searchQuery = ref('')
-const activeFilters = ref({
-  type: 'all', // apt, villa, officetel
-  priceRange: 'all'
-})
+const searchQuery = ref<string>('')
 
 const handleSearch = () => {
   emit('search', searchQuery.value)

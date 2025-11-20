@@ -1,10 +1,8 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import MarketView from '../views/MarketView.vue'
 import AnalysisView from '../views/AnalysisView.vue'
 
-const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
-  routes: [
+const routes: Array<RouteRecordRaw> = [
     {
       path: '/',
       name: 'market',
@@ -36,6 +34,9 @@ const router = createRouter({
       component: () => import('../views/SignUpView.vue')
     }
   ]
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes
 })
 
 export default router

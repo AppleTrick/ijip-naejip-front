@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSafeHomeStore } from '../stores/safehome'
@@ -9,8 +9,15 @@ const store = useSafeHomeStore()
 const { currentAddress } = storeToRefs(store)
 const { setAddress } = store
 
+interface FormData {
+  address: string
+  deposit: number
+  marketValue: number
+  priorDebt: number
+}
+
 // Local state for the form, initialized with store value
-const formData = ref({
+const formData = ref<FormData>({
   address: currentAddress.value,
   deposit: 0,
   marketValue: 0,

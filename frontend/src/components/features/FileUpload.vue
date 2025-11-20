@@ -1,11 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
-const emit = defineEmits(['file-analyzed'])
-const isAnalyzing = ref(false)
+const emit = defineEmits<{
+  (e: 'file-analyzed', data: { deposit: number, marketValue: number, priorDebt: number }): void
+}>()
+const isAnalyzing = ref<boolean>(false)
 
-const handleFileUpload = (event) => {
-  const file = event.target.files[0]
+const handleFileUpload = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  const file = target.files?.[0]
   if (!file) return
 
   isAnalyzing.value = true

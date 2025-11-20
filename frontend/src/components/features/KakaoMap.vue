@@ -1,33 +1,33 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import type { Property } from '../../stores/safehome'
 
-const props = defineProps({
-  address: String,
-  markers: {
-    type: Array,
-    default: () => []
-  }
-})
+const props = defineProps<{
+  address?: string
+  markers?: Property[]
+}>()
 
-const emit = defineEmits(['select-marker'])
+const emit = defineEmits<{
+  (e: 'select-marker', property: Property): void
+}>()
 
-const mapContainer = ref(null)
-let map = null
-let geocoder = null
-let mainMarker = null
-let mapMarkers = []
+const mapContainer = ref<HTMLElement | null>(null)
+let map: any = null
+let geocoder: any = null
+let mainMarker: any = null
+let mapMarkers: any[] = []
 
 const clearMarkers = () => {
   mapMarkers.forEach(m => m.setMap(null))
   mapMarkers = []
 }
 
-const renderMarkers = (items) => {
+const renderMarkers = (items: Property[] | undefined) => {
   clearMarkers()
   if (!map || !items) return
 
-  items.forEach(item => {
-    const position = new window.kakao.maps.LatLng(item.lat, item.lng)
+    items.forEach(item => {
+    const position = new (window as any).kakao.maps.LatLng(item.lat, item.lng)
     
     // Create Custom Overlay Content using DOM API
     const content = document.createElement('div')
@@ -44,7 +44,7 @@ const renderMarkers = (items) => {
       emit('select-marker', item)
     })
 
-    const customOverlay = new window.kakao.maps.CustomOverlay({
+    const customOverlay = new (window as any).kakao.maps.CustomOverlay({
       position: position,
       content: content,
       yAnchor: 1.2,
@@ -58,22 +58,22 @@ const renderMarkers = (items) => {
 
 onMounted(() => {
   const loadMap = () => {
-    if (window.kakao && window.kakao.maps) {
-      window.kakao.maps.load(() => {
+    if ((window as any).kakao && (window as any).kakao.maps) {
+      (window as any).kakao.maps.load(() => {
         console.log('Kakao Map SDK loaded. Initializing map...')
         const options = {
-          center: new window.kakao.maps.LatLng(37.566826, 126.9786567), // Seoul City Hall
+          center: new (window as any).kakao.maps.LatLng(37.566826, 126.9786567), // Seoul City Hall
           level: 5
         }
-        map = new window.kakao.maps.Map(mapContainer.value, options)
-        geocoder = new window.kakao.maps.services.Geocoder()
+        map = new (window as any).kakao.maps.Map(mapContainer.value, options)
+        geocoder = new (window as any).kakao.maps.services.Geocoder()
         
         // Initial Relayout
         setTimeout(() => {
           console.log('Relayout map...')
           map.relayout()
           map.setCenter(options.center)
-          if (props.markers.length > 0) {
+          if (props.markers && props.markers.length > 0) {
             renderMarkers(props.markers)
           }
         }, 500) // Increased delay to 500ms
@@ -86,7 +86,9 @@ onMounted(() => {
             map.setCenter(center)
           }
         })
-        resizeObserver.observe(mapContainer.value)
+        if (mapContainer.value) {
+          resizeObserver.observe(mapContainer.value)
+        }
       })
     } else {
       console.warn('Kakao Map SDK not found. Retrying...')
@@ -105,14 +107,14 @@ watch(() => props.markers, (newMarkers) => {
 watch(() => props.address, (newAddr) => {
   if (!map || !geocoder || !newAddr) return
 
-  geocoder.addressSearch(newAddr, function(result, status) {
-    if (status === window.kakao.maps.services.Status.OK) {
-      const coords = new window.kakao.maps.LatLng(result[0].y, result[0].x)
+  geocoder.addressSearch(newAddr, function(result: any[], status: any) {
+    if (status === (window as any).kakao.maps.services.Status.OK) {
+      const coords = new (window as any).kakao.maps.LatLng(result[0].y, result[0].x)
       map.setCenter(coords)
       map.setLevel(3)
       
       if (mainMarker) mainMarker.setMap(null)
-      mainMarker = new window.kakao.maps.Marker({
+      mainMarker = new (window as any).kakao.maps.Marker({
         map: map,
         position: coords
       })

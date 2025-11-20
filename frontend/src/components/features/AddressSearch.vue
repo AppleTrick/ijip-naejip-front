@@ -1,14 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { Search } from 'lucide-vue-next'
 
-const props = defineProps({
-  modelValue: String
-})
-const emit = defineEmits(['update:modelValue'])
+interface Props {
+  modelValue?: string
+}
+
+defineProps<Props>()
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: string): void
+}>()
 
 const openPostcode = () => {
-  new window.daum.Postcode({
-    oncomplete: function(data) {
+  new (window as any).daum.Postcode({
+    oncomplete: function(data: any) {
       emit('update:modelValue', data.address)
     }
   }).open()

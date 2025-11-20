@@ -1,20 +1,24 @@
-<script setup>
-defineProps({
-  modelValue: [String, Number],
-  options: {
-    type: Array,
-    required: true,
-    // Expected format: [{ label: 'Label', value: 'value' }]
-  },
-  label: String,
-  id: String,
-  placeholder: {
-    type: String,
-    default: '선택하세요'
-  }
+<script setup lang="ts">
+interface Option {
+  label: string
+  value: string | number
+}
+
+interface Props {
+  modelValue?: string | number
+  options: Option[]
+  label?: string
+  id?: string
+  placeholder?: string
+}
+
+withDefaults(defineProps<Props>(), {
+  placeholder: '선택하세요'
 })
 
-defineEmits(['update:modelValue'])
+defineEmits<{
+  (e: 'update:modelValue', value: string | number): void
+}>()
 </script>
 
 <template>
@@ -24,7 +28,7 @@ defineEmits(['update:modelValue'])
       <select
         :id="id"
         :value="modelValue"
-        @change="$emit('update:modelValue', $event.target.value)"
+        @change="$emit('update:modelValue', ($event.target as HTMLSelectElement).value)"
         class="w-full pl-4 pr-10 py-2.5 rounded-xl bg-white border border-gray-200 text-gray-900 font-medium focus:ring-2 focus:ring-lime-500 focus:border-transparent transition-all appearance-none cursor-pointer"
       >
         <option value="" disabled selected>{{ placeholder }}</option>

@@ -1,11 +1,11 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { Home, User, Menu, X } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
 
 const router = useRouter()
-const isMenuOpen = ref(false)
+const isMenuOpen = ref<boolean>(false)
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
@@ -13,11 +13,6 @@ const toggleMenu = () => {
 
 const closeMenu = () => {
   isMenuOpen.value = false
-}
-
-const navigateToLogin = () => {
-  router.push('/login')
-  closeMenu()
 }
 </script>
 

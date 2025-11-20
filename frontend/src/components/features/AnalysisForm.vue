@@ -1,18 +1,36 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue'
-import axios from 'axios'
 import AddressSearch from './AddressSearch.vue'
 import FileUpload from './FileUpload.vue'
 import BaseInput from '../common/BaseInput.vue'
 import BaseButton from '../common/BaseButton.vue'
 import { ShieldCheck, AlertTriangle, Ban, Check, ChevronDown } from 'lucide-vue-next'
 
-const props = defineProps({
-  modelValue: Object
-})
-const emit = defineEmits(['update:modelValue', 'analyze'])
+interface AnalysisResult {
+  safetyGrade: 'SAFE' | 'WARNING' | 'DANGER'
+  message: string
+  debtRatio: number
+}
 
-const form = ref({
+interface FormState {
+  address: string
+  deposit: number
+  marketValue: number
+  priorDebt: number
+  isViolation: boolean
+  usage: string
+}
+
+defineProps<{
+  modelValue: any
+}>()
+
+const emit = defineEmits<{
+  (e: 'update:modelValue', value: any): void
+  (e: 'analyze'): void
+}>()
+
+const form = ref<FormState>({
   address: '',
   deposit: 0,
   marketValue: 0,
@@ -27,10 +45,10 @@ watch(() => form.value.address, (newVal) => {
   emit('update:modelValue', { ...form.value, address: newVal })
 })
 
-const result = ref(null)
-const loading = ref(false)
+const result = ref<AnalysisResult | null>(null)
+const loading = ref<boolean>(false)
 
-const onFileAnalyzed = (data) => {
+const onFileAnalyzed = (data: any) => {
   form.value.deposit = data.deposit
   form.value.marketValue = data.marketValue
   form.value.priorDebt = data.priorDebt
@@ -40,7 +58,7 @@ const analyze = async () => {
   loading.value = true
   try {
     // 1. Basic Safety Check (Client-side for Building Ledger)
-    let localResult = {
+    let localResult: AnalysisResult = {
       safetyGrade: 'SAFE',
       message: '안전한 매물로 보입니다.',
       debtRatio: 0
@@ -48,8 +66,8 @@ const analyze = async () => {
 
     // Calculate Debt Ratio (Mock logic if backend is not reachable or for immediate feedback)
     if (form.value.marketValue > 0) {
-      const totalDebt = parseInt(form.value.deposit) + parseInt(form.value.priorDebt)
-      localResult.debtRatio = Math.round((totalDebt / form.value.marketValue) * 100)
+      const totalDebt = Number(form.value.deposit) + Number(form.value.priorDebt)
+      localResult.debtRatio = Math.round((totalDebt / Number(form.value.marketValue)) * 100)
     }
 
     // Check 1: Violation Building

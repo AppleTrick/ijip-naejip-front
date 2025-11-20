@@ -1,17 +1,20 @@
-<script setup>
-defineProps({
-  modelValue: [String, Number],
-  label: String,
-  type: {
-    type: String,
-    default: 'text'
-  },
-  placeholder: String,
-  unit: String,
-  id: String
+<script setup lang="ts">
+interface Props {
+  modelValue?: string | number
+  label?: string
+  type?: string
+  placeholder?: string
+  unit?: string
+  id?: string
+}
+
+withDefaults(defineProps<Props>(), {
+  type: 'text'
 })
 
-defineEmits(['update:modelValue'])
+defineEmits<{
+  (e: 'update:modelValue', value: string | number): void
+}>()
 </script>
 
 <template>
@@ -22,7 +25,7 @@ defineEmits(['update:modelValue'])
         :id="id"
         :type="type"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
+        @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
         class="w-full pl-4 pr-4 py-3.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-lime-500 focus:border-transparent transition-all"
         :class="{ 'pr-12': unit }"
         :placeholder="placeholder"

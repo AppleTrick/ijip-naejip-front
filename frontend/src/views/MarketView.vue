@@ -1,8 +1,8 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '../stores/safehome'
+import { useSafeHomeStore, type Property } from '../stores/safehome'
 import KakaoMap from '../components/features/KakaoMap.vue'
 import MarketFilter from '../components/features/MarketFilter.vue'
 import BaseButton from '../components/common/BaseButton.vue'
@@ -10,7 +10,7 @@ import { ShieldCheck, X, Check, Plus } from 'lucide-vue-next'
 
 const router = useRouter()
 const store = useSafeHomeStore()
-const { selectedProperty, filteredProperties, searchQuery, comparisonList } = storeToRefs(store)
+const { selectedProperty, filteredProperties } = storeToRefs(store)
 const { selectProperty, setMarketProperties, setSearchQuery, addToComparison, removeFromComparison, isInComparison } = store
 
 // Mock Data Generation (Moved from App.vue)
@@ -27,7 +27,7 @@ const generateMockData = () => {
   ]
 
   const types = ['APT', 'OPST', 'VILLA']
-  const properties = []
+  const properties: Property[] = []
 
   districts.forEach(district => {
     for (let i = 0; i < 20; i++) {
@@ -61,11 +61,11 @@ onMounted(() => {
   }
 })
 
-const handleSearch = (query) => {
+const handleSearch = (query: string) => {
   setSearchQuery(query)
 }
 
-const handleMarkerSelect = (property) => {
+const handleMarkerSelect = (property: Property) => {
   selectProperty(property)
 }
 

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useSafeHomeStore } from '../stores/safehome'
@@ -12,7 +12,7 @@ const store = useSafeHomeStore()
 const { myHouse, comparisonList } = storeToRefs(store)
 const { removeFromComparison } = store
 
-const sortOption = ref('default')
+const sortOption = ref<string>('default')
 const sortOptions = [
   { label: '기본순', value: 'default' },
   { label: '가격 낮은순', value: 'price_asc' },
@@ -20,18 +20,11 @@ const sortOptions = [
   { label: '면적 넓은순', value: 'area_desc' }
 ]
 
-// Mock Filters
-const filters = ref({
-  priceRange: [0, 20], // 억 단위
-  areaRange: [0, 60], // 평 단위
-  floors: []
-})
-
 const goBack = () => {
   router.back()
 }
 
-const parsePrice = (priceStr) => {
+const parsePrice = (priceStr: string | undefined): number => {
   if (!priceStr) return 0
   let total = 0
   const ukMatch = priceStr.match(/(\d+)억/)
@@ -42,7 +35,7 @@ const parsePrice = (priceStr) => {
   return total
 }
 
-const formatPriceDiff = (targetPrice, basePrice) => {
+const formatPriceDiff = (targetPrice: string, basePrice: string): string => {
   const diff = parsePrice(targetPrice) - parsePrice(basePrice)
   if (diff === 0) return '동일'
   const absDiff = Math.abs(diff)
@@ -56,12 +49,12 @@ const formatPriceDiff = (targetPrice, basePrice) => {
   return `${diff > 0 ? '+' : '-'}${result}`
 }
 
-const parseArea = (areaStr) => {
+const parseArea = (areaStr: string | undefined): number => {
   if (!areaStr) return 0
   return parseInt(areaStr.replace('평', ''))
 }
 
-const formatAreaDiff = (targetArea, baseArea) => {
+const formatAreaDiff = (targetArea: string, baseArea: string): string => {
   const diff = parseArea(targetArea) - parseArea(baseArea)
   if (diff === 0) return '동일'
   return `${diff > 0 ? '+' : ''}${diff}평`

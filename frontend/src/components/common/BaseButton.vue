@@ -1,25 +1,18 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 
-const props = defineProps({
-  variant: {
-    type: String,
-    default: 'primary', // primary, secondary, outline, danger
-    validator: (value) => ['primary', 'secondary', 'outline', 'danger'].includes(value)
-  },
-  size: {
-    type: String,
-    default: 'md', // sm, md, lg
-    validator: (value) => ['sm', 'md', 'lg'].includes(value)
-  },
-  fullWidth: {
-    type: Boolean,
-    default: false
-  },
-  disabled: {
-    type: Boolean,
-    default: false
-  }
+interface Props {
+  variant?: 'primary' | 'secondary' | 'outline' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+  fullWidth?: boolean
+  disabled?: boolean
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  variant: 'primary',
+  size: 'md',
+  fullWidth: false,
+  disabled: false
 })
 
 const baseClasses = 'inline-flex items-center justify-center rounded-lg font-bold transition-all transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2'

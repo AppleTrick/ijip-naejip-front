@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '../stores/safehome'
+import { useSafeHomeStore, type House } from '../stores/safehome'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import { Trash2 } from 'lucide-vue-next'
@@ -17,7 +17,7 @@ const user = ref({
   joinDate: '2023-11-20'
 })
 
-const newHouse = ref({
+const newHouse = ref<House>({
   name: '',
   address: '',
   price: '',

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
@@ -6,10 +6,10 @@ import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
-const name = ref('')
-const email = ref('')
-const password = ref('')
-const passwordConfirm = ref('')
+const name = ref<string>('')
+const email = ref<string>('')
+const password = ref<string>('')
+const passwordConfirm = ref<string>('')
 
 const handleSignUp = () => {
   console.log('Sign up attempt:', { name: name.value, email: email.value })
