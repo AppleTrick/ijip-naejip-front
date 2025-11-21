@@ -18,19 +18,75 @@ defineEmits<{
 </script>
 
 <template>
-  <div>
-    <label v-if="label" :for="id" class="block text-sm font-semibold text-[#2B2E4A] mb-2">{{ label }}</label>
-    <div class="relative group">
+  <div class="input-group">
+    <label v-if="label" :for="id" class="input-label">{{ label }}</label>
+    <div class="input-wrapper">
       <input 
         :id="id"
         :type="type"
         :value="modelValue"
         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-        class="w-full pl-4 pr-4 py-3.5 rounded-xl bg-[#F3F4F6] border border-[#E5E7EB] text-[#2B2E4A] font-medium focus:bg-white focus:ring-2 focus:ring-[#E84545] focus:border-transparent transition-all"
-        :class="{ 'pr-12': unit }"
+        class="input-field"
+        :class="{ 'has-unit': unit }"
         :placeholder="placeholder"
       >
-      <span v-if="unit" class="absolute right-4 top-1/2 -translate-y-1/2 text-[#9CA3AF] text-sm font-bold group-focus-within:text-[#E84545]">{{ unit }}</span>
+      <span v-if="unit" class="input-unit">{{ unit }}</span>
     </div>
   </div>
 </template>
+
+<style scoped>
+.input-group {
+  margin-bottom: 0;
+}
+
+.input-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 0.5rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  background-color: var(--color-gray-100);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-text);
+  font-weight: 500;
+  transition: all 0.2s;
+  outline: none;
+  box-sizing: border-box; /* Ensure padding doesn't affect width */
+}
+
+.input-field:focus {
+  background-color: var(--color-white);
+  box-shadow: 0 0 0 2px var(--color-primary);
+  border-color: transparent;
+}
+
+.input-field.has-unit {
+  padding-right: 3rem;
+}
+
+.input-unit {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gray-400);
+  font-size: 0.875rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.input-wrapper:focus-within .input-unit {
+  color: var(--color-primary);
+}
+</style>

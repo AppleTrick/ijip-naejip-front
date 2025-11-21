@@ -20,16 +20,56 @@ const openPostcode = () => {
 </script>
 
 <template>
-  <div class="relative">
+  <div class="search-container">
     <input 
       :value="modelValue" 
       readonly 
       @click="openPostcode"
       type="text" 
-      class="w-full pl-10 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer" 
+      class="search-input" 
       placeholder="주소 검색 (클릭)"
     >
-    <Search class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+    <Search class="search-icon" />
   </div>
 </template>
+
+<style scoped>
+.search-container {
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem 0.75rem 2.5rem;
+  border-radius: 0.75rem;
+  background-color: var(--color-gray-50);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-text);
+  font-size: 1rem;
+  transition: all 0.2s;
+  cursor: pointer;
+  outline: none;
+  box-sizing: border-box;
+}
+
+.search-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.search-input:focus {
+  box-shadow: 0 0 0 2px var(--color-primary);
+  border-color: transparent;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-gray-400);
+  width: 1.25rem;
+  height: 1.25rem;
+  pointer-events: none;
+}
+</style>
 

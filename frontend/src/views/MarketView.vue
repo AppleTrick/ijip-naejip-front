@@ -79,80 +79,80 @@ const goToAnalysis = () => {
 </script>
 
 <template>
-  <div class="flex-1 relative overflow-hidden flex h-full">
+  <div class="market-page">
     <!-- Left Sidebar (Property Details) -->
-    <div v-if="selectedProperty" class="absolute top-24 left-4 bottom-4 w-full md:w-[420px] bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl z-30 overflow-hidden flex flex-col animate-slide-in-left border border-white/50">
+    <div v-if="selectedProperty" class="property-sidebar">
       <!-- Header Image Placeholder -->
-      <div class="h-64 bg-[#E5E7EB] relative group">
+      <div class="sidebar-header">
         <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-             alt="Property" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-        <button @click="closePropertyCard" class="absolute top-4 right-4 bg-black/30 hover:bg-black/50 text-white p-2 rounded-full backdrop-blur-sm transition-all">
-          <X class="w-5 h-5" />
+             alt="Property" class="header-image">
+        <div class="header-overlay"></div>
+        <button @click="closePropertyCard" class="close-btn">
+          <X class="icon-sm" />
         </button>
-        <div class="absolute bottom-4 left-4">
-          <span class="px-3 py-1 rounded-lg bg-[#E84545] text-white text-xs font-bold shadow-sm">{{ selectedProperty.type }}</span>
+        <div class="type-badge-wrapper">
+          <span class="type-badge">{{ selectedProperty.type }}</span>
         </div>
       </div>
 
       <!-- Content -->
-      <div class="p-6 flex-1">
-        <div class="mb-6">
-          <div class="flex justify-between items-start mb-1">
-            <h2 class="text-2xl font-bold text-[#E84545]">{{ selectedProperty.name }}</h2>
+      <div class="sidebar-content">
+        <div class="property-header">
+          <div class="title-row">
+            <h2 class="property-title">{{ selectedProperty.name }}</h2>
             <button 
               @click="isInComparison(selectedProperty.id) ? removeFromComparison(selectedProperty.id) : addToComparison(selectedProperty)"
-              class="p-2 rounded-full transition-colors"
-              :class="isInComparison(selectedProperty.id) ? 'bg-[#903749]/20 text-[#E84545] hover:bg-[#903749]/30' : 'bg-[#F3F4F6] text-[#9CA3AF] hover:bg-[#E5E7EB]'"
+              class="compare-btn"
+              :class="isInComparison(selectedProperty.id) ? 'compare-btn--active' : 'compare-btn--inactive'"
               :title="isInComparison(selectedProperty.id) ? '비교함에서 제거' : '비교함에 추가'"
             >
-              <component :is="isInComparison(selectedProperty.id) ? Check : Plus" class="w-6 h-6" />
+              <component :is="isInComparison(selectedProperty.id) ? Check : Plus" class="icon-md" />
             </button>
           </div>
-          <p class="text-[#6B7280] flex items-center text-sm">
+          <p class="property-address">
             <span class="mr-2">📍</span> {{ selectedProperty.address }}
           </p>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="bg-gradient-to-br from-[#E84545]/10 to-[#903749]/10 p-5 rounded-2xl border-2 border-[#E84545]/30">
-            <p class="text-sm text-[#903749] font-bold mb-1">매매가</p>
-            <p class="text-3xl font-[800] text-[#E84545] tracking-tight">{{ selectedProperty.price }}</p>
+        <div class="price-grid">
+          <div class="price-card">
+            <p class="price-label">매매가</p>
+            <p class="price-value">{{ selectedProperty.price }}</p>
           </div>
-          <div class="bg-[#F3F4F6] p-4 rounded-2xl border border-[#903749]/20">
-            <p class="text-sm text-[#6B7280] mb-1">관리비</p>
-            <p class="text-lg font-bold text-[#2B2E4A]">{{ selectedProperty.maintenanceFee }}</p>
+          <div class="fee-card">
+            <p class="fee-label">관리비</p>
+            <p class="fee-value">{{ selectedProperty.maintenanceFee }}</p>
           </div>
         </div>
 
         <!-- Info Grid -->
-        <div class="grid grid-cols-2 gap-4 mb-8">
-          <div class="p-4 bg-[#F3F4F6] rounded-xl border border-[#903749]/20">
-            <p class="text-xs text-[#6B7280] mb-1">공급/전용면적</p>
-            <p class="font-bold text-[#E84545]">{{ selectedProperty.area }}</p>
+        <div class="info-grid">
+          <div class="info-card">
+            <p class="info-label">공급/전용면적</p>
+            <p class="info-value">{{ selectedProperty.area }}</p>
           </div>
-          <div class="p-4 bg-[#F3F4F6] rounded-xl border border-[#903749]/20">
-            <p class="text-xs text-[#6B7280] mb-1">해당층/총층</p>
-            <p class="font-bold text-[#E84545]">{{ selectedProperty.floor }}</p>
+          <div class="info-card">
+            <p class="info-label">해당층/총층</p>
+            <p class="info-value">{{ selectedProperty.floor }}</p>
           </div>
-          <div class="p-4 bg-[#F3F4F6] rounded-xl border border-[#903749]/20 col-span-2">
-            <p class="text-xs text-[#6B7280] mb-1">상세설명</p>
-            <p class="text-[#2B2E4A] text-sm leading-relaxed bg-white p-4 rounded-xl">
+          <div class="info-card full-width">
+            <p class="info-label">상세설명</p>
+            <p class="description-text">
               {{ selectedProperty.description }}
             </p>
           </div>
         </div>
 
         <!-- Safety Check CTA -->
-        <div class="bg-gradient-to-br from-[#53354A]/10 to-[#903749]/10 rounded-2xl p-6 border-2 border-[#903749]/30 mb-6">
-          <h3 class="font-bold text-[#E84545] mb-2 flex items-center text-lg">
-            <ShieldCheck class="w-6 h-6 mr-2 text-[#E84545]" />
+        <div class="safety-cta">
+          <h3 class="cta-title">
+            <ShieldCheck class="cta-icon" />
             이 매물, 안전할까요?
           </h3>
-          <p class="text-sm text-[#2B2E4A] mb-4 leading-relaxed">
+          <p class="cta-desc">
             등기부등본 AI 분석을 통해<br>전세 사기 위험도를 무료로 확인하세요.
           </p>
-          <BaseButton @click="goToAnalysis" full-width class="py-3">
+          <BaseButton @click="goToAnalysis" full-width class="cta-btn">
             안전도 분석 시작하기
           </BaseButton>
         </div>
@@ -160,15 +160,15 @@ const goToAnalysis = () => {
     </div>
 
     <!-- Map Area -->
-    <div class="flex-1 relative h-full">
+    <div class="map-area">
       <KakaoMap 
         :markers="filteredProperties" 
         @select-marker="handleMarkerSelect" 
       />
       
       <!-- Floating Search Bar -->
-      <div class="absolute top-4 left-4 right-4 z-20 flex justify-center pointer-events-none">
-        <div class="w-full max-w-2xl pointer-events-auto">
+      <div class="floating-search">
+        <div class="search-container">
           <MarketFilter @search="handleSearch" />
         </div>
       </div>
@@ -177,12 +177,318 @@ const goToAnalysis = () => {
 </template>
 
 <style scoped>
-.animate-slide-in-left {
+.market-page {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  height: 100%;
+}
+
+.property-sidebar {
+  position: absolute;
+  top: 6rem;
+  left: 1rem;
+  bottom: 1rem;
+  width: calc(100% - 2rem);
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  z-index: 30;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   animation: slideInLeft 0.3s ease-out;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+@media (min-width: 768px) {
+  .property-sidebar {
+    width: 420px;
+  }
 }
 
 @keyframes slideInLeft {
   from { transform: translateX(-100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
+}
+
+.sidebar-header {
+  height: 16rem;
+  background-color: var(--color-gray-200);
+  position: relative;
+  overflow: hidden;
+}
+
+.header-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.7s;
+}
+
+.sidebar-header:hover .header-image {
+  transform: scale(1.05);
+}
+
+.header-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.6), transparent);
+}
+
+.close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background-color: rgba(0, 0, 0, 0.3);
+  color: var(--color-white);
+  padding: 0.5rem;
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-btn:hover {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+.icon-sm {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.type-badge-wrapper {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.type-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  font-size: 0.75rem;
+  font-weight: 700;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-content {
+  padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.property-header {
+  margin-bottom: 1.5rem;
+}
+
+.title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.25rem;
+}
+
+.property-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.compare-btn {
+  padding: 0.5rem;
+  border-radius: 9999px;
+  transition: background-color 0.2s;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.compare-btn--active {
+  background-color: rgba(144, 55, 73, 0.2); /* secondary-transparent20 */
+  color: var(--color-primary);
+}
+
+.compare-btn--active:hover {
+  background-color: rgba(144, 55, 73, 0.3); /* secondary-transparent30 */
+}
+
+.compare-btn--inactive {
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-400);
+}
+
+.compare-btn--inactive:hover {
+  background-color: var(--color-gray-200);
+}
+
+.icon-md {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.property-address {
+  color: var(--color-text-light);
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+}
+
+.mr-2 {
+  margin-right: 0.5rem;
+}
+
+.price-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.price-card {
+  background: linear-gradient(to bottom right, rgba(232, 69, 69, 0.1), rgba(144, 55, 73, 0.1));
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 2px solid rgba(232, 69, 69, 0.3); /* primary-transparent30 */
+}
+
+.price-label {
+  font-size: 0.875rem;
+  color: var(--color-secondary);
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+}
+
+.price-value {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: -0.025em;
+}
+
+.fee-card {
+  background-color: var(--color-gray-100);
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgba(144, 55, 73, 0.2); /* secondary-transparent20 */
+}
+
+.fee-label {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.fee-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.info-card {
+  padding: 1rem;
+  background-color: var(--color-gray-100);
+  border-radius: 0.75rem;
+  border: 1px solid rgba(144, 55, 73, 0.2); /* secondary-transparent20 */
+}
+
+.full-width {
+  grid-column: span 2;
+}
+
+.info-label {
+  font-size: 0.75rem;
+  color: var(--color-text-light);
+  margin-bottom: 0.25rem;
+}
+
+.info-value {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.description-text {
+  color: var(--color-text);
+  font-size: 0.875rem;
+  line-height: 1.625;
+  background-color: var(--color-white);
+  padding: 1rem;
+  border-radius: 0.75rem;
+}
+
+.safety-cta {
+  background: linear-gradient(to bottom right, rgba(232, 69, 69, 0.1), rgba(144, 55, 73, 0.1));
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 2px solid rgba(144, 55, 73, 0.3); /* secondary-transparent30 */
+  margin-bottom: 1.5rem;
+}
+
+.cta-title {
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 1.125rem;
+}
+
+.cta-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  color: var(--color-primary);
+}
+
+.cta-desc {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+  line-height: 1.625;
+}
+
+.cta-btn {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.map-area {
+  flex: 1;
+  position: relative;
+  height: 100%;
+}
+
+.floating-search {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  right: 1rem;
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.search-container {
+  width: 100%;
+  max-width: 42rem;
+  pointer-events: auto;
 }
 </style>

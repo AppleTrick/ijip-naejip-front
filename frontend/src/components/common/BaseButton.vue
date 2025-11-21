@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-
 interface Props {
   variant?: 'primary' | 'secondary' | 'outline' | 'danger'
   size?: 'sm' | 'md' | 'lg'
@@ -8,54 +6,115 @@ interface Props {
   disabled?: boolean
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   variant: 'primary',
   size: 'md',
   fullWidth: false,
   disabled: false
 })
-
-const baseClasses = 'inline-flex items-center justify-center rounded-lg font-bold transition-all transform active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2'
-
-const variantClasses = computed(() => {
-  switch (props.variant) {
-    case 'primary':
-      return 'bg-[#E84545] hover:bg-[#D63939] text-white shadow-lg shadow-[#E84545]/30 focus:ring-[#E84545]'
-    case 'secondary':
-      return 'bg-[#903749] hover:bg-[#7A2F3E] text-white shadow-md shadow-[#903749]/20 focus:ring-[#903749]'
-    case 'outline':
-      return 'bg-white border-2 border-[#E5E7EB] hover:border-[#E84545] hover:text-[#E84545] text-[#6B7280] focus:ring-[#E84545]'
-    case 'danger':
-      return 'bg-[#E84545] hover:bg-[#D63939] text-white shadow-lg shadow-[#E84545]/30 focus:ring-[#E84545]'
-    default:
-      return ''
-  }
-})
-
-const sizeClasses = computed(() => {
-  switch (props.size) {
-    case 'sm':
-      return 'px-3 py-1.5 text-sm'
-    case 'md':
-      return 'px-4 py-2 text-base'
-    case 'lg':
-      return 'px-6 py-3.5 text-lg'
-    default:
-      return ''
-  }
-})
 </script>
 
 <template>
   <button 
+    class="btn"
     :class="[
-      baseClasses, 
-      variantClasses, 
-      sizeClasses, 
-      { 'w-full': fullWidth, 'opacity-50 cursor-not-allowed': disabled }
+      `btn--${variant}`, 
+      `btn--${size}`, 
+      { 'btn--full': fullWidth, 'btn--disabled': disabled }
     ]"
     :disabled="disabled"
   >
     <slot></slot>
   </button>
 </template>
+
+<style scoped>
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  transition: all 0.2s;
+  transform: scale(1);
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn:active {
+  transform: scale(0.98);
+}
+
+.btn:focus {
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Variants */
+.btn--primary {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: 0 4px 6px -1px rgba(232, 69, 69, 0.3);
+}
+
+.btn--primary:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn--secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+  box-shadow: 0 4px 6px -1px rgba(144, 55, 73, 0.2);
+}
+
+.btn--secondary:hover {
+  background-color: var(--color-secondary-hover);
+}
+
+.btn--outline {
+  background-color: var(--color-white);
+  border: 2px solid var(--color-gray-200);
+  color: var(--color-text-light);
+}
+
+.btn--outline:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.btn--danger {
+  background-color: var(--color-danger);
+  color: var(--color-white);
+  box-shadow: 0 4px 6px -1px rgba(232, 69, 69, 0.3);
+}
+
+.btn--danger:hover {
+  background-color: var(--color-danger-hover);
+}
+
+/* Sizes */
+.btn--sm {
+  padding: 0.375rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn--md {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+}
+
+.btn--lg {
+  padding: 0.875rem 1.5rem;
+  font-size: 1.125rem;
+}
+
+/* Modifiers */
+.btn--full {
+  width: 100%;
+}
+
+.btn--disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+</style>

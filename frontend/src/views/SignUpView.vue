@@ -20,18 +20,18 @@ const handleSignUp = () => {
 </script>
 
 <template>
-  <div class="min-h-full flex items-center justify-center bg-[#F5F5F5] px-4 py-12 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border-2 border-[#E84545]/20">
-      <div>
-        <h2 class="mt-6 text-center text-3xl font-extrabold text-[#E84545]">
+  <div class="signup-page">
+    <div class="signup-container">
+      <div class="signup-header">
+        <h2 class="signup-title">
           회원가입
         </h2>
-        <p class="mt-2 text-center text-sm text-[#6B7280]">
+        <p class="signup-subtitle">
           SafeHome과 함께 안전한 집을 찾아보세요
         </p>
       </div>
-      <form class="mt-8 space-y-6" @submit.prevent="handleSignUp">
-        <div class="space-y-4">
+      <form class="signup-form" @submit.prevent="handleSignUp">
+        <div class="input-group">
           <BaseInput
             id="name"
             v-model="name"
@@ -62,7 +62,7 @@ const handleSignUp = () => {
           />
         </div>
 
-        <div class="space-y-3">
+        <div class="button-group">
           <BaseButton
             type="submit"
             variant="primary"
@@ -72,9 +72,9 @@ const handleSignUp = () => {
             가입하기
           </BaseButton>
           
-          <div class="text-center text-sm text-[#6B7280]">
+          <div class="login-link-container">
             이미 계정이 있으신가요? 
-            <a href="#" @click.prevent="router.push('/login')" class="font-medium text-[#E84545] hover:text-[#D63939]">
+            <a href="#" @click.prevent="router.push('/login')" class="login-link">
               로그인하기
             </a>
           </div>
@@ -83,3 +83,94 @@ const handleSignUp = () => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.signup-page {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  padding: 3rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .signup-page {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .signup-page {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.signup-container {
+  max-width: 28rem; /* max-w-md */
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background-color: var(--color-white);
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border: 2px solid rgba(232, 69, 69, 0.2); /* primary-transparent20 */
+}
+
+.signup-header {
+  text-align: center;
+}
+
+.signup-title {
+  margin-top: 1.5rem;
+  font-size: 1.875rem; /* 3xl */
+  line-height: 2.25rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.signup-subtitle {
+  margin-top: 0.5rem;
+  font-size: 0.875rem; /* sm */
+  color: var(--color-text-light);
+}
+
+.signup-form {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.button-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.login-link-container {
+  text-align: center;
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+}
+
+.login-link {
+  font-weight: 500;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.login-link:hover {
+  color: var(--color-primary-hover);
+}
+</style>

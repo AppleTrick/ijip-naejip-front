@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
+import { colors } from '@/constants/colors'
 
 import type { Property } from '../../stores/safehome'
 
@@ -33,9 +34,27 @@ const renderMarkers = (items: Property[] | undefined) => {
     // Create Custom Overlay Content using DOM API
     const content = document.createElement('div')
     content.className = 'custom-overlay-marker'
+    // We use inline styles here because this HTML is injected outside of Vue's scope
     content.innerHTML = `
-      <div class="px-4 py-2 bg-white border-2 border-[#E84545] rounded-[50px] shadow-[0_4px_10px_rgba(232,69,69,0.3)] flex items-center justify-center cursor-pointer transform transition-transform hover:scale-110">
-        <span class="text-[#E84545] font-extrabold text-sm whitespace-nowrap font-['Pretendard']">${item.price}</span>
+      <div style="
+        padding: 0.5rem 1rem;
+        background-color: white;
+        border: 2px solid ${colors.primary};
+        border-radius: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 10px ${colors.primaryTransparent30};
+        transition: transform 0.2s;
+      " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        <span style="
+          color: ${colors.primary};
+          font-weight: 800;
+          font-size: 0.875rem;
+          white-space: nowrap;
+          font-family: 'Pretendard', sans-serif;
+        ">${item.price}</span>
       </div>
     `
     
@@ -124,5 +143,13 @@ watch(() => props.address, (newAddr) => {
 </script>
 
 <template>
-  <div ref="mapContainer" class="w-full h-full bg-gray-200"></div>
+  <div ref="mapContainer" class="map-container"></div>
 </template>
+
+<style scoped>
+.map-container {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-gray-200);
+}
+</style>

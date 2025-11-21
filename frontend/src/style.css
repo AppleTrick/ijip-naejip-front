@@ -1,11 +1,11 @@
-@import "tailwindcss";
+/* Tailwind removed */
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
 :root {
-  --color-primary: #4A70A9; /* Medium Blue */
-  --color-secondary: #8FABD4; /* Light Blue */
-  --color-bg: #EFECE3; /* Light Beige */
-  --color-text: #000000; /* Black */
+  --color-primary: #E84545; /* Bright Red */
+  --color-secondary: #903749; /* Wine Red */
+  --color-bg: #F5F5F5; /* Light Gray */
+  --color-text: #2B2E4A; /* Dark Navy */
 }
 
 html, body, #app {

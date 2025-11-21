@@ -36,15 +36,52 @@ watch(currentAddress, (newVal) => {
 </script>
 
 <template>
-  <div class="flex h-full w-full">
+  <div class="analysis-view">
     <!-- Left Side: Analysis Form -->
-    <div class="w-full md:w-[600px] h-full border-r border-gray-200 bg-white z-10 shadow-xl overflow-hidden">
+    <div class="sidebar">
       <AnalysisForm v-model="formData" />
     </div>
 
     <!-- Right Side: Map -->
-    <div class="hidden md:block flex-1 relative bg-gray-100">
+    <div class="map-container">
       <KakaoMap :address="formData.address" />
     </div>
   </div>
 </template>
+
+<style scoped>
+.analysis-view {
+  display: flex;
+  height: 100%;
+  width: 100%;
+}
+
+.sidebar {
+  width: 100%;
+  height: 100%;
+  border-right: 1px solid var(--color-gray-200);
+  background-color: var(--color-white);
+  z-index: 10;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .sidebar {
+    width: 600px;
+  }
+}
+
+.map-container {
+  display: none;
+  flex: 1;
+  position: relative;
+  background-color: var(--color-gray-100);
+}
+
+@media (min-width: 768px) {
+  .map-container {
+    display: block;
+  }
+}
+</style>
