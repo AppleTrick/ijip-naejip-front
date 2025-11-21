@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '../stores/safehome'
+import { useSafeHomeStore } from '@/stores/safehome'
 import { useRouter } from 'vue-router'
-import BaseButton from '../components/common/BaseButton.vue'
-import BaseSelect from '../components/common/BaseSelect.vue'
+import BaseButton from '@/components/common/BaseButton.vue'
+import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -210,7 +210,7 @@ const sortedComparisonList = computed(() => {
                 </div>
               </div>
             </div>
-            
+
             <!-- Empty State for My House -->
             <div v-else class="empty-my-house">
               <Home class="empty-icon" />

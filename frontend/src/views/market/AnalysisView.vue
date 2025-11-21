@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '../stores/safehome'
-import AnalysisForm from '../components/features/AnalysisForm.vue'
-import KakaoMap from '../components/features/KakaoMap.vue'
+import { useSafeHomeStore } from '@/stores/safehome'
+import AnalysisForm from '@/components/features/AnalysisForm.vue'
+import KakaoMap from '@/components/features/KakaoMap.vue'
 
 const store = useSafeHomeStore()
 const { currentAddress } = storeToRefs(store)

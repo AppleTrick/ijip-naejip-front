@@ -2,10 +2,10 @@
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore, type Property } from '../stores/safehome'
-import KakaoMap from '../components/features/KakaoMap.vue'
-import MarketFilter from '../components/features/MarketFilter.vue'
-import BaseButton from '../components/common/BaseButton.vue'
+import { useSafeHomeStore, type Property } from '@/stores/safehome'
+import KakaoMap from '@/components/features/KakaoMap.vue'
+import MarketFilter from '@/components/features/MarketFilter.vue'
+import BaseButton from '@/components/common/BaseButton.vue'
 import { ShieldCheck, X, Check, Plus } from 'lucide-vue-next'
 
 const router = useRouter()
