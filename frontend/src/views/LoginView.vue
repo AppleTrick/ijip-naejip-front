@@ -3,12 +3,16 @@ import { ref } from 'vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 const email = ref<string>('')
 const password = ref<string>('')
 
 const handleLogin = () => {
   console.log('Login attempt:', email.value, password.value)
   // TODO: Implement actual login logic
+  router.push('/home')
 }
 </script>
 
@@ -63,21 +67,6 @@ const handleLogin = () => {
 
         <div class="button-group">
           <BaseButton
-            type="submit"
-            variant="primary"
-            :full-width="true"
-            size="lg"
-          >
-            로그인
-          </BaseButton>
-          
-          <BaseButton
-            type="button"
-            variant="outline"
-            :full-width="true"
-            size="lg"
-          >
-            회원가입
           </BaseButton>
         </div>
       </form>

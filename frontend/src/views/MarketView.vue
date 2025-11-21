@@ -80,6 +80,12 @@ const closePropertyCard = () => {
 const goToAnalysis = () => {
   router.push('/analysis')
 }
+
+const goToDetail = () => {
+  if (selectedProperty.value) {
+    router.push(`/price/${selectedProperty.value.id}`)
+  }
+}
 </script>
 
 <template>
@@ -113,9 +119,15 @@ const goToAnalysis = () => {
               <component :is="isInComparison(selectedProperty.id) ? Check : Plus" class="icon-md" />
             </button>
           </div>
+
           <p class="property-address">
             <span class="mr-2">📍</span> {{ selectedProperty.address }}
           </p>
+          <div class="action-row">
+            <BaseButton full-width variant="primary" @click="goToDetail">
+              매물 상세 정보 보기
+            </BaseButton>
+          </div>
         </div>
 
         <div class="price-grid">
@@ -304,7 +316,7 @@ const goToAnalysis = () => {
 .property-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-text);
 }
 
 .compare-btn {
@@ -346,6 +358,10 @@ const goToAnalysis = () => {
   display: flex;
   align-items: center;
   font-size: 0.875rem;
+}
+
+.action-row {
+  margin-top: 1rem;
 }
 
 .mr-2 {
@@ -425,7 +441,7 @@ const goToAnalysis = () => {
 
 .info-value {
   font-weight: 700;
-  color: var(--color-primary);
+  color: var(--color-text);
 }
 
 .description-text {

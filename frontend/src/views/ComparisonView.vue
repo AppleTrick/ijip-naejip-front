@@ -271,8 +271,11 @@ const sortedComparisonList = computed(() => {
                     </div>
                     
                     <div class="card-footer">
-                      <BaseButton variant="outline" size="sm" @click="router.push('/')">
+                      <BaseButton variant="outline" size="sm" @click="router.push('/map')">
                         지도에서 보기
+                      </BaseButton>
+                      <BaseButton variant="primary" size="sm" @click="router.push(`/price/${property.id}`)">
+                        상세 정보
                       </BaseButton>
                     </div>
                   </div>
@@ -288,7 +291,7 @@ const sortedComparisonList = computed(() => {
                 </div>
                 <h3 class="empty-title">비교할 매물이 없어요</h3>
                 <p class="empty-subtitle">지도에서 관심있는 매물을 담아보세요.</p>
-                <BaseButton @click="router.push('/')" size="sm">
+                <BaseButton @click="router.push('/map')" size="sm">
                   매물 보러가기
                 </BaseButton>
               </div>

@@ -131,6 +131,10 @@ export const useSafeHomeStore = defineStore('safehome', () => {
 
   function addToComparison(property: Property) {
     if (!isInComparison(property.id)) {
+      if (comparisonList.value.length >= 3) {
+        alert('비교함에는 최대 3개의 매물만 담을 수 있습니다.')
+        return
+      }
       comparisonList.value.push(property)
     }
   }

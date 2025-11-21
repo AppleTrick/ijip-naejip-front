@@ -33,7 +33,14 @@ const closeMenu = () => {
           <!-- Main Navigation -->
           <div class="nav-links">
             <router-link 
-              to="/" 
+              to="/home" 
+              class="nav-link" 
+              active-class="nav-link--active"
+            >
+              홈
+            </router-link>
+            <router-link 
+              to="/map" 
               class="nav-link" 
               active-class="nav-link--active"
             >
@@ -60,7 +67,7 @@ const closeMenu = () => {
 
           <!-- Auth & User -->
           <div class="auth-group">
-            <router-link to="/mypage" class="user-icon-link" title="마이페이지">
+            <router-link to="/settings" class="user-icon-link" title="설정">
               <User class="user-icon" />
             </router-link>
             <div class="auth-buttons">
@@ -98,7 +105,15 @@ const closeMenu = () => {
     <div v-if="isMenuOpen" class="mobile-menu">
       <div class="mobile-menu-content">
         <router-link 
-          to="/" 
+          to="/home" 
+          class="mobile-nav-link"
+          active-class="mobile-nav-link--active"
+          @click="closeMenu"
+        >
+          홈
+        </router-link>
+        <router-link 
+          to="/map" 
           class="mobile-nav-link"
           active-class="mobile-nav-link--active"
           @click="closeMenu"
@@ -123,13 +138,13 @@ const closeMenu = () => {
         </router-link>
         
         <div class="mobile-divider">
-          <router-link 
-            to="/mypage"
+            <router-link 
+            to="/settings"
             class="mobile-user-link"
             @click="closeMenu"
           >
             <User class="mobile-user-icon" />
-            마이페이지
+            설정
           </router-link>
           <div class="mobile-auth-buttons">
             <BaseButton 
