@@ -65,6 +65,10 @@ const handleSearch = (query: string) => {
   setSearchQuery(query)
 }
 
+const handleFilter = (filters: any) => {
+  store.setFilters(filters)
+}
+
 const handleMarkerSelect = (property: Property) => {
   selectProperty(property)
 }
@@ -169,7 +173,7 @@ const goToAnalysis = () => {
       <!-- Floating Search Bar -->
       <div class="floating-search">
         <div class="search-container">
-          <MarketFilter @search="handleSearch" />
+          <MarketFilter @search="handleSearch" @filter="handleFilter" />
         </div>
       </div>
     </div>

@@ -35,15 +35,69 @@ export const useSafeHomeStore = defineStore('safehome', () => {
   const myHouse = ref<House | null>(null)
   const comparisonList = ref<Property[]>([])
 
+  const filters = ref({
+    types: [] as string[],
+    priceRange: { min: 0, max: 20 },
+    area: [] as string[],
+    general: [] as string[]
+  })
+
   // Getters
   const filteredProperties = computed(() => {
-    if (!searchQuery.value) return marketProperties.value
-    
-    const query = searchQuery.value.toLowerCase()
-    return marketProperties.value.filter(p => 
-      p.name.toLowerCase().includes(query) || 
-      p.address.toLowerCase().includes(query)
-    )
+    let result = marketProperties.value
+
+    // 1. Search Query
+    if (searchQuery.value) {
+      const query = searchQuery.value.toLowerCase()
+      result = result.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        p.address.toLowerCase().includes(query)
+      )
+    }
+
+    // 2. Type Filter
+    if (filters.value.types.length > 0) {
+      result = result.filter(p => {
+        const typeCode = p.type === '아파트' ? 'APT' : p.type === '오피스텔' ? 'OPST' : 'VILLA'
+        return filters.value.types.includes(typeCode)
+      })
+    }
+
+    // 3. Price Filter
+    // Mock data price format: "10억 5000만원"
+    // We need to parse this to compare with min/max (unit: 100 million / Eok)
+    const parsePriceToEok = (priceStr: string): number => {
+      let total = 0
+      const ukMatch = priceStr.match(/(\d+)억/)
+      const manMatch = priceStr.match(/(\d+)만원/)
+      
+      if (ukMatch) total += parseInt(ukMatch[1])
+      if (manMatch) total += parseInt(manMatch[1]) / 10000
+      
+      return total
+    }
+
+    if (filters.value.priceRange.min > 0 || filters.value.priceRange.max < 20) {
+      result = result.filter(p => {
+        const price = parsePriceToEok(p.price)
+        return price >= filters.value.priceRange.min && price <= filters.value.priceRange.max
+      })
+    }
+
+    // 4. Area Filter
+    // Mock data area format: "34평"
+    if (filters.value.area.length > 0) {
+      result = result.filter(p => {
+        const areaVal = parseInt(p.area.replace('평', ''))
+        return filters.value.area.some(range => {
+          if (range === '40+') return areaVal >= 40
+          const min = parseInt(range)
+          return areaVal >= min && areaVal < min + 10
+        })
+      })
+    }
+
+    return result
   })
 
   const isInComparison = (propertyId: number | string) => {
@@ -67,6 +121,10 @@ export const useSafeHomeStore = defineStore('safehome', () => {
     searchQuery.value = query
   }
 
+  function setFilters(newFilters: any) {
+    filters.value = newFilters
+  }
+
   function setMyHouse(house: House | null) {
     myHouse.value = house
   }
@@ -86,6 +144,7 @@ export const useSafeHomeStore = defineStore('safehome', () => {
     selectedProperty,
     currentAddress,
     searchQuery,
+    filters,
     filteredProperties,
     myHouse,
     comparisonList,
@@ -93,6 +152,7 @@ export const useSafeHomeStore = defineStore('safehome', () => {
     selectProperty,
     setAddress,
     setSearchQuery,
+    setFilters,
     setMyHouse,
     addToComparison,
     removeFromComparison,
