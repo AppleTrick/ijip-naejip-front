@@ -1,24 +1,44 @@
-# SafeHome (안심홈) 🏠
+# SafeHome Frontend 🖥️
 
-SafeHome is a web application designed to help users find safe housing by analyzing various risk factors such as deposit return risks (Jeonse fraud) and building violations.
+This directory contains the frontend source code for the SafeHome application.
 
-## Project Structure
+## Tech Stack
 
-The project is divided into two main parts:
+- **Framework**: Vue.js 3 (Composition API)
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Pinia
+- **Routing**: Vue Router
+- **Icons**: Lucide Vue Next
+- **Maps**: Kakao Maps API
 
-- **Frontend**: Built with Vue.js 3, Vite, and Tailwind CSS. Handles the user interface for map visualization, safety analysis, and property comparison.
-- **Backend**: Built with Spring Boot. Handles data processing, safety analysis logic, and API endpoints.
+## Project Setup
 
-## Key Features
+### Prerequisites
 
-- **Market Map**: Visualize property prices and locations on an interactive map.
-- **Safety Analysis**: Analyze the safety of a property based on deposit, market value, and debt.
-- **Property Comparison**: Compare multiple properties side-by-side to make informed decisions.
-- **My Page**: Manage user profile and saved "My House" information.
+- Node.js (LTS version recommended)
+- npm or yarn
 
-## Getting Started
+### Installation
 
-Please refer to the `README.md` files in the `frontend` and `backend` directories for specific installation and running instructions.
+```bash
+npm install
+```
 
-- [Frontend Documentation](./frontend/README.md)
-- [Backend Documentation](./backend/README.md)
+### Compile and Hot-Reload for Development
+
+```bash
+npm run dev
+```
+
+### Compile and Minify for Production
+
+```bash
+npm run build
+```
+
+## Key Components
+
+- **Views**: `MarketView`, `AnalysisView`, `ComparisonView`, `LoginView`, `SignUpView`, `MyPageView`
+- **Common Components**: `BaseButton`, `BaseInput`, `BaseSelect`
+- **Features**: `AnalysisForm`, `KakaoMap`, `MarketFilter`
