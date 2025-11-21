@@ -9,7 +9,7 @@ const userName = ref('김싸피')
 
 // Mock Data
 const recommendations = ref([
-  { id: 1, name: '반포 자이', price: '35억', type: '아파트', location: '서초구 반포동', image: 'https://images.unsplash.com/photo-1600596542815-60c37c6525fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
+  { id: 1, name: '반포 자이', price: '35억', type: '아파트', location: '서초구 반포동', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
   { id: 2, name: '한남 더힐', price: '80억', type: '빌라', location: '용산구 한남동', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
   { id: 3, name: '아크로 리버파크', price: '45억', type: '아파트', location: '서초구 반포동', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
 ])

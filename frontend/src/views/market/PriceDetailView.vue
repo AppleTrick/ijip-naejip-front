@@ -49,7 +49,7 @@ const goBack = () => {
         <!-- Image & Basic Info -->
         <div class="info-section">
           <div class="image-wrapper">
-            <img src="https://images.unsplash.com/photo-1600596542815-60c37c6525fa?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Property" class="property-image" />
+            <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Property" class="property-image" />
             <span class="type-badge">{{ property.type }}</span>
           </div>
           
