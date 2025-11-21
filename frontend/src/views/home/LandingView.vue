@@ -166,7 +166,7 @@ onMounted(() => {
              @mouseleave="handleMouseLeave">
           <div class="feature-bg"></div>
           <div class="icon-wrapper map-gradient">
-            <Map class="feature-icon" />
+            <Map class="feature-icon" />  
           </div>
           <h3 class="feature-title">인터랙티브 매물 지도</h3>
           <p class="feature-description">
