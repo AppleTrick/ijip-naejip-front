@@ -27,17 +27,21 @@ onMounted(() => {
 
 <style scoped>
 .app-container {
-  min-height: 100vh;
+  height: 100vh; /* Fixed height */
   width: 100%;
   background-color: var(--color-background);
   color: var(--color-text);
   font-family: "Pretendard", sans-serif;
   display: flex;
   flex-direction: column;
+  overflow: hidden; /* Prevent container scroll */
 }
 
 .main-content {
   flex: 1;
   position: relative;
+  overflow: hidden; /* Ensure children handle their own scrolling */
+  display: flex;
+  flex-direction: column; /* Ensure children fill height */
 }
 </style>

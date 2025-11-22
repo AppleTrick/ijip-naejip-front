@@ -127,8 +127,8 @@ onMounted(() => {
   position: absolute;
   top: 2rem;
   right: 2rem;
-  width: 360px;
-  max-width: calc(100% - 4rem);
+  width: 300px;
+  max-width: calc(100% - 2rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -177,7 +177,7 @@ onMounted(() => {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-radius: 1.25rem;
-  padding: 1.5rem;
+  padding: 1rem;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.5);
   pointer-events: auto; /* Re-enable clicks for cards */
@@ -201,12 +201,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 0.75rem;
 }
 
 .icon-box {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 1rem;
   background-color: var(--color-primary-light, rgba(144, 55, 73, 0.1));
   display: flex;
@@ -216,7 +216,7 @@ onMounted(() => {
 }
 
 .card-title {
-  font-size: 1.125rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);
   margin-bottom: 0.25rem;
@@ -256,7 +256,7 @@ onMounted(() => {
 }
 
 .stat-value {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 800;
   color: var(--color-text);
 }
@@ -268,7 +268,7 @@ onMounted(() => {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-text);
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .activity-list {
@@ -346,8 +346,8 @@ onMounted(() => {
 }
 
 .step-icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 2rem;
+  height: 2rem;
   border-radius: 0.75rem;
   display: flex;
   align-items: center;

@@ -323,6 +323,7 @@ const analyze = async () => {
   display: flex;
   flex-direction: column;
   background-color: var(--color-gray-50);
+  overflow: hidden; /* Prevent double scrollbars */
 }
 
 .content-area {

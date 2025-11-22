@@ -253,6 +253,8 @@ onMounted(() => {
 <style scoped>
 .landing-page {
   width: 100%;
+  height: 100%; /* Fill the fixed main-content */
+  overflow-y: auto; /* Enable internal scrolling */
   position: relative;
   background: linear-gradient(to bottom, #ffffff, #f9fafb);
 }
