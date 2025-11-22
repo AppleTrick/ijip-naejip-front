@@ -4,6 +4,7 @@ import { storeToRefs } from 'pinia'
 import { useSafeHomeStore } from '@/stores/safehome'
 import AnalysisForm from '@/components/features/AnalysisForm.vue'
 import KakaoMap from '@/components/features/KakaoMap.vue'
+import AnalysisMapOverlay from '@/components/features/AnalysisMapOverlay.vue'
 
 const store = useSafeHomeStore()
 const { currentAddress } = storeToRefs(store)
@@ -45,6 +46,7 @@ watch(currentAddress, (newVal) => {
     <!-- Right Side: Map -->
     <div class="map-container">
       <KakaoMap :address="formData.address" />
+      <AnalysisMapOverlay />
     </div>
   </div>
 </template>
@@ -68,7 +70,7 @@ watch(currentAddress, (newVal) => {
 
 @media (min-width: 768px) {
   .sidebar {
-    width: 600px;
+    width: 450px;
   }
 }
 
