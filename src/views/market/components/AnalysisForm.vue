@@ -4,7 +4,6 @@ import AddressSearch from '@/components/features/address/AddressSearch.vue'
 import FileUpload from './FileUpload.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
-import BaseCard from '@/components/common/BaseCard.vue'
 import { ShieldCheck, AlertTriangle, Ban, Check, ChevronDown } from 'lucide-vue-next'
 
 interface AnalysisResult {

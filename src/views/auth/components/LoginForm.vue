@@ -48,9 +48,9 @@ const handleLogin = () => {
       </div>
 
       <div class="forgot-password">
-        <a href="#" class="forgot-link">
+        <router-link to="/find-password" class="forgot-link">
           비밀번호를 잊으셨나요?
-        </a>
+        </router-link>
       </div>
     </div>
 
