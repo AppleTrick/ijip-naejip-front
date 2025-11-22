@@ -440,6 +440,8 @@ const analyze = async () => {
 .radio-label {
   position: relative;
   cursor: pointer;
+  display: flex;
+  height: 100%;
 }
 
 .sr-only {
@@ -460,7 +462,7 @@ const analyze = async () => {
   border-radius: 0.75rem;
   border: 2px solid var(--color-gray-200);
   transition: all 0.2s;
-  height: 100%;
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
