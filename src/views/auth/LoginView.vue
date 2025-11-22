@@ -66,7 +66,11 @@ const handleLogin = () => {
         </div>
 
         <div class="button-group">
-          <BaseButton
+          <BaseButton type="submit"
+            variant="primary"
+            :full-width="true"
+            size="lg">
+            로그인
           </BaseButton>
         </div>
       </form>

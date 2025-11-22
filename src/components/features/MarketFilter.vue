@@ -207,7 +207,8 @@ const formatPrice = (val: number) => {
 
 .search-input {
   width: 100%;
-  padding: 1rem 6rem 1rem 3rem;
+  height: 3rem;
+  padding: 0 6rem 0 3rem;
   border-radius: 0.75rem;
   border: 1px solid var(--color-gray-200);
   font-size: 1.125rem;

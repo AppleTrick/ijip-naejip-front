@@ -253,18 +253,17 @@ onMounted(() => {
 <style scoped>
 .landing-page {
   width: 100%;
-  overflow-x: hidden;
   position: relative;
   background: linear-gradient(to bottom, #ffffff, #f9fafb);
 }
 
 /* Animated Background */
 .background-gradient {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   background: 
     radial-gradient(ellipse at 20% 30%, rgba(232, 69, 69, 0.08) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 70%, rgba(144, 55, 73, 0.08) 0%, transparent 50%),
@@ -280,11 +279,11 @@ onMounted(() => {
 }
 
 .particles {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   overflow: hidden;
   pointer-events: none;
   z-index: -1;

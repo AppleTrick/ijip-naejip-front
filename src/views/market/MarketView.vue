@@ -198,7 +198,7 @@ const goToDetail = () => {
   position: relative;
   overflow: hidden;
   display: flex;
-  height: 100%;
+  height: calc(100vh - 4rem); /* Viewport height - Navbar height */
 }
 
 .property-sidebar {

@@ -8,12 +8,23 @@
   --color-text: #2B2E4A; /* Dark Navy */
 }
 
-html, body, #app {
+html {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden; /* Prevent body scroll */
+}
+
+body {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* Prevent horizontal scroll on body only */
   font-family: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, Roboto, "Helvetica Neue", "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
   background-color: var(--color-bg);
   color: var(--color-text);
+}
+
+#app {
+  min-height: 100%;
+  width: 100%;
 }

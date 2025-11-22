@@ -50,7 +50,8 @@ onUnmounted(() => document.removeEventListener('click', close))
 .filter-btn {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
+  height: 3rem;
+  padding: 0 1rem;
   background-color: var(--color-white);
   border-radius: 0.75rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
@@ -60,6 +61,7 @@ onUnmounted(() => document.removeEventListener('click', close))
   white-space: nowrap;
   transition: all 0.2s;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .filter-btn:hover {
