@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { User, Bell, Lock, Home, LogOut, ChevronRight, Trash2 } from 'lucide-vue-next'
+import BaseCard from '@/components/common/BaseCard.vue'
 
 const router = useRouter()
 
@@ -53,10 +54,11 @@ const handleDeleteAccount = () => {
       <h1 class="page-title">설정</h1>
       
       <div class="settings-list">
-        <button 
+        <BaseCard 
           v-for="item in menuItems" 
           :key="item.id" 
           class="settings-item"
+          :hoverable="true"
           @click="item.action"
         >
           <div class="item-icon-wrapper">
@@ -67,7 +69,7 @@ const handleDeleteAccount = () => {
             <p class="item-desc">{{ item.desc }}</p>
           </div>
           <ChevronRight class="arrow-icon" />
-        </button>
+        </BaseCard>
       </div>
 
       <div class="danger-zone">
@@ -114,19 +116,12 @@ const handleDeleteAccount = () => {
 .settings-item {
   display: flex;
   align-items: center;
-  background-color: var(--color-white);
   padding: 1.5rem;
-  border-radius: 1rem;
-  border: 1px solid var(--color-gray-200);
-  cursor: pointer;
-  transition: all 0.2s;
   text-align: left;
   width: 100%;
 }
 
 .settings-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   border-color: var(--color-primary);
 }
 

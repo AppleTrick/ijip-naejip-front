@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
 import { Search, Filter } from 'lucide-vue-next'
-import BaseFilterDropdown from '../common/BaseFilterDropdown.vue'
+import BaseFilterDropdown from '@/components/common/BaseFilterDropdown.vue'
 
 const emit = defineEmits<{
   (e: 'search', query: string): void

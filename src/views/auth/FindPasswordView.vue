@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
+import BaseCard from '@/components/common/BaseCard.vue'
 import { ArrowLeft, Mail } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -31,7 +32,7 @@ const handleSend = () => {
         <div class="placeholder"></div>
       </div>
 
-      <div class="content-card">
+      <BaseCard class="content-card">
         <div class="icon-header">
           <div class="icon-wrapper">
             <Mail class="mail-icon" />
@@ -73,7 +74,7 @@ const handleSend = () => {
             로그인으로 돌아가기
           </BaseButton>
         </div>
-      </div>
+      </BaseCard>
     </div>
   </div>
 </template>
@@ -130,10 +131,7 @@ const handleSend = () => {
 }
 
 .content-card {
-  background-color: var(--color-white);
   padding: 2.5rem 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .icon-header {

@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { colors } from '@/constants/colors'
 
-import type { Property } from '../../stores/safehome'
+import type { Property } from '@/stores/safehome'
 
 const props = defineProps<{
   address?: string

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
-import AddressSearch from '@/components/features/AddressSearch.vue'
+import AddressSearch from '@/components/features/address/AddressSearch.vue'
 import { ArrowLeft, Home } from 'lucide-vue-next'
 import { useSafeHomeStore } from '@/stores/safehome'
 
