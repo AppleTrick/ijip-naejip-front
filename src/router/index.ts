@@ -70,6 +70,11 @@ const routes: Array<RouteRecordRaw> = [
       path: '/settings/password',
       name: 'password-change',
       component: () => import('../views/settings/PasswordChangeView.vue')
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: () => import('../views/NotFoundView.vue')
     }
 ]
 
