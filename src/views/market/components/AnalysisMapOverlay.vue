@@ -161,7 +161,7 @@ onMounted(() => {
 }
 
 .toggle-btn:hover {
-  background-color: var(--color-gray-50);
+  background-color: var(--color-gray-100);
   transform: translateY(-1px);
   box-shadow: 0 6px 8px -1px rgba(0, 0, 0, 0.1);
 }
@@ -230,7 +230,7 @@ onMounted(() => {
 .stats-grid {
   display: flex;
   align-items: center;
-  background-color: var(--color-gray-50);
+  background-color: var(--color-gray-100);
   padding: 1rem;
   border-radius: 1rem;
 }

@@ -54,8 +54,9 @@ watch(currentAddress, (newVal) => {
 <style scoped>
 .analysis-view {
   display: flex;
-  height: 100%;
+  height: calc(100vh - 4rem); /* Match MarketView pattern */
   width: 100%;
+  overflow: hidden;
 }
 
 .sidebar {

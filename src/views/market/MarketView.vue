@@ -195,10 +195,10 @@ const goToDetail = () => {
 <style scoped>
 .market-page {
   flex: 1;
-  position: relative;
+  position: absolute;
+  inset: 0;
   overflow: hidden;
   display: flex;
-  height: calc(100vh - 4rem); /* Viewport height - Navbar height */
 }
 
 .property-sidebar {
@@ -493,6 +493,8 @@ const goToDetail = () => {
   flex: 1;
   position: relative;
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .floating-search {

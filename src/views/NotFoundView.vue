@@ -29,7 +29,6 @@ const goHome = () => {
   min-height: 100vh;
   background-color: var(--color-background);
   font-family: 'Inter', sans-serif;
-  overflow: hidden;
 }
 
 .content {
