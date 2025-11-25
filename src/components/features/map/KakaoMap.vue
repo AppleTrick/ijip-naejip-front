@@ -120,7 +120,7 @@ onMounted(() => {
   if (!document.getElementById(scriptId)) {
     const script = document.createElement('script')
     script.id = scriptId
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_API_KEY}&libraries=services&autoload=false`
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_API_KEY}&libraries=services&autoload=false`
     script.onload = () => loadMap()
     document.head.appendChild(script)
   } else {

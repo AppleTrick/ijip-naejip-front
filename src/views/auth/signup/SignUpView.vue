@@ -4,72 +4,159 @@ import SignUpForm from './components/SignUpForm.vue'
 
 <template>
   <div class="signup-page">
-    <div class="signup-container">
-      <div class="signup-header">
-        <h2 class="signup-title">
-          회원가입
-        </h2>
-        <p class="signup-subtitle">
-          SafeHome과 함께 안전한 집을 찾아보세요
-        </p>
+    <div class="split-layout">
+      <!-- Left Side: Form -->
+      <div class="form-section">
+        <div class="form-container">
+          <div class="brand-header">
+            <img src="@/assets/logo.png" alt="이집내집" class="brand-logo" />
+            <span class="brand-name">이집내집</span>
+          </div>
+          
+          <div class="signup-header">
+            <h2 class="signup-title">
+              회원가입
+            </h2>
+            <p class="signup-subtitle">
+              SafeHome과 함께 안전한 집을 찾아보세요
+            </p>
+          </div>
+          <SignUpForm />
+        </div>
       </div>
-      <SignUpForm />
+
+      <!-- Right Side: Image -->
+      <div class="image-section">
+        <div class="image-overlay">
+          <div class="overlay-content">
+            <h3 class="overlay-title">Join Our Community</h3>
+            <p class="overlay-desc">
+              이미 10,000명 이상의 사용자가<br>
+              이집내집을 통해 안전한 집을 찾았습니다.
+            </p>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
 .signup-page {
-  min-height: 100%;
+  height: 100vh;
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.split-layout {
+  display: flex;
+  height: 100%;
+}
+
+.form-section {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--color-bg);
-  padding: 3rem 1rem;
-}
-
-@media (min-width: 640px) {
-  .signup-page {
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .signup-page {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-.signup-container {
-  max-width: 28rem; /* max-w-md */
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  background-color: var(--color-white);
   padding: 2rem;
-  border-radius: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  border: 2px solid rgba(232, 69, 69, 0.2); /* primary-transparent20 */
+  background-color: var(--color-white);
+  overflow-y: auto; /* Allow scrolling if form is long */
+}
+
+.form-container {
+  width: 100%;
+  max-width: 28rem;
+  animation: slideInLeft 0.5s ease-out;
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 3rem;
+}
+
+.brand-logo {
+  width: 32px;
+  height: 32px;
+}
+
+.brand-name {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--color-text);
 }
 
 .signup-header {
-  text-align: center;
+  margin-bottom: 2.5rem;
 }
 
 .signup-title {
-  margin-top: 1.5rem;
-  font-size: 1.875rem; /* 3xl */
-  line-height: 2.25rem;
+  font-size: 2rem;
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
 }
 
 .signup-subtitle {
-  margin-top: 0.5rem;
-  font-size: 0.875rem; /* sm */
+  font-size: 1rem;
   color: var(--color-text-light);
+  line-height: 1.5;
+}
+
+.image-section {
+  display: none;
+  flex: 1.2;
+  background-image: url('@/assets/auth-bg.png');
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .image-section {
+    display: block;
+  }
+}
+
+.image-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 4rem;
+}
+
+.overlay-content {
+  color: white;
+  animation: fadeInUp 0.8s ease-out 0.2s backwards;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.overlay-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -0.02em;
+}
+
+.overlay-desc {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  opacity: 0.9;
 }
 </style>

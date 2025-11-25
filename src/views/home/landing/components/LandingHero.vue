@@ -17,13 +17,17 @@ const navigateToMap = () => {
 <template>
   <section class="hero-section">
     <div class="hero-content">
+      <div class="brand-header">
+        <img src="@/assets/logo.png" alt="이집내집" class="brand-logo-img" />
+        <span class="brand-name">이집내집</span>
+      </div>
       <div class="badge">
         <CheckCircle :size="16" />
         <span>전세사기 ZERO 프로젝트</span>
       </div>
       <h1 class="hero-title">
         당신의 안전한 보금자리,<br>
-        <span class="highlight">SafeHome</span><span class="gradient-text">에서 찾으세요</span>
+        <span class="highlight">이집내집</span><span class="gradient-text">에서 찾으세요</span>
       </h1>
       <p class="hero-subtitle">
         빅데이터 기반 전세사기 예방 분석과 실거래가 정보를 한눈에.<br>
@@ -126,6 +130,26 @@ const navigateToMap = () => {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.brand-logo-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.brand-name {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 .badge {

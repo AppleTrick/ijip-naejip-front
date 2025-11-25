@@ -1,6 +1,7 @@
 <template>
   <div class="background-wrapper">
-    <div class="background-gradient"></div>
+    <div class="background-image"></div>
+    <div class="background-overlay"></div>
     <div class="particles">
       <div class="particle" v-for="n in 30" :key="n" :style="{ 
         left: `${Math.random() * 100}%`, 
@@ -23,24 +24,26 @@
   overflow: hidden;
 }
 
-.background-gradient {
+.background-image {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100vh;
-  background: 
-    radial-gradient(ellipse at 20% 30%, rgba(232, 69, 69, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 70%, rgba(144, 55, 73, 0.08) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(83, 53, 74, 0.05) 0%, transparent 50%);
-  animation: gradientShift 15s ease infinite;
-  pointer-events: none;
-  z-index: -1;
+  background-image: url('@/assets/landing-bg.png');
+  background-size: cover;
+  background-position: center;
+  z-index: -2;
 }
 
-@keyframes gradientShift {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.1); }
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.95));
+  z-index: -1;
 }
 
 .particles {

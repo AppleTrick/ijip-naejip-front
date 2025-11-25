@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import HomeWelcome from './components/HomeWelcome.vue'
+import DashboardHeader from './components/DashboardHeader.vue'
 import HomeRecommendations from './components/HomeRecommendations.vue'
 import HomeTrends from './components/HomeTrends.vue'
 import HomeSidebar from './components/HomeSidebar.vue'
@@ -22,30 +22,46 @@ const recentViews = ref([
 
 <template>
   <div class="home-view">
-    <!-- Welcome Section -->
-    <HomeWelcome :user-name="userName" />
+    <div class="container">
+      <!-- Dashboard Header -->
+      <DashboardHeader :user-name="userName" />
 
-    <div class="container content-grid">
-      <!-- Main Content -->
-      <div class="main-column">
-        <!-- Recommendations Carousel/Grid -->
-        <HomeRecommendations :items="recommendations" />
+      <div class="content-grid">
+        <!-- Main Column -->
+        <div class="main-column">
+          <!-- Recommendations Section -->
+          <section class="section-wrapper">
+            <div class="section-header">
+              <h2 class="section-title">추천 매물</h2>
+              <button class="more-btn">더보기</button>
+            </div>
+            <HomeRecommendations :items="recommendations" />
+          </section>
 
-        <!-- Market Trends -->
-        <HomeTrends />
+          <!-- Market Trends Section -->
+          <section class="section-wrapper">
+            <div class="section-header">
+              <h2 class="section-title">시장 동향</h2>
+            </div>
+            <HomeTrends />
+          </section>
+        </div>
+
+        <!-- Sidebar Column -->
+        <aside class="sidebar-column">
+          <HomeSidebar :recent-items="recentViews" />
+        </aside>
       </div>
-
-      <!-- Sidebar -->
-      <HomeSidebar :recent-items="recentViews" />
     </div>
   </div>
 </template>
 
 <style scoped>
 .home-view {
-  height: 100%; /* Fill parent height */
-  overflow-y: auto; /* Enable vertical scrolling */
+  height: 100%;
+  overflow-y: auto;
   background-color: var(--color-bg);
+  padding-top: 2rem;
   padding-bottom: 4rem;
 }
 
@@ -67,7 +83,6 @@ const recentViews = ref([
   }
 }
 
-/* Content Grid */
 .content-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -77,6 +92,43 @@ const recentViews = ref([
 @media (min-width: 1024px) {
   .content-grid {
     grid-template-columns: 1fr 20rem;
+    gap: 2.5rem;
   }
+}
+
+.main-column {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.section-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.section-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.more-btn {
+  font-size: 0.875rem;
+  color: var(--color-text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.more-btn:hover {
+  color: var(--color-primary);
 }
 </style>
