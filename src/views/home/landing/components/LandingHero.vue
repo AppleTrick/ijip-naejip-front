@@ -26,8 +26,7 @@ const navigateToMap = () => {
         <span>전세사기 ZERO 프로젝트</span>
       </div>
       <h1 class="hero-title">
-        당신의 안전한 보금자리,<br>
-        <span class="highlight">이집내집</span><span class="gradient-text">에서 찾으세요</span>
+        당신의 안전한 보금자리 <span class="highlight">이집내집</span><span class="gradient-text">에서 찾으세요</span>
       </h1>
       <p class="hero-subtitle">
         빅데이터 기반 전세사기 예방 분석과 실거래가 정보를 한눈에.<br>
@@ -179,6 +178,7 @@ const navigateToMap = () => {
   color: var(--color-text);
   margin-bottom: 1.5rem;
   letter-spacing: -0.02em;
+  word-break: keep-all; /* Prevent awkward word breaks */
 }
 
 .highlight {

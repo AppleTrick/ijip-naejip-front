@@ -12,6 +12,8 @@ const recommendations = ref([
   { id: 1, name: '반포 자이', price: '35억', type: '아파트', location: '서초구 반포동', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
   { id: 2, name: '한남 더힐', price: '80억', type: '빌라', location: '용산구 한남동', image: 'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
   { id: 3, name: '아크로 리버파크', price: '45억', type: '아파트', location: '서초구 반포동', image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
+  { id: 4, name: '나인원 한남', price: '90억', type: '아파트', location: '용산구 한남동', image: 'https://images.unsplash.com/photo-1613490493576-7fde63acd811?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
+  { id: 5, name: '성수 트리마제', price: '60억', type: '아파트', location: '성동구 성수동', image: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80' },
 ])
 
 const recentViews = ref([
@@ -31,10 +33,6 @@ const recentViews = ref([
         <div class="main-column">
           <!-- Recommendations Section -->
           <section class="section-wrapper">
-            <div class="section-header">
-              <h2 class="section-title">추천 매물</h2>
-              <button class="more-btn">더보기</button>
-            </div>
             <HomeRecommendations :items="recommendations" />
           </section>
 
@@ -100,6 +98,7 @@ const recentViews = ref([
   display: flex;
   flex-direction: column;
   gap: 3rem;
+  min-width: 0; /* Critical for nested flex/grid scrolling */
 }
 
 .section-wrapper {

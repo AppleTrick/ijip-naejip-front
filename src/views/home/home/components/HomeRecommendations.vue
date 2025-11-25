@@ -99,25 +99,44 @@ const navigateToDetail = (id: number) => {
 }
 
 .card-grid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
+  display: flex;
+  flex-wrap: nowrap;
   gap: 1.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 1rem; /* Space for scrollbar */
+  -webkit-overflow-scrolling: touch;
+  margin: 0 -1rem; /* Negative margin to allow full-width scroll on mobile */
+  padding: 0 1rem 1rem 1rem; /* Padding to compensate negative margin */
 }
 
 @media (min-width: 640px) {
   .card-grid {
-    grid-template-columns: repeat(2, 1fr);
+    margin: 0;
+    padding: 0 0 1rem 0;
   }
 }
 
-@media (min-width: 1280px) {
-  .card-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+/* Hide scrollbar for Chrome, Safari and Opera */
+.card-grid::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.card-grid {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.property-card {
+  min-width: 280px;
+  max-width: 320px;
+  flex: 0 0 auto;
+  scroll-snap-align: start;
 }
 
 .image-wrapper {
-  height: 12rem;
+  height: 14rem; /* Taller images for carousel */
   position: relative;
 }
 

@@ -12,6 +12,11 @@ const routes: Array<RouteRecordRaw> = [
       component: () => import('../views/home/home/HomeView.vue')
     },
     {
+      path: '/landing-v2',
+      name: 'landing-v2',
+      component: () => import('../views/home/landing/LandingViewV2.vue')
+    },
+    {
       path: '/map',
       name: 'market',
       component: () => import('../views/market/market-map/MarketView.vue')

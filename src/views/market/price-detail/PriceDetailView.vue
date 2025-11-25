@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
+import PriceChart from './components/PriceChart.vue'
 import { ArrowLeft, MapPin, TrendingUp, Calendar } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -88,14 +89,7 @@ const goBack = () => {
           
           <!-- Graph Placeholder -->
           <div class="graph-container">
-            <div class="mock-graph">
-              <div class="graph-line"></div>
-              <div class="graph-points">
-                <div v-for="(t, i) in property.transactions" :key="i" class="point" :style="{ left: `${i * 20 + 10}%`, bottom: `${Math.random() * 50 + 20}%` }">
-                  <span class="point-tooltip">{{ t.price }}</span>
-                </div>
-              </div>
-            </div>
+            <PriceChart :data="property.transactions" />
           </div>
 
           <!-- Transaction List -->

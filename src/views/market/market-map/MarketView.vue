@@ -206,7 +206,7 @@ const goToDetail = () => {
   top: 6rem;
   left: 1rem;
   bottom: 1rem;
-  width: calc(100% - 2rem);
+  width: 420px;
   background-color: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   border-radius: 1rem;
@@ -219,10 +219,24 @@ const goToDetail = () => {
   border: 1px solid rgba(255, 255, 255, 0.5);
 }
 
-@media (min-width: 768px) {
+@media (max-width: 768px) {
   .property-sidebar {
-    width: 420px;
+    top: auto;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 60vh;
+    border-radius: 1.5rem 1.5rem 0 0;
+    animation: slideInUp 0.3s ease-out;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
   }
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes slideInLeft {

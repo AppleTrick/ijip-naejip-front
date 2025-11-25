@@ -1,7 +1,5 @@
 <template>
   <div class="background-wrapper">
-    <div class="background-image"></div>
-    <div class="background-overlay"></div>
     <div class="particles">
       <div class="particle" v-for="n in 30" :key="n" :style="{ 
         left: `${Math.random() * 100}%`, 
@@ -22,28 +20,7 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-}
-
-.background-image {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background-image: url('@/assets/landing-bg.png');
-  background-size: cover;
-  background-position: center;
-  z-index: -2;
-}
-
-.background-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100vh;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.85), rgba(255, 255, 255, 0.95));
-  z-index: -1;
+  background: linear-gradient(135deg, rgba(232, 69, 69, 0.05) 0%, rgba(144, 55, 73, 0.05) 100%);
 }
 
 .particles {

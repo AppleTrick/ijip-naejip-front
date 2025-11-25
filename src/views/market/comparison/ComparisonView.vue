@@ -188,7 +188,7 @@ const sortedComparisonList = computed(() => {
                       <h3 class="property-name">{{ myHouse.name }}</h3>
                       <p class="property-address">{{ myHouse.address }}</p>
                     </div>
-                    <BaseButton @click="router.push('/mypage')" size="sm" variant="outline">
+                    <BaseButton @click="router.push('/settings/house')" size="sm" variant="outline">
                       수정
                     </BaseButton>
                   </div>
@@ -215,7 +215,7 @@ const sortedComparisonList = computed(() => {
             <div v-else class="empty-my-house">
               <Home class="empty-icon" />
               <p class="empty-text">내 집을 등록하면 비교가 더 쉬워집니다.</p>
-              <BaseButton @click="router.push('/mypage')" size="sm">내 집 등록하기</BaseButton>
+              <BaseButton @click="router.push('/settings/house')" size="sm">내 집 등록하기</BaseButton>
             </div>
 
             <!-- Comparison List -->
