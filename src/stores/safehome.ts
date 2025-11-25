@@ -1,21 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
-export interface Property {
-  id: number | string
-  name: string
-  address: string
-  price: string
-  area: string
-  floor: string
-  type: string
-  lat: number
-  lng: number
-  deposit?: string
-  maintenanceFee?: string
-  description?: string
-  safetyScore?: number
-}
+import type { Property } from '@/api/types'
 
 export interface House {
   name: string

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
+import { useAuth } from '@/composables/useAuth'
 
-const router = useRouter()
+const { login, isLoading, error } = useAuth()
+
 const email = ref<string>('')
 const password = ref<string>('')
 
-const handleLogin = () => {
-  console.log('Login attempt:', email.value, password.value)
-  // TODO: Implement actual login logic
-  router.push('/home')
+const handleLogin = async () => {
+  if (!email.value || !password.value) return
+  await login(email.value, password.value)
 }
 </script>
 

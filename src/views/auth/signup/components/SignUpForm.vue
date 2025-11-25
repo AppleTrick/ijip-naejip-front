@@ -3,19 +3,22 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
+import { useAuth } from '@/composables/useAuth'
 
 const router = useRouter()
+const { signup, isLoading, error } = useAuth()
 
 const name = ref<string>('')
 const email = ref<string>('')
 const password = ref<string>('')
 const passwordConfirm = ref<string>('')
 
-const handleSignUp = () => {
-  console.log('Sign up attempt:', { name: name.value, email: email.value })
-  // TODO: Implement actual sign up logic
-  alert('회원가입이 완료되었습니다. (Mock)')
-  router.push('/login')
+const handleSignUp = async () => {
+  if (password.value !== passwordConfirm.value) {
+    alert('비밀번호가 일치하지 않습니다.')
+    return
+  }
+  await signup(name.value, email.value, password.value)
 }
 </script>
 
