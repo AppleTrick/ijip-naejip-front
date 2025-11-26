@@ -30,10 +30,10 @@ const handleAddressSelect = (address: any) => {
 const handleSave = () => {
   // Save to store
   store.setMyHouse({
-    name: house.value.name,
-    address: `${house.value.address} ${house.value.detailAddress}`,
-    price: house.value.price,
-    area: house.value.area,
+    aptNm: house.value.name,
+    roadNm: `${house.value.address} ${house.value.detailAddress}`,
+    dealAmount: house.value.price,
+    excluUseAr: house.value.area,
     floor: house.value.floor
   })
   

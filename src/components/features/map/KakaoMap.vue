@@ -2,7 +2,7 @@
 import { ref, onMounted, watch } from 'vue'
 import { colors } from '@/constants/colors'
 
-import type { Property } from '@/stores/safehome'
+import type { Property } from '@/api/types'
 
 const props = defineProps<{
   address?: string
@@ -29,7 +29,7 @@ const renderMarkers = (items: Property[] | undefined) => {
   if (!map || !items) return
 
     items.forEach(item => {
-    const position = new (window as any).kakao.maps.LatLng(item.lat, item.lng)
+    const position = new (window as any).kakao.maps.LatLng(item.latitude, item.longitude)
     
     // Create Custom Overlay Content using DOM API
     const content = document.createElement('div')
@@ -54,7 +54,7 @@ const renderMarkers = (items: Property[] | undefined) => {
           font-size: 0.875rem;
           white-space: nowrap;
           font-family: 'Pretendard', sans-serif;
-        ">${item.price}</span>
+        ">${item.dealAmount}</span>
       </div>
     `
     

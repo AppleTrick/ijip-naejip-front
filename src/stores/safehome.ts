@@ -1,18 +1,19 @@
+
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import type { Property } from '@/api/types'
 
 export interface House {
-  name: string
-  address: string
-  price: string
-  area: string
+  aptNm: string
+  roadNm: string
+  dealAmount: string
+  excluUseAr: string
   floor: string
+  buildYear?: number
 }
 
 export const useSafeHomeStore = defineStore('safehome', () => {
-  // State
   const marketProperties = ref<Property[]>([])
   const selectedProperty = ref<Property | null>(null)
   const currentAddress = ref<string>('')
@@ -22,10 +23,8 @@ export const useSafeHomeStore = defineStore('safehome', () => {
   const comparisonList = ref<Property[]>([])
 
   const filters = ref({
-    types: [] as string[],
     priceRange: { min: 0, max: 20 },
-    area: [] as string[],
-    general: [] as string[]
+    area: [] as string[]
   })
 
   // Getters
@@ -36,22 +35,12 @@ export const useSafeHomeStore = defineStore('safehome', () => {
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
       result = result.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        p.address.toLowerCase().includes(query)
+        p.aptNm.toLowerCase().includes(query) || 
+        p.roadNm.toLowerCase().includes(query)
       )
     }
 
-    // 2. Type Filter
-    if (filters.value.types.length > 0) {
-      result = result.filter(p => {
-        const typeCode = p.type === '아파트' ? 'APT' : p.type === '오피스텔' ? 'OPST' : 'VILLA'
-        return filters.value.types.includes(typeCode)
-      })
-    }
-
-    // 3. Price Filter
-    // Mock data price format: "10억 5000만원"
-    // We need to parse this to compare with min/max (unit: 100 million / Eok)
+    // 2. Price Filter
     const parsePriceToEok = (priceStr: string): number => {
       let total = 0
       const ukMatch = priceStr.match(/(\d+)억/)
@@ -65,16 +54,15 @@ export const useSafeHomeStore = defineStore('safehome', () => {
 
     if (filters.value.priceRange.min > 0 || filters.value.priceRange.max < 20) {
       result = result.filter(p => {
-        const price = parsePriceToEok(p.price)
+        const price = parsePriceToEok(p.dealAmount)
         return price >= filters.value.priceRange.min && price <= filters.value.priceRange.max
       })
     }
 
-    // 4. Area Filter
-    // Mock data area format: "34평"
+    // 3. Area Filter
     if (filters.value.area.length > 0) {
       result = result.filter(p => {
-        const areaVal = parseInt(p.area.replace('평', ''))
+        const areaVal = parseInt(p.excluUseAr.replace('평', ''))
         return filters.value.area.some(range => {
           if (range === '40+') return areaVal >= 40
           const min = parseInt(range)
@@ -86,9 +74,13 @@ export const useSafeHomeStore = defineStore('safehome', () => {
     return result
   })
 
-  const isInComparison = (propertyId: number | string) => {
-    return comparisonList.value.some(p => p.id === propertyId)
-  }
+  const isInComparison = computed(() => {
+    return (propertyId: string) => comparisonList.value.some(p => p.aptSeq === propertyId)
+  })
+
+  const getPropertyById = computed(() => {
+    return (id: string) => marketProperties.value.find(p => p.aptSeq === id)
+  })
 
   // Actions
   function setMarketProperties(properties: Property[]) {
@@ -116,13 +108,13 @@ export const useSafeHomeStore = defineStore('safehome', () => {
   }
 
   function addToComparison(property: Property) {
-    if (!isInComparison(property.id)) {
+    if (!isInComparison.value(property.aptSeq)) {
       comparisonList.value.push(property)
     }
   }
 
-  function removeFromComparison(propertyId: number | string) {
-    comparisonList.value = comparisonList.value.filter(p => p.id !== propertyId)
+  function removeFromComparison(propertyId: string) {
+    comparisonList.value = comparisonList.value.filter(p => p.aptSeq !== propertyId)
   }
 
   return {
@@ -134,6 +126,7 @@ export const useSafeHomeStore = defineStore('safehome', () => {
     filteredProperties,
     myHouse,
     comparisonList,
+    getPropertyById,
     setMarketProperties,
     selectProperty,
     setAddress,

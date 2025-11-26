@@ -1,3 +1,4 @@
+
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
@@ -45,7 +46,7 @@ const goToAnalysis = () => {
 
 const goToDetail = () => {
   if (selectedProperty.value) {
-    router.push(`/price/${selectedProperty.value.id}`)
+    router.push(`/price/${selectedProperty.value.aptSeq}`)
   }
 }
 </script>
@@ -62,28 +63,25 @@ const goToDetail = () => {
         <button @click="closePropertyCard" class="close-btn">
           <X class="icon-sm" />
         </button>
-        <div class="type-badge-wrapper">
-          <span class="type-badge">{{ selectedProperty.type }}</span>
-        </div>
       </div>
 
       <!-- Content -->
       <div class="sidebar-content">
         <div class="property-header">
           <div class="title-row">
-            <h2 class="property-title">{{ selectedProperty.name }}</h2>
+            <h2 class="property-title">{{ selectedProperty.aptNm }}</h2>
             <button 
-              @click="isInComparison(selectedProperty.id) ? removeFromComparison(selectedProperty.id) : addToComparison(selectedProperty)"
+              @click="isInComparison(selectedProperty.aptSeq) ? removeFromComparison(selectedProperty.aptSeq) : addToComparison(selectedProperty)"
               class="compare-btn"
-              :class="isInComparison(selectedProperty.id) ? 'compare-btn--active' : 'compare-btn--inactive'"
-              :title="isInComparison(selectedProperty.id) ? '비교함에서 제거' : '비교함에 추가'"
+              :class="isInComparison(selectedProperty.aptSeq) ? 'compare-btn--active' : 'compare-btn--inactive'"
+              :title="isInComparison(selectedProperty.aptSeq) ? '비교함에서 제거' : '비교함에 추가'"
             >
-              <component :is="isInComparison(selectedProperty.id) ? Check : Plus" class="icon-md" />
+              <component :is="isInComparison(selectedProperty.aptSeq) ? Check : Plus" class="icon-md" />
             </button>
           </div>
 
           <p class="property-address">
-            <span class="mr-2">📍</span> {{ selectedProperty.address }}
+            <span class="mr-2">📍</span> {{ selectedProperty.roadNm }}
           </p>
           <div class="action-row">
             <BaseButton full-width variant="primary" @click="goToDetail">
@@ -95,23 +93,23 @@ const goToDetail = () => {
         <div class="price-grid">
           <div class="price-card">
             <p class="price-label">매매가</p>
-            <p class="price-value">{{ formatPrice(selectedProperty.price) }}</p>
-          </div>
-          <div class="fee-card">
-            <p class="fee-label">관리비</p>
-            <p class="fee-value">{{ selectedProperty.maintenanceFee }}</p>
+            <p class="price-value">{{ selectedProperty.dealAmount }}</p>
           </div>
         </div>
 
         <!-- Info Grid -->
         <div class="info-grid">
           <div class="info-card">
-            <p class="info-label">공급/전용면적</p>
-            <p class="info-value">{{ selectedProperty.area }}</p>
+            <p class="info-label">전용면적</p>
+            <p class="info-value">{{ selectedProperty.excluUseAr }}</p>
           </div>
           <div class="info-card">
-            <p class="info-label">해당층/총층</p>
+            <p class="info-label">층수</p>
             <p class="info-value">{{ selectedProperty.floor }}</p>
+          </div>
+          <div class="info-card" v-if="selectedProperty.buildYear">
+            <p class="info-label">건축년도</p>
+            <p class="info-value">{{ selectedProperty.buildYear }}년</p>
           </div>
           <div class="info-card full-width">
             <p class="info-label">상세설명</p>
@@ -330,10 +328,10 @@ const goToDetail = () => {
 }
 
 .property-address {
-  color: var(--color-text-light);
+  color: var(--color-gray-500);
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
-  font-size: 0.875rem;
 }
 
 .action-row {
@@ -346,30 +344,29 @@ const goToDetail = () => {
 
 .price-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: var(--color-gray-50);
+  border-radius: 0.75rem;
 }
 
 .price-card {
-  background: linear-gradient(to bottom right, rgba(232, 69, 69, 0.1), rgba(144, 55, 73, 0.1));
-  padding: 1.25rem;
-  border-radius: 1rem;
-  border: 2px solid rgba(232, 69, 69, 0.3); /* primary-transparent30 */
+  display: flex;
+  flex-direction: column;
 }
 
 .price-label {
   font-size: 0.875rem;
-  color: var(--color-secondary);
-  font-weight: 700;
+  color: var(--color-gray-500);
   margin-bottom: 0.25rem;
 }
 
 .price-value {
-  font-size: 1.875rem;
-  font-weight: 800;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: var(--color-primary);
-  letter-spacing: -0.025em;
 }
 
 .fee-card {
@@ -400,93 +397,99 @@ const goToDetail = () => {
 
 .info-card {
   padding: 1rem;
-  background-color: var(--color-gray-100);
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
   border-radius: 0.75rem;
-  border: 1px solid rgba(144, 55, 73, 0.2); /* secondary-transparent20 */
 }
 
 .full-width {
   grid-column: span 2;
 }
 
+.info-card.full-width {
+  grid-column: span 2;
+}
+
 .info-label {
-  font-size: 0.75rem;
-  color: var(--color-text-light);
-  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+  margin-bottom: 0.5rem;
 }
 
 .info-value {
-  font-weight: 700;
+  font-size: 1.125rem;
+  font-weight: 600;
   color: var(--color-text);
 }
 
 .description-text {
-  color: var(--color-text);
-  font-size: 0.875rem;
-  line-height: 1.625;
-  background-color: var(--color-white);
-  padding: 1rem;
-  border-radius: 0.75rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--color-gray-600);
 }
 
 .safety-cta {
-  background: linear-gradient(to bottom right, rgba(232, 69, 69, 0.1), rgba(144, 55, 73, 0.1));
-  border-radius: 1rem;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   padding: 1.5rem;
-  border: 2px solid rgba(144, 55, 73, 0.3); /* secondary-transparent30 */
-  margin-bottom: 1.5rem;
+  border-radius: 1rem;
+  color: var(--color-white);
+  text-align: center;
 }
 
 .cta-title {
+  font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-primary);
   margin-bottom: 0.5rem;
   display: flex;
   align-items: center;
-  font-size: 1.125rem;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .cta-icon {
   width: 1.5rem;
   height: 1.5rem;
-  margin-right: 0.5rem;
-  color: var(--color-primary);
 }
 
 .cta-desc {
-  font-size: 0.875rem;
-  color: var(--color-text);
-  margin-bottom: 1rem;
-  line-height: 1.625;
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin-bottom: 1.25rem;
+  line-height: 1.5;
 }
 
 .cta-btn {
-  padding-top: 0.75rem;
-  padding-bottom: 0.75rem;
+  background-color: var(--color-white) !important;
+  color: var(--color-primary) !important;
+  font-weight: 700;
+  border: none;
+}
+
+.cta-btn:hover {
+  background-color: var(--color-gray-100) !important;
 }
 
 .map-area {
   flex: 1;
   position: relative;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
 }
 
 .floating-search {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
-  right: 1rem;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 20;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
+  width: 90%;
+  max-width: 600px;
 }
 
 .search-container {
-  width: 100%;
-  max-width: 42rem;
-  pointer-events: auto;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  padding: 0.75rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.5);
 }
 </style>

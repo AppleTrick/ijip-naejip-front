@@ -68,13 +68,13 @@ const sortedComparisonList = computed(() => {
   // Sort logic
   switch (sortOption.value) {
     case 'price_asc':
-      list.sort((a, b) => parsePrice(a.price) - parsePrice(b.price))
+      list.sort((a, b) => parsePrice(a.dealAmount) - parsePrice(b.dealAmount))
       break
     case 'price_desc':
-      list.sort((a, b) => parsePrice(b.price) - parsePrice(a.price))
+      list.sort((a, b) => parsePrice(b.dealAmount) - parsePrice(a.dealAmount))
       break
     case 'area_desc':
-      list.sort((a, b) => parseArea(b.area) - parseArea(a.area))
+      list.sort((a, b) => parseArea(b.excluUseAr) - parseArea(a.excluUseAr))
       break
   }
   
@@ -185,8 +185,8 @@ const sortedComparisonList = computed(() => {
                 <div class="card-details">
                   <div class="details-header">
                     <div>
-                      <h3 class="property-name">{{ myHouse.name }}</h3>
-                      <p class="property-address">{{ myHouse.address }}</p>
+                      <h3 class="property-name">{{ myHouse.aptNm }}</h3>
+                      <p class="property-address">{{ myHouse.roadNm }}</p>
                     </div>
                     <BaseButton @click="router.push('/settings/house')" size="sm" variant="outline">
                       수정
@@ -196,15 +196,19 @@ const sortedComparisonList = computed(() => {
                   <div class="stats-grid">
                     <div class="stat-item">
                       <p class="stat-label">매매가</p>
-                      <p class="stat-value">{{ myHouse.price }}</p>
+                      <p class="stat-value">{{ myHouse.dealAmount }}</p>
                     </div>
                     <div class="stat-item">
                       <p class="stat-label">면적</p>
-                      <p class="stat-value">{{ myHouse.area }}</p>
+                      <p class="stat-value">{{ myHouse.excluUseAr }}</p>
                     </div>
                     <div class="stat-item">
                       <p class="stat-label">층수</p>
                       <p class="stat-value">{{ myHouse.floor }}</p>
+                    </div>
+                    <div class="stat-item" v-if="myHouse.buildYear">
+                      <p class="stat-label">건축년도</p>
+                      <p class="stat-value">{{ myHouse.buildYear }}년</p>
                     </div>
                   </div>
                 </div>
@@ -220,9 +224,9 @@ const sortedComparisonList = computed(() => {
 
             <!-- Comparison List -->
             <div v-if="sortedComparisonList.length > 0" class="comparison-items">
-              <div v-for="property in sortedComparisonList" :key="property.id" class="property-card-wrapper">
+              <div v-for="property in sortedComparisonList" :key="property.aptSeq" class="property-card-wrapper">
                 <div class="property-card">
-                  <button @click="removeFromComparison(property.id)" 
+                  <button @click="removeFromComparison(property.aptSeq)" 
                           class="remove-btn">
                     <Trash2 class="icon-sm" />
                   </button>
@@ -230,16 +234,13 @@ const sortedComparisonList = computed(() => {
                   <div class="card-image-wrapper">
                     <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
                          alt="Property" class="card-image" />
-                    <div class="type-badge-wrapper">
-                      <span class="type-badge">{{ property.type }}</span>
-                    </div>
                   </div>
 
                   <div class="card-details">
                     <div class="details-header">
                       <div>
-                        <h3 class="property-name">{{ property.name }}</h3>
-                        <p class="property-address">{{ property.address }}</p>
+                        <h3 class="property-name">{{ property.aptNm }}</h3>
+                        <p class="property-address">{{ property.roadNm }}</p>
                       </div>
                     </div>
 
@@ -247,20 +248,20 @@ const sortedComparisonList = computed(() => {
                       <!-- Price Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">매매가</p>
-                        <p class="stat-value">{{ property.price }}</p>
+                        <p class="stat-value">{{ property.dealAmount }}</p>
                         <div v-if="myHouse" class="diff-text" 
-                             :class="parsePrice(property.price) > parsePrice(myHouse.price) ? 'text-red' : parsePrice(property.price) < parsePrice(myHouse.price) ? 'text-blue' : 'text-gray'">
-                          {{ formatPriceDiff(property.price, myHouse.price) }}
+                             :class="parsePrice(property.dealAmount) > parsePrice(myHouse.dealAmount) ? 'text-red' : parsePrice(property.dealAmount) < parsePrice(myHouse.dealAmount) ? 'text-blue' : 'text-gray'">
+                          {{ formatPriceDiff(property.dealAmount, myHouse.dealAmount) }}
                         </div>
                       </div>
 
                       <!-- Area Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">면적</p>
-                        <p class="stat-value">{{ property.area }}</p>
+                        <p class="stat-value">{{ property.excluUseAr }}</p>
                         <div v-if="myHouse" class="diff-text"
-                             :class="parseArea(property.area) > parseArea(myHouse.area) ? 'text-blue' : parseArea(property.area) < parseArea(myHouse.area) ? 'text-red' : 'text-gray'">
-                          {{ formatAreaDiff(property.area, myHouse.area) }}
+                             :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'text-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'text-red' : 'text-gray'">
+                          {{ formatAreaDiff(property.excluUseAr, myHouse.excluUseAr) }}
                         </div>
                       </div>
 
@@ -268,13 +269,22 @@ const sortedComparisonList = computed(() => {
                         <p class="stat-label">층수</p>
                         <p class="stat-value">{{ property.floor }}</p>
                       </div>
+
+                      <div class="stat-item highlight-bg" v-if="property.buildYear">
+                        <p class="stat-label">건축년도</p>
+                        <p class="stat-value">{{ property.buildYear }}년</p>
+                        <div v-if="myHouse && myHouse.buildYear" class="diff-text"
+                             :class="property.buildYear > myHouse.buildYear ? 'text-blue' : property.buildYear < myHouse.buildYear ? 'text-red' : 'text-gray'">
+                          {{ property.buildYear - myHouse.buildYear === 0 ? '동일' : (property.buildYear - myHouse.buildYear > 0 ? '+' : '') + (property.buildYear - myHouse.buildYear) + '년' }}
+                        </div>
+                      </div>
                     </div>
                     
                     <div class="card-footer">
                       <BaseButton variant="outline" size="sm" @click="router.push('/map')">
                         지도에서 보기
                       </BaseButton>
-                      <BaseButton variant="primary" size="sm" @click="router.push(`/price/${property.id}`)">
+                      <BaseButton variant="primary" size="sm" @click="router.push(`/price/${property.aptSeq}`)">
                         상세 정보
                       </BaseButton>
                     </div>

@@ -20,8 +20,8 @@ export const getProperties = async (filters?: MarketFilters): Promise<Property[]
   if (filters) {
     if (filters.minLat && filters.maxLat && filters.minLng && filters.maxLng) {
       properties = properties.filter(p => 
-        p.lat >= filters.minLat! && p.lat <= filters.maxLat! &&
-        p.lng >= filters.minLng! && p.lng <= filters.maxLng!
+        p.latitude >= filters.minLat! && p.latitude <= filters.maxLat! &&
+        p.longitude >= filters.minLng! && p.longitude <= filters.maxLng!
       )
     }
     // Add other filter logic here if needed
@@ -33,5 +33,5 @@ export const getProperties = async (filters?: MarketFilters): Promise<Property[]
 export const getPropertyDetail = async (id: string): Promise<Property | undefined> => {
   await new Promise(resolve => setTimeout(resolve, 300))
   const properties = getPropertiesData()
-  return properties.find(p => p.id === id)
+  return properties.find(p => p.aptSeq === id)
 }
