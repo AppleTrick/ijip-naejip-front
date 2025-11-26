@@ -10,6 +10,7 @@ import MarketFilter from './components/MarketFilter.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { ShieldCheck, X, Check, Plus } from 'lucide-vue-next'
 import { useMarket } from '@/composables/useMarket'
+import { formatPrice } from '@/utils/formatters'
 
 
 const router = useRouter()
@@ -103,7 +104,7 @@ const goToDetail = () => {
         <div class="price-grid">
           <div class="price-card">
             <p class="price-label">매매가</p>
-            <p class="price-value">{{ selectedProperty.dealAmount }}</p>
+            <p class="price-value">{{ formatPrice(selectedProperty.dealAmount) }}</p>
           </div>
         </div>
 

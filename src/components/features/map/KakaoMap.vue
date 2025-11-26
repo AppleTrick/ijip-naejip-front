@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
 import { colors } from '@/constants/colors'
+import { formatPrice } from '@/utils/formatters'
 
 import type { Property } from '@/api/types'
 
@@ -60,7 +61,7 @@ const renderMarkers = (items: Property[] | undefined) => {
           font-size: 0.875rem;
           white-space: nowrap;
           font-family: 'Pretendard', sans-serif;
-        ">${item.dealAmount}</span>
+        ">${formatPrice(item.dealAmount)}</span>
       </div>
     `
     
