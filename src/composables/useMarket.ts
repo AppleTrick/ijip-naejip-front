@@ -8,11 +8,11 @@ export function useMarket() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchProperties = async (filters?: MarketFilters) => {
+  const fetchProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number }) => {
     isLoading.value = true
     error.value = null
     try {
-      const data = await marketApi.getProperties(filters)
+      const data = await marketApi.getProperties(filters, bounds)
       store.setMarketProperties(data)
     } catch (e: any) {
       error.value = e.message || '매물 목록을 불러오는데 실패했습니다.'

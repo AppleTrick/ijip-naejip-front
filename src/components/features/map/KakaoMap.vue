@@ -11,6 +11,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'select-marker', property: Property): void
+  (e: 'update-bounds', bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }): void
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
@@ -92,15 +93,46 @@ onMounted(() => {
         map = new (window as any).kakao.maps.Map(mapContainer.value, options)
         geocoder = new (window as any).kakao.maps.services.Geocoder()
         
+        const emitBounds = () => {
+          if (!map) return
+          const level = map.getLevel()
+          const bounds = map.getBounds()
+          const swLatlng = bounds.getSouthWest()
+          const neLatlng = bounds.getNorthEast()
+
+          const boundsData = {
+            minLat: swLatlng.getLat(),
+            maxLat: neLatlng.getLat(),
+            minLng: swLatlng.getLng(),
+            maxLng: neLatlng.getLng(),
+            level: level
+          }
+          
+          console.log('Emitting update-bounds:', boundsData)
+          emit('update-bounds', boundsData)
+        }
+
         // Initial Relayout
-        setTimeout(() => {
+        window.requestAnimationFrame(() => {
           console.log('Relayout map...')
           map.relayout()
           map.setCenter(options.center)
+          
+          // Emit initial bounds
+          console.log('Initial bounds check')
+          emitBounds()
+
           if (props.markers && props.markers.length > 0) {
             renderMarkers(props.markers)
           }
-        }, 500) // Increased delay to 500ms
+        })
+
+        // Add idle event listener
+        console.log('Adding idle event listener')
+        ;(window as any).kakao.maps.event.addListener(map, 'idle', function() {
+          console.log('Map idle event fired')
+          emitBounds()
+        })
 
         // Resize Observer for Responsive Layout
         const resizeObserver = new ResizeObserver(() => {
@@ -135,6 +167,7 @@ onMounted(() => {
 
 
 watch(() => props.markers, (newMarkers) => {
+  console.log('KakaoMap: markers prop updated:', newMarkers?.length)
   renderMarkers(newMarkers)
 }, { deep: true })
 

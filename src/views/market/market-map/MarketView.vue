@@ -10,7 +10,7 @@ import MarketFilter from './components/MarketFilter.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { ShieldCheck, X, Check, Plus } from 'lucide-vue-next'
 import { useMarket } from '@/composables/useMarket'
-import { formatPrice } from '@/utils/formatters'
+
 
 const router = useRouter()
 const store = useSafeHomeStore()
@@ -19,9 +19,7 @@ const { selectProperty, setSearchQuery, addToComparison, removeFromComparison, i
 const { fetchProperties } = useMarket()
 
 onMounted(async () => {
-  if (store.marketProperties.length === 0) {
-    await fetchProperties()
-  }
+  // Initial fetch is triggered by map 'idle' event providing bounds
 })
 
 const handleSearch = (query: string) => {
@@ -38,6 +36,18 @@ const handleMarkerSelect = (property: Property) => {
 
 const closePropertyCard = () => {
   selectProperty(null)
+}
+
+const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
+  // Zoom level logic
+  if (bounds.level <= 5) {
+    await fetchProperties(undefined, bounds)
+  } else {
+    // Level 6+: Clear markers or show message (Future: Aggregate API)
+    // For now, we can clear markers to avoid clutter or keep them if we want to show what was there
+    // store.setProperties([]) // Optional: Clear properties if zoomed out too much
+    console.log('Zoom level too high for individual properties:', bounds.level)
+  }
 }
 
 const goToAnalysis = () => {
@@ -140,6 +150,7 @@ const goToDetail = () => {
       <KakaoMap 
         :markers="filteredProperties" 
         @select-marker="handleMarkerSelect" 
+        @update-bounds="handleBoundsUpdate"
       />
       
       <!-- Floating Search Bar -->
