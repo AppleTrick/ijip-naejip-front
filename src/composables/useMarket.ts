@@ -8,7 +8,7 @@ export function useMarket() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
-  const fetchProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number }) => {
+  const fetchProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
     isLoading.value = true
     error.value = null
     try {

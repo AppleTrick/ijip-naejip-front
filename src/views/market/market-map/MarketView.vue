@@ -40,15 +40,8 @@ const closePropertyCard = () => {
 }
 
 const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
-  // Zoom level logic
-  if (bounds.level <= 5) {
-    await fetchProperties(undefined, bounds)
-  } else {
-    // Level 6+: Clear markers or show message (Future: Aggregate API)
-    // For now, we can clear markers to avoid clutter or keep them if we want to show what was there
-    // store.setProperties([]) // Optional: Clear properties if zoomed out too much
-    console.log('Zoom level too high for individual properties:', bounds.level)
-  }
+  // Level-based fetching logic is now handled inside fetchProperties (via marketApi)
+  await fetchProperties(undefined, bounds)
 }
 
 const goToAnalysis = () => {
