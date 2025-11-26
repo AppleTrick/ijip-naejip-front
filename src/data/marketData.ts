@@ -1,57 +1,117 @@
-import type { Property } from '@/api/types'
+import http from '@/api/http'
+import type { Property, DongCode } from '@/api/types'
 
-export const generateMarketData = (): Property[] => {
-  const districts = [
-    { name: '강남구', lat: 37.5172, lng: 127.0473 },
-    { name: '서초구', lat: 37.4837, lng: 127.0324 },
-    { name: '송파구', lat: 37.5145, lng: 127.1066 },
-    { name: '마포구', lat: 37.5665, lng: 126.9018 },
-    { name: '용산구', lat: 37.5326, lng: 126.9900 },
-    { name: '성동구', lat: 37.5633, lng: 127.0371 },
-    { name: '영등포구', lat: 37.5264, lng: 126.8962 },
-    { name: '종로구', lat: 37.5730, lng: 126.9794 }
-  ]
+// Helper to fetch dongs for Songpa-gu
+const fetchSongpaDongs = async (): Promise<DongCode[]> => {
+  try {
+    console.log('Fetching dongs for Seoul Songpa-gu...')
+    const response = await http.get<DongCode[]>('/api/dongcode/dong', {
+      params: {
+        sido: '서울특별시',
+        gugun: '송파구'
+      }
+    })
+    console.log('Fetched dongs:', response.data)
+    return response.data
+  } catch (error) {
+    console.error('Failed to fetch dongs:', error)
+    return []
+  }
+}
 
-  const properties: Property[] = []
+// Helper to fetch deals for a specific dong
+const fetchDealsByDong = async (dongCode: string, limit: number = 50): Promise<any[]> => {
+  try {
+    console.log(`Fetching deals for dong ${dongCode}...`)
+    const response = await http.get<any[]>(`/api/house/deals/dong/${dongCode}`, {
+      params: { limit }, // Use the passed limit
+      timeout: 5000 // 5 seconds timeout
+    })
+    console.log(`Fetched deals for dong ${dongCode}: ${response.data.length} items`)
+    return response.data
+  } catch (error) {
+    console.error(`Failed to fetch deals for dong ${dongCode}:`, error)
+    return []
+  }
+}
 
-  districts.forEach(district => {
-    for (let i = 0; i < 20; i++) {
-      const price = Math.floor(Math.random() * 150000) + 10000 // 1억 ~ 16억
+export const fetchSongpaMarketData = async (): Promise<Property[]> => {
+  console.log('Starting fetchSongpaMarketData...')
+  const dongs = await fetchSongpaDongs()
+  console.log(`Found ${dongs.length} dongs.`)
+  
+  if (dongs.length === 0) return []
 
-      properties.push({
-        aptSeq: `${district.name}-${i}`,
-        aptNm: `${district.name} 아파트 ${i + 1}호`, // Simplified name
-        dealAmount: `${Math.floor(price / 10000)}억 ${price % 10000 > 0 ? (price % 10000) + '만원' : ''}`,
-        latitude: district.lat + (Math.random() - 0.5) * 0.04,
-        longitude: district.lng + (Math.random() - 0.5) * 0.04,
-        roadNm: `서울시 ${district.name} 테헤란로 ${Math.floor(Math.random() * 100) + 1}길 ${Math.floor(Math.random() * 50) + 1}`,
-        excluUseAr: `${Math.floor(Math.random() * 50) + 20}평`,
-        floor: `${Math.floor(Math.random() * 20) + 1}층`,
-        description: '역세권, 채광 좋음, 풀옵션, 주차 가능, 즉시 입주 가능. 신혼부부 추천 매물입니다.',
-        buildYear: Math.floor(Math.random() * 30) + 1995, // 1995 ~ 2024
-        jibunAddress: `서울시 ${district.name} 역삼동 ${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 100) + 1}`,
-        deals: [
-          {
-            no: i * 100 + 1,
-            aptSeq: `${district.name}-${i}`,
-            aptDong: `${Math.floor(Math.random() * 10) + 101}동`,
-            floor: `${Math.floor(Math.random() * 20) + 1}`,
-            dealDate: 20231015,
-            excluUseAr: 84.99,
-            dealAmount: price
-          },
-          {
-            no: i * 100 + 2,
-            aptSeq: `${district.name}-${i}`,
-            aptDong: `${Math.floor(Math.random() * 10) + 101}동`,
-            floor: `${Math.floor(Math.random() * 20) + 1}`,
-            dealDate: 20230920,
-            excluUseAr: 84.99,
-            dealAmount: price - 5000
-          }
-        ]
+  // Fetch deals for all dongs in parallel
+  // Limit to 10 per dong to get roughly 130 items total (13 dongs * 10)
+  const dealsPromises = dongs.map(dong => fetchDealsByDong(dong.dongCode, 10))
+  console.log('Fetching deals for all dongs...')
+  
+  let dealsResults: any[][] = []
+  try {
+    // Use allSettled to handle partial failures
+    const results = await Promise.allSettled(dealsPromises)
+    
+    dealsResults = results
+      .filter((result): result is PromiseFulfilledResult<any[]> => result.status === 'fulfilled')
+      .map(result => result.value)
+      
+    console.log(`Promise.allSettled completed. Success: ${dealsResults.length}, Failed: ${results.length - dealsResults.length}`)
+  } catch (error) {
+    console.error('Error in fetching deals:', error)
+    return []
+  }
+  
+  // Flatten all deals
+  const allDeals = dealsResults.flat()
+  console.log(`Fetched total ${allDeals.length} deals.`)
+
+  const allProperties: Property[] = []
+  const MAX_LIMIT = 100 // Reduced limit as requested
+  
+  // Group deals by AptSeq to form Properties
+  
+  // Group deals by AptSeq to form Properties
+  const propertiesMap = new Map<string, Property>()
+  
+  for (const deal of allDeals) {
+    if (propertiesMap.size >= MAX_LIMIT) break
+
+    if (!propertiesMap.has(deal.aptSeq)) {
+      propertiesMap.set(deal.aptSeq, {
+        aptSeq: deal.aptSeq,
+        aptNm: deal.aptNm,
+        dealAmount: deal.dealAmount.toLocaleString() + '만원', // Format as string
+        latitude: parseFloat(deal.latitude),
+        longitude: parseFloat(deal.longitude),
+        roadNm: deal.roadNm,
+        excluUseAr: deal.excluUseAr + 'm²',
+        floor: deal.floor + '층',
+        description: `건축년도: ${deal.buildYear}년`,
+        buildYear: deal.buildYear,
+        jibunAddress: deal.jibun,
+        deals: []
       })
     }
-  })
-  return properties
+    
+    const property = propertiesMap.get(deal.aptSeq)!
+    property.deals?.push({
+      no: deal.no,
+      aptSeq: deal.aptSeq,
+      aptDong: deal.aptDong,
+      floor: deal.floor,
+      dealDate: deal.dealDate,
+      excluUseAr: deal.excluUseAr,
+      dealAmount: deal.dealAmount
+    })
+  }
+  
+  allProperties.push(...propertiesMap.values())
+  return allProperties.slice(0, MAX_LIMIT)
 }
+
+// Deprecated: generateMarketData is removed in favor of fetchSongpaMarketData
+export const generateMarketData = (): Property[] => {
+  return []
+}
+

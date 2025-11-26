@@ -25,10 +25,15 @@ const clearMarkers = () => {
 }
 
 const renderMarkers = (items: Property[] | undefined) => {
+  console.log('renderMarkers called with:', items?.length, 'items')
   clearMarkers()
-  if (!map || !items) return
+  if (!map || !items) {
+    console.log('Map or items missing. Map:', !!map, 'Items:', !!items)
+    return
+  }
 
-    items.forEach(item => {
+  items.forEach(item => {
+    // console.log('Creating marker for:', item.aptNm, item.latitude, item.longitude)
     const position = new (window as any).kakao.maps.LatLng(item.latitude, item.longitude)
     
     // Create Custom Overlay Content using DOM API
