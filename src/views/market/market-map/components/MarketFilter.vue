@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, reactive, watch } from 'vue'
-import { Search, Filter } from 'lucide-vue-next'
+import { Search } from 'lucide-vue-next'
 import BaseFilterDropdown from '@/components/common/BaseFilterDropdown.vue'
 
 const emit = defineEmits<{
@@ -12,31 +12,16 @@ const searchQuery = ref<string>('')
 
 // Filter States
 const filters = reactive({
-  types: [] as string[],
   priceRange: { min: 0, max: 20 }, // Unit: 100 Million (Eok)
-  area: [] as string[],
-  general: [] as string[]
+  area: [] as string[]
 })
 
 // Options
-const typeOptions = [
-  { label: '아파트', value: 'APT' },
-  { label: '오피스텔', value: 'OPST' },
-  { label: '빌라/주택', value: 'VILLA' }
-]
-
 const areaOptions = [
   { label: '10평대', value: '10' },
   { label: '20평대', value: '20' },
   { label: '30평대', value: '30' },
   { label: '40평대 이상', value: '40+' }
-]
-
-const generalOptions = [
-  { label: '주차 가능', value: 'parking' },
-  { label: '엘리베이터', value: 'elevator' },
-  { label: '신축 (5년 이내)', value: 'new' },
-  { label: '남향', value: 'south' }
 ]
 
 const handleSearch = () => {
@@ -82,43 +67,6 @@ const formatPrice = (val: number) => {
 
     <!-- Filters -->
     <div class="filter-buttons">
-      <!-- General Filter -->
-      <BaseFilterDropdown label="필터" :is-active="filters.general.length > 0">
-        <template #icon>
-          <Filter class="filter-icon" />
-        </template>
-        <div class="dropdown-content">
-          <div class="checkbox-group">
-            <label v-for="option in generalOptions" :key="option.value" class="checkbox-label">
-              <input 
-                type="checkbox" 
-                :value="option.value" 
-                v-model="filters.general"
-                class="checkbox-input"
-              >
-              <span class="checkbox-text">{{ option.label }}</span>
-            </label>
-          </div>
-        </div>
-      </BaseFilterDropdown>
-
-      <!-- Property Type Filter -->
-      <BaseFilterDropdown label="아파트/오피스텔" :is-active="filters.types.length > 0">
-        <div class="dropdown-content">
-          <div class="checkbox-group">
-            <label v-for="option in typeOptions" :key="option.value" class="checkbox-label">
-              <input 
-                type="checkbox" 
-                :value="option.value" 
-                v-model="filters.types"
-                class="checkbox-input"
-              >
-              <span class="checkbox-text">{{ option.label }}</span>
-            </label>
-          </div>
-        </div>
-      </BaseFilterDropdown>
-
       <!-- Price Filter -->
       <BaseFilterDropdown label="가격대" :is-active="filters.priceRange.min > 0 || filters.priceRange.max < 20">
         <div class="dropdown-content w-64">

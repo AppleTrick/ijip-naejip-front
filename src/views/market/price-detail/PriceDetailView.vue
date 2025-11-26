@@ -11,13 +11,13 @@ const propertyId = route.params.id
 
 // Mock Data
 const property = ref({
-  id: propertyId,
-  name: '반포 자이',
-  address: '서울시 서초구 반포동 20-45',
-  price: '35억',
-  area: '34평',
+  aptSeq: propertyId,
+  aptNm: '반포 자이',
+  roadNm: '서울시 서초구 반포동 20-45',
+  dealAmount: '35억',
+  excluUseAr: '34평',
   floor: '15층',
-  type: '아파트',
+  buildYear: 2009,
   description: '한강뷰가 보이는 로얄층 매물입니다. 최근 올수리 완료되어 즉시 입주 가능합니다.',
   transactions: [
     { date: '2023.10', price: '34억 5000' },
@@ -51,24 +51,27 @@ const goBack = () => {
         <div class="info-section">
           <div class="image-wrapper">
             <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="Property" class="property-image" />
-            <span class="type-badge">{{ property.type }}</span>
           </div>
           
           <div class="basic-info">
-            <h2 class="property-name">{{ property.name }}</h2>
+            <h2 class="property-name">{{ property.aptNm }}</h2>
             <p class="property-address">
-              <MapPin class="icon-sm" /> {{ property.address }}
+              <MapPin class="icon-sm" /> {{ property.roadNm }}
             </p>
-            <p class="property-price">{{ property.price }}</p>
+            <p class="property-price">{{ property.dealAmount }}</p>
             
             <div class="specs-grid">
               <div class="spec-item">
                 <span class="spec-label">면적</span>
-                <span class="spec-value">{{ property.area }}</span>
+                <span class="spec-value">{{ property.excluUseAr }}</span>
               </div>
               <div class="spec-item">
                 <span class="spec-label">층수</span>
                 <span class="spec-value">{{ property.floor }}</span>
+              </div>
+              <div class="spec-item" v-if="property.buildYear">
+                <span class="spec-label">건축년도</span>
+                <span class="spec-value">{{ property.buildYear }}년</span>
               </div>
             </div>
 
