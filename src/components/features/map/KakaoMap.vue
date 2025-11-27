@@ -46,7 +46,8 @@ const renderMarkers = (items: Property[] | undefined) => {
     
     // Create Vue VNode and render it to the container
     const vnode = createVNode(MapMarkerOverlay, {
-      price: item.dealAmount
+      price: item.dealAmount,
+      name: item.aptNm
     })
     render(vnode, content)
     

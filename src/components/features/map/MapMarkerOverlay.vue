@@ -5,6 +5,7 @@ import { formatPrice } from '@/utils/formatters'
 
 const props = defineProps<{
   price: string | number
+  name?: string
   isSelected?: boolean
 }>()
 
@@ -13,32 +14,45 @@ const formattedPrice = computed(() => formatPrice(props.price))
 
 <template>
   <div class="marker-overlay">
+    <span v-if="name" class="region-name">{{ name }}</span>
     <span class="price-text">{{ formattedPrice }}</span>
   </div>
 </template>
 
 <style scoped>
 .marker-overlay {
-  padding: 0.5rem 1rem;
+  padding: 0.5rem 0.75rem;
   background-color: v-bind('colors.primary');
   border: 2px solid v-bind('colors.primary');
-  border-radius: 50px;
+  border-radius: 1rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   box-shadow: 0 4px 10px rgba(43, 46, 74, 0.3); /* primaryTransparent30 */
   transition: transform 0.2s;
+  min-width: 60px;
 }
 
 .marker-overlay:hover {
   transform: scale(1.1);
+  z-index: 10;
+}
+
+.region-name {
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  margin-bottom: 0.125rem;
+  white-space: nowrap;
+  opacity: 0.9;
 }
 
 .price-text {
   color: white;
-  font-weight: 600;
-  font-size: 0.875rem;
+  font-weight: 700;
+  font-size: 0.9rem;
   white-space: nowrap;
   font-family: 'Pretendard', sans-serif;
 }

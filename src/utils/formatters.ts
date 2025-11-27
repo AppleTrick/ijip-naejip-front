@@ -8,18 +8,16 @@ export const formatPrice = (price: string | number): string => {
 
   if (isNaN(value)) return String(price)
 
-  const uk = Math.floor(value / 10000)
-  const man = value % 10000
-
-  let result = ''
-  if (uk > 0) result += `${uk}억`
-  if (man > 0) {
-    result += ` ${man}만원`
-  } else if (uk > 0) {
-    result += '원'
+  // Input is in '만원' unit
+  if (value >= 10000) {
+    // 1억 이상
+    const uk = value / 10000
+    return `${parseFloat(uk.toFixed(1))}억`
+  } else {
+    // 1억 미만 (천만원 단위)
+    const cheon = value / 1000
+    return `${parseFloat(cheon.toFixed(1))}천`
   }
-  
-  return result.trim() || '0원'
 }
 
 export const formatDate = (date: Date | string): string => {
