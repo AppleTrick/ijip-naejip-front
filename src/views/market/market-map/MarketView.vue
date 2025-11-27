@@ -490,11 +490,11 @@ const goToDetail = () => {
 }
 
 .search-container {
-  background-color: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
+  /* background-color: rgba(255, 255, 255, 0.95); */
+  /* backdrop-filter: blur(8px); */
   padding: 0.75rem;
-  border-radius: 1rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  /* border-radius: 1rem; */
+  /* box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); */
+  /* border: 1px solid rgba(255, 255, 255, 0.5); */
 }
 </style>

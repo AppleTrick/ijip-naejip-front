@@ -1,6 +1,8 @@
 export interface Colors {
   primary: string
   primaryHover: string
+  primaryLight: string
+  softRed: string
   secondary: string
   secondaryHover: string
   secondaryLight: string
@@ -29,6 +31,8 @@ export interface Colors {
 export const colors: Colors = {
   primary: '#E84545',        // Bright Red
   primaryHover: '#D63939',   // Darker Red for hover
+  primaryLight: '#FFE5E5',   // Light Red (Solid)
+  softRed: '#FF6B6B',        // Soft Red for markers
   secondary: '#903749',      // Wine Red
   secondaryHover: '#7A2F3E', // Darker Wine Red
   secondaryLight: '#90374933', // Wine Red with transparency

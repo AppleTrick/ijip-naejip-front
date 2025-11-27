@@ -22,7 +22,7 @@ const formattedPrice = computed(() => formatPrice(props.price))
 <style scoped>
 .marker-overlay {
   padding: 0.5rem 0.75rem;
-  background-color: v-bind('colors.primary');
+  background-color: v-bind('colors.softRed');
   border: 2px solid v-bind('colors.primary');
   border-radius: 1rem;
   display: flex;
