@@ -8,16 +8,25 @@ export function useMarket() {
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
+  let lastRequestId = 0
+
   const fetchProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
+    const requestId = ++lastRequestId
     isLoading.value = true
     error.value = null
     try {
       const data = await marketApi.getProperties(filters, bounds)
-      store.setMarketProperties(data)
+      if (requestId === lastRequestId) {
+        store.setMarketProperties(data)
+      }
     } catch (e: any) {
-      error.value = e.message || '매물 목록을 불러오는데 실패했습니다.'
+      if (requestId === lastRequestId) {
+        error.value = e.message || '매물 목록을 불러오는데 실패했습니다.'
+      }
     } finally {
-      isLoading.value = false
+      if (requestId === lastRequestId) {
+        isLoading.value = false
+      }
     }
   }
 

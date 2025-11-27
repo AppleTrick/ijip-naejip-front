@@ -26,11 +26,20 @@ const fetchDealsByBounds = async (bounds: { minLat: number, maxLat: number, minL
 // Note: With bounds fetching, caching strategy might need to change (e.g., cache by bounds or clear on move)
 // For now, we will simply replace the cache with the new bounds data
 // Cache the data
+// Cache the data
 let cachedDeals: any[] = []
+let latestFetchId = 0
 
 const fetchRawDeals = async (bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number }) => {
   if (bounds) {
-    cachedDeals = await fetchDealsByBounds(bounds)
+    const fetchId = ++latestFetchId
+    const data = await fetchDealsByBounds(bounds)
+    
+    // Only update cache if this is the latest request
+    if (fetchId === latestFetchId) {
+      cachedDeals = data
+    }
+    return data
   }
   return cachedDeals
 }
@@ -110,49 +119,58 @@ const groupDealsByAptDong = (deals: any[]): Property[] => {
   return Array.from(propertiesMap.values())
 }
 
-// Placeholder for Dong aggregation API
-const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<any[]> => {
-  console.log('Fetching dong aggregates (placeholder)')
-  // TODO: Implement actual API call
-  return []
+import { dongAggregates, guAggregates, cityAggregates } from '@/data/mockMarketData'
+
+// ... (existing helper functions)
+
+// Mock API calls for aggregates
+const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
+  console.log('Fetching dong aggregates (Mock)')
+  // In a real app, we would filter by bounds here
+  return dongAggregates
 }
 
-// Placeholder for Gu aggregation API
-const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<any[]> => {
-  console.log('Fetching gu aggregates (placeholder)')
-  // TODO: Implement actual API call
-  return []
+const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
+  return guAggregates
+}
+
+const fetchCityAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
+  return cityAggregates
 }
 
 export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }): Promise<Property[]> => {
-  // Always fetch raw deals first if bounds are provided
-  const rawDeals = await fetchRawDeals(bounds)
-  
   let properties: Property[] = []
 
-  if (bounds && bounds.level <= 3) {
-    // Level 1-3: Apartment Dong Level (Detailed)
-    console.log(`Level ${bounds.level}: Grouping by Apt Dong`)
-    properties = groupDealsByAptDong(rawDeals)
-  } else if (bounds && bounds.level <= 5) {
-    // Level 4-5: Apartment Complex Level (Average)
-    console.log(`Level ${bounds.level}: Grouping by Apt Complex`)
-    properties = groupDealsByAptComplex(rawDeals)
-  } else if (bounds && bounds.level <= 8) {
-    // Level 6-8: Dong aggregates
-    console.log(`Level ${bounds.level}: Fetching Dong aggregates (Not implemented yet)`)
-    properties = [] 
-  } else if (bounds) {
-    // Level 9+: Gu aggregates
-    console.log(`Level ${bounds.level}: Fetching Gu aggregates (Not implemented yet)`)
-    properties = []
+  if (bounds) {
+    if (bounds.level <= 2) {
+      // Level 1-2: Apartment Dong Level (Detailed)
+      console.log(`Level ${bounds.level}: Grouping by Apt Dong`)
+      const rawDeals = await fetchRawDeals(bounds)
+      properties = groupDealsByAptDong(rawDeals)
+    } else if (bounds.level <= 4) {
+      // Level 3-4: Apartment Complex Level (Average)
+      console.log(`Level ${bounds.level}: Grouping by Apt Complex`)
+      const rawDeals = await fetchRawDeals(bounds)
+      properties = groupDealsByAptComplex(rawDeals)
+    } else if (bounds.level <= 5) {
+      // Level 5: Dong aggregates
+      properties = await fetchDongAggregates(bounds)
+    } else if (bounds.level <= 7) {
+      // Level 6-7: Gu aggregates
+      properties = await fetchGuAggregates(bounds)
+    } else {
+      // Level 8+: City (Do/Si) aggregates
+      properties = await fetchCityAggregates(bounds)
+    }
   } else {
     // Fallback if no bounds (return cached complex view)
+    const rawDeals = await fetchRawDeals()
     properties = groupDealsByAptComplex(rawDeals)
   }
 
   if (filters) {
     // Apply client-side filters if needed
+    // Note: For aggregates, filtering might need to be different or disabled
   }
 
   return properties

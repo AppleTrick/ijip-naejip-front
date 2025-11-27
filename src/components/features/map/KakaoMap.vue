@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
-import { colors } from '@/constants/colors'
-import { formatPrice } from '@/utils/formatters'
+import { ref, onMounted, watch, createVNode, render } from 'vue'
+import MapMarkerOverlay from './MapMarkerOverlay.vue'
 
 import type { Property } from '@/api/types'
 
@@ -22,50 +21,36 @@ let mainMarker: any = null
 let mapMarkers: any[] = []
 
 const clearMarkers = () => {
-  mapMarkers.forEach(m => m.setMap(null))
+  mapMarkers.forEach(m => {
+    // Unmount Vue component to prevent memory leaks
+    if (m.vueContainer) {
+      render(null, m.vueContainer)
+    }
+    m.setMap(null)
+  })
   mapMarkers = []
 }
 
 const renderMarkers = (items: Property[] | undefined) => {
-  console.log('renderMarkers called with:', items?.length, 'items')
   clearMarkers()
   if (!map || !items) {
-    console.log('Map or items missing. Map:', !!map, 'Items:', !!items)
     return
   }
 
   items.forEach(item => {
-    // console.log('Creating marker for:', item.aptNm, item.latitude, item.longitude)
     const position = new (window as any).kakao.maps.LatLng(item.latitude, item.longitude)
     
-    // Create Custom Overlay Content using DOM API
+    // Create container for Vue component
     const content = document.createElement('div')
     content.className = 'custom-overlay-marker'
-    // We use inline styles here because this HTML is injected outside of Vue's scope
-    content.innerHTML = `
-      <div style="
-        padding: 0.5rem 1rem;
-        background-color: white;
-        border: 2px solid ${colors.primary};
-        border-radius: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-        box-shadow: 0 4px 10px ${colors.primaryTransparent30};
-        transition: transform 0.2s;
-      " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-        <span style="
-          color: ${colors.primary};
-          font-weight: 800;
-          font-size: 0.875rem;
-          white-space: nowrap;
-          font-family: 'Pretendard', sans-serif;
-        ">${formatPrice(item.dealAmount)}</span>
-      </div>
-    `
     
-    // Handle Click
+    // Create Vue VNode and render it to the container
+    const vnode = createVNode(MapMarkerOverlay, {
+      price: item.dealAmount
+    })
+    render(vnode, content)
+    
+    // Handle Click (Add event listener to the container)
     content.addEventListener('click', () => {
       emit('select-marker', item)
     })
@@ -76,6 +61,9 @@ const renderMarkers = (items: Property[] | undefined) => {
       yAnchor: 1.2,
       zIndex: 3
     })
+    
+    // Store container reference for cleanup
+    ;(customOverlay as any).vueContainer = content
     
     customOverlay.setMap(map)
     mapMarkers.push(customOverlay)
