@@ -1,17 +1,29 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
-import { useAuth } from '@/composables/useAuth'
+import { useAuthStore } from '@/stores/auth'
 
-const { login, isLoading, error } = useAuth()
+const router = useRouter()
+const authStore = useAuthStore()
 
 const email = ref<string>('')
 const password = ref<string>('')
 
 const handleLogin = async () => {
   if (!email.value || !password.value) return
-  await login(email.value, password.value)
+  
+  const success = await authStore.login({
+    email: email.value,
+    password: password.value
+  })
+
+  if (success) {
+    router.push('/')
+  } else {
+    alert('로그인 실패: ' + authStore.error)
+  }
 }
 </script>
 

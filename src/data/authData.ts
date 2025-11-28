@@ -1,4 +1,5 @@
-import { mockUser, type User } from './userData'
+import { mockUser } from './userData'
+import type { User } from '@/api/types'
 
 export interface AuthResponse {
   accessToken: string

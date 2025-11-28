@@ -31,10 +31,16 @@ const routes: Array<RouteRecordRaw> = [
       name: 'comparison',
       component: () => import('../views/market/comparison/ComparisonView.vue')
     },
+
     {
       path: '/analysis',
       name: 'analysis',
       component: () => import('../views/market/analysis/AnalysisView.vue')
+    },
+    {
+      path: '/survey',
+      name: 'preference-survey',
+      component: () => import('../views/survey/PreferenceSurveyView.vue')
     },
     {
       path: '/login',

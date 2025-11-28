@@ -1,5 +1,20 @@
 <script setup lang="ts">
-import SignUpForm from './components/SignUpForm.vue'
+import { useRouter } from 'vue-router'
+import { useSignUp } from '@/composables/useSignUp'
+import SignUpStep1 from './components/SignUpStep1.vue'
+import SignUpStep2 from './components/SignUpStep2.vue'
+import SignUpStep3 from './components/SignUpStep3.vue'
+
+const router = useRouter()
+const { 
+  currentStep, 
+  totalSteps, 
+  signupData, 
+  updateData, 
+  nextStep, 
+  prevStep, 
+  submitSignup 
+} = useSignUp()
 </script>
 
 <template>
@@ -8,7 +23,7 @@ import SignUpForm from './components/SignUpForm.vue'
       <!-- Left Side: Form -->
       <div class="form-section">
         <div class="form-container">
-          <div class="brand-header">
+          <div class="brand-header" @click="router.push('/')">
             <img src="@/assets/logo.png" alt="이집내집" class="brand-logo" />
             <span class="brand-name">이집내집</span>
           </div>
@@ -17,11 +32,38 @@ import SignUpForm from './components/SignUpForm.vue'
             <h2 class="signup-title">
               회원가입
             </h2>
-            <p class="signup-subtitle">
-              SafeHome과 함께 안전한 집을 찾아보세요
-            </p>
+            <div class="step-indicator">
+              <div 
+                v-for="step in totalSteps" 
+                :key="step"
+                class="step-dot"
+                :class="{ active: step <= currentStep }"
+              ></div>
+            </div>
           </div>
-          <SignUpForm />
+
+          <!-- Steps -->
+          <SignUpStep1 
+            v-if="currentStep === 1"
+            :data="signupData"
+            @update="(d) => updateData(1, d)"
+            @next="nextStep"
+          />
+          <SignUpStep2 
+            v-if="currentStep === 2"
+            :data="signupData.personalInfo"
+            @update="(d) => updateData(2, d)"
+            @next="nextStep"
+            @prev="prevStep"
+          />
+          <SignUpStep3 
+            v-if="currentStep === 3"
+            :data="signupData.preferences"
+            @update="(d) => updateData(3, d)"
+            @submit="submitSignup"
+            @prev="prevStep"
+          />
+
         </div>
       </div>
 
@@ -106,10 +148,22 @@ import SignUpForm from './components/SignUpForm.vue'
   letter-spacing: -0.02em;
 }
 
-.signup-subtitle {
-  font-size: 1rem;
-  color: var(--color-text-light);
-  line-height: 1.5;
+.step-indicator {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.step-dot {
+  width: 2rem;
+  height: 0.25rem;
+  background-color: var(--color-gray-200);
+  border-radius: 9999px;
+  transition: all 0.3s;
+}
+
+.step-dot.active {
+  background-color: var(--color-primary);
 }
 
 .image-section {

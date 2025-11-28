@@ -1,9 +1,47 @@
 export interface User {
-  id: number
+  id: string
   name: string
   email: string
   phone?: string
-  profileImage?: string
+  profileImage?: string | null
+  // Personal Info
+  gender?: 'male' | 'female' | 'other'
+  ageGroup?: string
+  job?: string
+  maritalStatus?: 'single' | 'married'
+  // Preferences
+  budget?: { min: number, max: number }
+  interestAreas?: string[]
+  commuteLocation?: string
+  // Notifications
+  notifications?: {
+    appPush: boolean
+    email: boolean
+    marketing: boolean
+  }
+}
+
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+export interface SignUpData {
+  email: string
+  password: string
+  name: string
+  phone: string
+  personalInfo: {
+    gender: string
+    ageGroup: string
+    job: string
+    maritalStatus: string
+  }
+  preferences: {
+    budget: { min: number, max: number }
+    interestAreas: string[]
+    commuteLocation: string
+  }
 }
 
 export interface DongCode {

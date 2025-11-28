@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseToggle from '@/components/common/BaseToggle.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const settings = ref({
   pushEnabled: true,
@@ -12,8 +14,24 @@ const settings = ref({
   marketingEnabled: false
 })
 
-const handleSave = () => {
-  // TODO: Implement save logic
+onMounted(() => {
+  if (authStore.user?.notifications) {
+    settings.value = {
+      pushEnabled: authStore.user.notifications.appPush,
+      emailEnabled: authStore.user.notifications.email,
+      marketingEnabled: authStore.user.notifications.marketing
+    }
+  }
+})
+
+const handleSave = async () => {
+  await authStore.updateUser({
+    notifications: {
+      appPush: settings.value.pushEnabled,
+      email: settings.value.emailEnabled,
+      marketing: settings.value.marketingEnabled
+    }
+  })
   alert('알림 설정이 저장되었습니다.')
   router.back()
 }

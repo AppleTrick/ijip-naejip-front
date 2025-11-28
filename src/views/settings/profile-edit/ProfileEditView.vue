@@ -1,10 +1,30 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Camera } from 'lucide-vue-next'
+import { useAuthStore } from '@/stores/auth'
 import ProfileEditForm from './components/ProfileEditForm.vue'
 
 const router = useRouter()
-const userName = '김싸피' // This would typically come from a store or prop
+const authStore = useAuthStore()
+const fileInput = ref<HTMLInputElement | null>(null)
+
+const user = computed(() => authStore.user)
+const profileImage = ref(user.value?.profileImage || null)
+
+const triggerFileInput = () => {
+  fileInput.value?.click()
+}
+
+const handleFileChange = (event: Event) => {
+  const target = event.target as HTMLInputElement
+  if (target.files && target.files[0]) {
+    const file = target.files[0]
+    // Mock upload: create object URL
+    profileImage.value = URL.createObjectURL(file)
+    // In real app, upload to server here
+  }
+}
 </script>
 
 <template>
@@ -22,12 +42,22 @@ const userName = '김싸피' // This would typically come from a store or prop
       <!-- Profile Image -->
       <div class="profile-image-section">
         <div class="image-wrapper">
-          <div class="avatar-placeholder">
-            {{ userName[0] }}
+          <div v-if="profileImage" class="avatar-image">
+            <img :src="profileImage" alt="Profile" />
           </div>
-          <button class="camera-btn">
+          <div v-else class="avatar-placeholder">
+            {{ user?.name?.[0] || 'U' }}
+          </div>
+          <button class="camera-btn" @click="triggerFileInput">
             <Camera class="camera-icon" />
           </button>
+          <input 
+            ref="fileInput"
+            type="file" 
+            accept="image/*" 
+            class="hidden-input"
+            @change="handleFileChange"
+          >
         </div>
       </div>
 
@@ -131,5 +161,22 @@ const userName = '김싸피' // This would typically come from a store or prop
 .camera-icon {
   width: 1rem;
   height: 1rem;
+}
+
+.avatar-image {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hidden-input {
+  display: none;
 }
 </style>

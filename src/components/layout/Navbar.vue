@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Home, User, Menu, X } from 'lucide-vue-next'
+import { ref, computed } from 'vue'
+import { Home, Menu, X, LogOut, Settings } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
 import BaseButton from '@/components/common/BaseButton.vue'
 
 const router = useRouter()
+const authStore = useAuthStore()
 const isMenuOpen = ref<boolean>(false)
+
+const isAuthenticated = computed(() => authStore.isAuthenticated)
+const user = computed(() => authStore.user)
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
@@ -13,6 +18,12 @@ const toggleMenu = () => {
 
 const closeMenu = () => {
   isMenuOpen.value = false
+}
+
+const handleLogout = () => {
+  authStore.logout()
+  router.push('/')
+  closeMenu()
 }
 </script>
 
@@ -60,6 +71,14 @@ const closeMenu = () => {
             >
               집 비교하기
             </router-link>
+            <router-link 
+              v-if="isAuthenticated"
+              to="/survey" 
+              class="nav-link" 
+              active-class="nav-link--active"
+            >
+              성향 조사
+            </router-link>
           </div>
 
           <!-- Divider -->
@@ -67,27 +86,37 @@ const closeMenu = () => {
 
           <!-- Auth & User -->
           <div class="auth-group">
-            <router-link to="/settings" class="user-icon-link" title="설정">
-              <User class="user-icon" />
-            </router-link>
-            <div class="auth-buttons">
-              <BaseButton 
-                variant="outline" 
-                size="sm" 
-                class="auth-btn"
-                @click="router.push('/login')"
-              >
-                로그인
-              </BaseButton>
-              <BaseButton 
-                variant="primary" 
-                size="sm" 
-                class="auth-btn shadow-btn"
-                @click="router.push('/signup')"
-              >
-                회원가입
-              </BaseButton>
-            </div>
+            <template v-if="isAuthenticated">
+              <div class="user-info">
+                <span class="user-name">{{ user?.name }}님</span>
+              </div>
+              <router-link to="/settings" class="icon-btn" title="설정">
+                <Settings class="icon-sm" />
+              </router-link>
+              <button @click="handleLogout" class="icon-btn" title="로그아웃">
+                <LogOut class="icon-sm" />
+              </button>
+            </template>
+            <template v-else>
+              <div class="auth-buttons">
+                <BaseButton 
+                  variant="outline" 
+                  size="sm" 
+                  class="auth-btn"
+                  @click="router.push('/login')"
+                >
+                  로그인
+                </BaseButton>
+                <BaseButton 
+                  variant="primary" 
+                  size="sm" 
+                  class="auth-btn shadow-btn"
+                  @click="router.push('/signup')"
+                >
+                  회원가입
+                </BaseButton>
+              </div>
+            </template>
           </div>
         </div>
 
@@ -136,34 +165,57 @@ const closeMenu = () => {
         >
           집 비교하기
         </router-link>
+        <router-link 
+          v-if="isAuthenticated"
+          to="/survey" 
+          class="mobile-nav-link"
+          active-class="mobile-nav-link--active"
+          @click="closeMenu"
+        >
+          성향 조사
+        </router-link>
         
         <div class="mobile-divider">
+          <template v-if="isAuthenticated">
+            <div class="mobile-user-info">
+              <span class="mobile-user-name">{{ user?.name }}님 안녕하세요</span>
+            </div>
             <router-link 
-            to="/settings"
-            class="mobile-user-link"
-            @click="closeMenu"
-          >
-            <User class="mobile-user-icon" />
-            설정
-          </router-link>
-          <div class="mobile-auth-buttons">
-            <BaseButton 
-              variant="outline" 
-              :full-width="true" 
-              class="mobile-auth-btn"
-              @click="router.push('/login'); closeMenu()"
+              to="/settings"
+              class="mobile-user-link"
+              @click="closeMenu"
             >
-              로그인
-            </BaseButton>
-            <BaseButton 
-              variant="primary" 
-              :full-width="true" 
-              class="mobile-auth-btn"
-              @click="router.push('/signup'); closeMenu()"
+              <Settings class="mobile-user-icon" />
+              설정
+            </router-link>
+            <button 
+              class="mobile-user-link"
+              @click="handleLogout"
             >
-              회원가입
-            </BaseButton>
-          </div>
+              <LogOut class="mobile-user-icon" />
+              로그아웃
+            </button>
+          </template>
+          <template v-else>
+            <div class="mobile-auth-buttons">
+              <BaseButton 
+                variant="outline" 
+                :full-width="true" 
+                class="mobile-auth-btn"
+                @click="router.push('/login'); closeMenu()"
+              >
+                로그인
+              </BaseButton>
+              <BaseButton 
+                variant="primary" 
+                :full-width="true" 
+                class="mobile-auth-btn"
+                @click="router.push('/signup'); closeMenu()"
+              >
+                회원가입
+              </BaseButton>
+            </div>
+          </template>
         </div>
       </div>
     </div>
@@ -458,6 +510,42 @@ const closeMenu = () => {
 
 .mobile-auth-btn {
   justify-content: center;
+}
+
+.user-info {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-right: 0.5rem;
+}
+
+.icon-btn {
+  color: var(--color-text-light);
+  padding: 0.5rem;
+  border-radius: 9999px;
+  transition: all 0.2s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn:hover {
+  color: var(--color-primary);
+  background-color: var(--color-gray-100);
+}
+
+.icon-sm {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.mobile-user-info {
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  color: var(--color-text);
 }
 
 @keyframes fadeInDown {
