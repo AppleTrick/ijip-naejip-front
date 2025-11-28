@@ -7,6 +7,7 @@ import type { Property } from '@/api/types'
 const props = defineProps<{
   address?: string
   markers?: Property[]
+  center?: { lat: number, lng: number }
 }>()
 
 const emit = defineEmits<{
@@ -54,6 +55,33 @@ const renderMarkers = (items: Property[] | undefined) => {
     // Handle Click (Add event listener to the container)
     content.addEventListener('click', () => {
       emit('select-marker', item)
+      
+      // Center map on clicked marker and zoom in
+      if (map) {
+        const newCenter = new (window as any).kakao.maps.LatLng(item.latitude, item.longitude)
+        
+        // Determine target zoom level based on marker type
+        const currentLevel = map.getLevel()
+        let targetLevel = currentLevel
+        
+        if (item.aptSeq.startsWith('city-')) {
+          targetLevel = 9 // City → District level (wider view)
+        } else if (item.aptSeq.startsWith('gu-')) {
+          targetLevel = 5 // District → Neighborhood level (closer view)
+        } else if (item.aptSeq.startsWith('dong-')) {
+          targetLevel = 4 // Neighborhood → Apartment level (very close zoom)
+        }
+        
+        // Smooth pan to marker location first
+        map.panTo(newCenter)
+        
+        // Then zoom after pan animation completes (panTo takes ~300ms)
+        if (targetLevel < currentLevel) {
+          setTimeout(() => {
+            map.setLevel(targetLevel, { animate: true })
+          }, 400) // Wait for pan to complete
+        }
+      }
     })
 
     const customOverlay = new (window as any).kakao.maps.CustomOverlay({
@@ -178,6 +206,13 @@ watch(() => props.address, (newAddr) => {
     }
   })
 })
+
+watch(() => props.center, (newCenter) => {
+  if (!map || !newCenter) return
+  const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
+  map.setCenter(coords)
+  // Optionally adjust zoom level if needed, but maybe let parent decide or keep current
+}, { deep: true })
 </script>
 
 <template>

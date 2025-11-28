@@ -119,23 +119,55 @@ const groupDealsByAptDong = (deals: any[]): Property[] => {
   return Array.from(propertiesMap.values())
 }
 
-import { dongAggregates, guAggregates, cityAggregates } from '@/data/mockMarketData'
+import { NEIGHBORHOODS, DISTRICTS, CITIES } from '@/data/marketData'
+import type { RegionStats } from '@/data/marketData'
 
-// ... (existing helper functions)
+// Convert RegionStats to Property format for map display
+const convertToProperty = (item: RegionStats): Property => {
+  return {
+    aptSeq: item.id,
+    aptNm: item.name,
+    dealAmount: String(item.avgPrice), // Pass as string number, MapMarkerOverlay will format
+    latitude: item.lat || 0,
+    longitude: item.lng || 0,
+    roadNm: item.name,
+    excluUseAr: '-',
+    floor: '-',
+    description: item.name,
+    buildYear: 0
+  }
+}
 
 // Mock API calls for aggregates
 const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
   console.log('Fetching dong aggregates (Mock)')
-  // In a real app, we would filter by bounds here
-  return dongAggregates
+  // Filter neighborhoods within bounds
+  const filtered = NEIGHBORHOODS.filter(n => 
+    n.lat && n.lng &&
+    n.lat >= bounds.minLat && n.lat <= bounds.maxLat &&
+    n.lng >= bounds.minLng && n.lng <= bounds.maxLng
+  )
+  return filtered.map(convertToProperty)
 }
 
 const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
-  return guAggregates
+  // Filter districts within bounds
+  const filtered = DISTRICTS.filter(d => 
+    d.lat && d.lng &&
+    d.lat >= bounds.minLat && d.lat <= bounds.maxLat &&
+    d.lng >= bounds.minLng && d.lng <= bounds.maxLng
+  )
+  return filtered.map(convertToProperty)
 }
 
 const fetchCityAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
-  return cityAggregates
+  // Filter cities within bounds
+  const filtered = CITIES.filter(c => 
+    c.lat && c.lng &&
+    c.lat >= bounds.minLat && c.lat <= bounds.maxLat &&
+    c.lng >= bounds.minLng && c.lng <= bounds.maxLng
+  )
+  return filtered.map(convertToProperty)
 }
 
 export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }): Promise<Property[]> => {
