@@ -62,5 +62,5 @@ export const updateProfile = async (user: Partial<User>): Promise<User> => {
 
 export const updateNotifications = async (settings: any): Promise<void> => {
   await delay(500)
-  console.log('Notifications updated:', settings)
+
 }

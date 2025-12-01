@@ -103,7 +103,7 @@ onMounted(() => {
   const loadMap = () => {
     if ((window as any).kakao && (window as any).kakao.maps) {
       (window as any).kakao.maps.load(() => {
-        console.log('Kakao Map SDK loaded. Initializing map...')
+
         const options = {
           center: new (window as any).kakao.maps.LatLng(37.566826, 126.9786567), // Seoul City Hall
           level: 5
@@ -126,18 +126,18 @@ onMounted(() => {
             level: level
           }
           
-          console.log('Emitting update-bounds:', boundsData)
+
           emit('update-bounds', boundsData)
         }
 
         // Initial Relayout
         window.requestAnimationFrame(() => {
-          console.log('Relayout map...')
+
           map.relayout()
           map.setCenter(options.center)
           
           // Emit initial bounds
-          console.log('Initial bounds check')
+
           emitBounds()
 
           if (props.markers && props.markers.length > 0) {
@@ -146,9 +146,9 @@ onMounted(() => {
         })
 
         // Add idle event listener
-        console.log('Adding idle event listener')
+
         ;(window as any).kakao.maps.event.addListener(map, 'idle', function() {
-          console.log('Map idle event fired')
+
           emitBounds()
         })
 
@@ -185,7 +185,7 @@ onMounted(() => {
 
 
 watch(() => props.markers, (newMarkers) => {
-  console.log('KakaoMap: markers prop updated:', newMarkers?.length)
+
   renderMarkers(newMarkers)
 }, { deep: true })
 

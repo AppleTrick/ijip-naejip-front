@@ -4,7 +4,7 @@ import type { Property, MarketFilters } from './types'
 // Helper to fetch deals by bounds
 const fetchDealsByBounds = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }, limit: number = 100): Promise<any[]> => {
   try {
-    console.log('Fetching deals by bounds:', bounds)
+
     const response = await http.get<any[]>('/api/house/deals/bounds', {
       params: {
         minLat: bounds.minLat,
@@ -14,7 +14,7 @@ const fetchDealsByBounds = async (bounds: { minLat: number, maxLat: number, minL
         limit
       }
     })
-    console.log(`Fetched deals by bounds: ${response.data.length} items`)
+
     return response.data
   } catch (error) {
     console.error('Failed to fetch deals by bounds:', error)
@@ -26,7 +26,6 @@ const fetchDealsByBounds = async (bounds: { minLat: number, maxLat: number, minL
 // Note: With bounds fetching, caching strategy might need to change (e.g., cache by bounds or clear on move)
 // For now, we will simply replace the cache with the new bounds data
 // Cache the data
-// Cache the data
 let cachedDeals: any[] = []
 let latestFetchId = 0
 
@@ -34,7 +33,7 @@ const fetchRawDeals = async (bounds?: { minLat: number, maxLat: number, minLng: 
   if (bounds) {
     const fetchId = ++latestFetchId
     const data = await fetchDealsByBounds(bounds)
-    
+
     // Only update cache if this is the latest request
     if (fetchId === latestFetchId) {
       cachedDeals = data
@@ -46,7 +45,7 @@ const fetchRawDeals = async (bounds?: { minLat: number, maxLat: number, minLng: 
 
 const groupDealsByAptComplex = (deals: any[]): Property[] => {
   const propertiesMap = new Map<string, Property>()
-  
+
   for (const deal of deals) {
     if (!propertiesMap.has(deal.aptSeq)) {
       propertiesMap.set(deal.aptSeq, {
@@ -64,7 +63,7 @@ const groupDealsByAptComplex = (deals: any[]): Property[] => {
         deals: []
       })
     }
-    
+
     const property = propertiesMap.get(deal.aptSeq)!
     property.deals?.push({
       no: deal.no,
@@ -81,11 +80,11 @@ const groupDealsByAptComplex = (deals: any[]): Property[] => {
 
 const groupDealsByAptDong = (deals: any[]): Property[] => {
   const propertiesMap = new Map<string, Property>()
-  
+
   for (const deal of deals) {
     // Group by AptSeq + AptDong
     const key = `${deal.aptSeq}-${deal.aptDong}`
-    
+
     if (!propertiesMap.has(key)) {
       propertiesMap.set(key, {
         aptSeq: deal.aptSeq, // Keep original aptSeq for reference
@@ -93,7 +92,7 @@ const groupDealsByAptDong = (deals: any[]): Property[] => {
         dealAmount: deal.dealAmount.toLocaleString() + '만원',
         // Note: Using same lat/lng as complex. Markers might overlap if DB doesn't have dong-specific coords.
         // In a real app, we might apply a small random offset or use specific dong coords.
-        latitude: parseFloat(deal.latitude), 
+        latitude: parseFloat(deal.latitude),
         longitude: parseFloat(deal.longitude),
         roadNm: deal.roadNm,
         excluUseAr: deal.excluUseAr + 'm²',
@@ -104,7 +103,7 @@ const groupDealsByAptDong = (deals: any[]): Property[] => {
         deals: []
       })
     }
-    
+
     const property = propertiesMap.get(key)!
     property.deals?.push({
       no: deal.no,
@@ -140,9 +139,9 @@ const convertToProperty = (item: RegionStats): Property => {
 
 // Mock API calls for aggregates
 const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
-  console.log('Fetching dong aggregates (Mock)')
+
   // Filter neighborhoods within bounds
-  const filtered = NEIGHBORHOODS.filter(n => 
+  const filtered = NEIGHBORHOODS.filter(n =>
     n.lat && n.lng &&
     n.lat >= bounds.minLat && n.lat <= bounds.maxLat &&
     n.lng >= bounds.minLng && n.lng <= bounds.maxLng
@@ -152,7 +151,7 @@ const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, min
 
 const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
   // Filter districts within bounds
-  const filtered = DISTRICTS.filter(d => 
+  const filtered = DISTRICTS.filter(d =>
     d.lat && d.lng &&
     d.lat >= bounds.minLat && d.lat <= bounds.maxLat &&
     d.lng >= bounds.minLng && d.lng <= bounds.maxLng
@@ -162,7 +161,7 @@ const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLn
 
 const fetchCityAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
   // Filter cities within bounds
-  const filtered = CITIES.filter(c => 
+  const filtered = CITIES.filter(c =>
     c.lat && c.lng &&
     c.lat >= bounds.minLat && c.lat <= bounds.maxLat &&
     c.lng >= bounds.minLng && c.lng <= bounds.maxLng
@@ -176,12 +175,12 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
   if (bounds) {
     if (bounds.level <= 2) {
       // Level 1-2: Apartment Dong Level (Detailed)
-      console.log(`Level ${bounds.level}: Grouping by Apt Dong`)
+
       const rawDeals = await fetchRawDeals(bounds)
       properties = groupDealsByAptDong(rawDeals)
     } else if (bounds.level <= 4) {
       // Level 3-4: Apartment Complex Level (Average)
-      console.log(`Level ${bounds.level}: Grouping by Apt Complex`)
+
       const rawDeals = await fetchRawDeals(bounds)
       properties = groupDealsByAptComplex(rawDeals)
     } else if (bounds.level <= 5) {

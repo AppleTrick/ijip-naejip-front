@@ -43,7 +43,7 @@ const handleLogout = () => {
 
 const handleDeleteAccount = () => {
   if (confirm('정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) {
-    console.log('Delete Account')
+    // TODO: Implement delete account logic
   }
 }
 </script>

@@ -19,7 +19,6 @@ const drawChart = async () => {
   const container = chartRef.value
   const rect = container.getBoundingClientRect()
   
-  // If width is 0, retry.
   if (rect.width === 0) {
     setTimeout(drawChart, 100)
     return
@@ -28,7 +27,6 @@ const drawChart = async () => {
   const width = rect.width
   const height = props.height || rect.height || 100
 
-  // Clear previous chart
   d3.select(container).selectAll('*').remove()
 
   const margin = { top: 10, right: 10, bottom: 20, left: 35 }
@@ -38,13 +36,12 @@ const drawChart = async () => {
   const svg = d3.select(container)
     .append('svg')
     .attr('width', '100%')
-    .attr('height', '100%') // Use 100% to fill container
+    .attr('height', '100%')
     .attr('viewBox', `0 0 ${width} ${height}`)
     .attr('preserveAspectRatio', 'none')
     .append('g')
     .attr('transform', `translate(${margin.left},${margin.top})`)
 
-  // X Axis
   const x = d3.scalePoint()
     .domain(props.data.map(d => d.date))
     .range([0, innerWidth])
@@ -58,7 +55,6 @@ const drawChart = async () => {
     .style('font-size', '10px')
     .style('fill', '#9ca3af')
 
-  // Y Axis
   const minPrice = d3.min(props.data, d => d.price) || 0
   const maxPrice = d3.max(props.data, d => d.price) || 0
   const padding = (maxPrice - minPrice) * 0.1
@@ -75,7 +71,6 @@ const drawChart = async () => {
     .style('font-size', '10px')
     .style('fill', '#9ca3af')
 
-  // Line
   const line = d3.line<PriceTrend>()
     .x(d => x(d.date) || 0)
     .y(d => y(d.price))
@@ -88,7 +83,6 @@ const drawChart = async () => {
     .attr('stroke-width', 2)
     .attr('d', line)
 
-  // Area (Gradient)
   const area = d3.area<PriceTrend>()
     .x(d => x(d.date) || 0)
     .y0(innerHeight)
@@ -120,7 +114,6 @@ const drawChart = async () => {
     .attr('fill', `url(#${gradientId})`)
     .attr('d', area)
 
-  // Dots
   svg.selectAll('.dot')
     .data(props.data)
     .enter()
@@ -139,7 +132,6 @@ onMounted(() => {
   
   if (chartRef.value) {
     resizeObserver.value = new ResizeObserver(() => {
-      // Debounce slightly to avoid thrashing
       requestAnimationFrame(drawChart)
     })
     resizeObserver.value.observe(chartRef.value)
@@ -165,6 +157,6 @@ watch(() => props.data, () => {
 .trend-chart {
   width: 100%;
   height: 100%;
-  min-height: 100px; /* Ensure it has height */
+  min-height: 100px;
 }
 </style>

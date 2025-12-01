@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { colors } from '@/constants/colors'
 import { formatPrice } from '@/utils/formatters'
 
 const props = defineProps<{
@@ -22,8 +21,8 @@ const formattedPrice = computed(() => formatPrice(props.price))
 <style scoped>
 .marker-overlay {
   padding: 0.5rem 0.75rem;
-  background-color: v-bind('colors.softRed');
-  border: 2px solid v-bind('colors.primary');
+  background-color: var(--color-soft-red);
+  border: 2px solid var(--color-primary);
   border-radius: 1rem;
   display: flex;
   flex-direction: column;
