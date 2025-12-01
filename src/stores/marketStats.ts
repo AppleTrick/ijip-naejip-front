@@ -8,17 +8,17 @@ export type ViewLevel = 'city' | 'district' | 'neighborhood' | 'apartment'
 export const useMarketStatsStore = defineStore('marketStats', () => {
   const currentLevel = ref<ViewLevel>('city')
   const isSidebarOpen = ref(false)
-  
-  // Current Region Data (Self)
+
+  // 현재 지역 데이터 (자신)
   const currentRegion = ref<RegionStats | null>(null)
-  
-  // List of Sub-regions (Children)
+
+  // 하위 지역 목록 (자식)
   const statsList = ref<RegionStats[]>([])
-  
+
   const selectedApartmentId = ref<string | null>(null)
   const isLoading = ref(false)
 
-  // Actions
+  // 액션
   const toggleSidebar = () => {
     isSidebarOpen.value = !isSidebarOpen.value
   }
@@ -45,7 +45,8 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     }
   }
 
-  const selectDistrict = async (district: RegionStats) => {
+  // district는 id만 있으면 됨
+  const selectDistrict = async (district: { id: string }) => {
     isLoading.value = true
     try {
       const data = await statsApi.getDistrictStats(district.id)
@@ -53,14 +54,13 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
       statsList.value = data.children
       currentLevel.value = 'district'
       selectedApartmentId.value = null
-      selectedApartmentId.value = null
       openSidebar()
     } finally {
       isLoading.value = false
     }
   }
 
-  const selectNeighborhood = async (neighborhood: RegionStats) => {
+  const selectNeighborhood = async (neighborhood: { id: string }) => {
     isLoading.value = true
     try {
       const data = await statsApi.getNeighborhoodStats(neighborhood.id)
@@ -82,24 +82,29 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
 
   const goBack = () => {
     if (currentLevel.value === 'apartment') {
-      // Go back to neighborhood view
-      // Ideally we should have the parent neighborhood ID stored or passed
-      // For now, we'll just reload the current neighborhood if we have it, or default to city
       if (currentRegion.value) {
-        // If we are at apartment level, currentRegion is actually the Neighborhood
-        // So we just switch level back
         currentLevel.value = 'neighborhood'
         selectedApartmentId.value = null
       } else {
         fetchCityStats()
       }
     } else if (currentLevel.value === 'neighborhood') {
-      // Go back to District
-      // We need to know which district we were in. 
-      // Simplified: Go to City for now, or we need to store history/parent
-      fetchCityStats()
+      // 구 단계로 돌아가기
+      if (currentRegion.value && currentRegion.value.parentId) {
+        // 부모 구 데이터를 가져와야 함
+        selectDistrict({ id: currentRegion.value.parentId })
+      } else {
+        fetchCityStats()
+      }
     } else if (currentLevel.value === 'district') {
-      fetchCityStats()
+      // 시 단계로 돌아가기
+      if (currentRegion.value && currentRegion.value.parentId) {
+        // 부모(시) 데이터로 이동 (예: 강남구 -> 서울시)
+        selectDistrict({ id: currentRegion.value.parentId })
+      } else {
+        // 부모가 없으면 최상위(전국)로 이동 (예: 서울시 -> 전국)
+        fetchCityStats()
+      }
     }
   }
 

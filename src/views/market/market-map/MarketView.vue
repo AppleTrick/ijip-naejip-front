@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useSafeHomeStore } from '@/stores/safehome'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -10,7 +9,6 @@ import MarketFilter from './components/MarketFilter.vue'
 import MarketSidebar from './components/sidebar/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 
-const router = useRouter()
 const store = useSafeHomeStore()
 const { filteredProperties } = storeToRefs(store)
 const { selectProperty, setSearchQuery } = store
@@ -22,7 +20,18 @@ const mapCenter = computed(() => {
   if (currentRegion.value && currentRegion.value.lat && currentRegion.value.lng) {
     return { lat: currentRegion.value.lat, lng: currentRegion.value.lng }
   }
-  return undefined
+  // Default center (Korea)
+  return { lat: 36.5, lng: 127.5 }
+})
+
+const mapLevel = computed(() => {
+  switch (statsStore.currentLevel) {
+    case 'city': return 9
+    case 'district': return 7
+    case 'neighborhood': return 5
+    case 'apartment': return 3
+    default: return 9
+  }
 })
 
 onMounted(async () => {
@@ -45,28 +54,13 @@ const handleMarkerSelect = (property: Property) => {
   
   if (id.startsWith('city-')) {
     // City clicked - load its districts
-    statsStore.selectDistrict({
-      id: id,
-      name: property.aptNm,
-      avgPrice: parseInt(property.dealAmount.replace(/[^0-9]/g, '')),
-      trend: []
-    })
+    statsStore.selectDistrict({ id: id })
   } else if (id.startsWith('gu-')) {
     // District clicked - load its neighborhoods
-    statsStore.selectDistrict({
-      id: id,
-      name: property.aptNm,
-      avgPrice: parseInt(property.dealAmount.replace(/[^0-9]/g, '')),
-      trend: [] 
-    })
+    statsStore.selectDistrict({ id: id })
   } else if (id.startsWith('dong-')) {
     // Neighborhood clicked - load its apartments
-    statsStore.selectNeighborhood({
-      id: id,
-      name: property.aptNm,
-      avgPrice: parseInt(property.dealAmount.replace(/[^0-9]/g, '')),
-      trend: []
-    })
+    statsStore.selectNeighborhood({ id: id })
   } else {
     // Apartment clicked
     statsStore.selectApartment(property.aptSeq)
@@ -88,6 +82,7 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
       <KakaoMap 
         :markers="filteredProperties" 
         :center="mapCenter"
+        :level="mapLevel"
         @select-marker="handleMarkerSelect" 
         @update-bounds="handleBoundsUpdate"
       />

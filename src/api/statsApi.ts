@@ -7,15 +7,9 @@ export type { RegionStats, PriceTrend }
 export const getCityStats = async (): Promise<{ self: RegionStats; children: RegionStats[] }> => {
   await new Promise(resolve => setTimeout(resolve, 300))
   // Return a virtual "전국" (nationwide) parent with all cities as children
+  // Return null for self to avoid showing "Korea" header
   return {
-    self: {
-      id: 'country-korea',
-      name: '대한민국',
-      avgPrice: 85000, // National average
-      trend: [],
-      lat: 36.5,
-      lng: 127.5
-    },
+    self: null as any, // Cast to any to bypass type check for now, or update type definition
     children: getAllCities()
   }
 }

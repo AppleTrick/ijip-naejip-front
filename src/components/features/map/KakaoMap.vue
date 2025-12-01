@@ -8,6 +8,7 @@ const props = defineProps<{
   address?: string
   markers?: Property[]
   center?: { lat: number, lng: number }
+  level?: number
 }>()
 
 const emit = defineEmits<{
@@ -207,12 +208,30 @@ watch(() => props.address, (newAddr) => {
   })
 })
 
-watch(() => props.center, (newCenter) => {
-  if (!map || !newCenter) return
-  const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
-  map.setCenter(coords)
-  // Optionally adjust zoom level if needed, but maybe let parent decide or keep current
-}, { deep: true })
+watch([() => props.center, () => props.level], ([newCenter, newLevel], [oldCenter, oldLevel]) => {
+  if (!map) return
+
+  // 1. Handle Center Change (Pan)
+  let isPanning = false
+  if (newCenter && (!oldCenter || newCenter.lat !== oldCenter.lat || newCenter.lng !== oldCenter.lng)) {
+    const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
+    map.panTo(coords)
+    isPanning = true
+  }
+
+  // 2. Handle Level Change (Zoom)
+  if (newLevel && newLevel !== oldLevel) {
+    if (isPanning) {
+      // If panning, wait for it to finish before zooming to avoid conflict
+      setTimeout(() => {
+        map.setLevel(newLevel, { animate: true })
+      }, 400)
+    } else {
+      // If only zooming, do it immediately
+      map.setLevel(newLevel, { animate: true })
+    }
+  }
+})
 </script>
 
 <template>

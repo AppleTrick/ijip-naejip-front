@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import { useMarketStatsStore } from '@/stores/marketStats'
 import { storeToRefs } from 'pinia'
-import CityLevelView from './CityLevelView.vue'
-import DistrictLevelView from './DistrictLevelView.vue'
-import NeighborhoodLevelView from './NeighborhoodLevelView.vue'
-import ApartmentLevelView from './ApartmentLevelView.vue'
+import RegionStatsView from '@/components/features/sidebar/RegionStatsView.vue'
+import ApartmentLevelView from '@/components/features/sidebar/ApartmentLevelView.vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
 const store = useMarketStatsStore()
@@ -16,9 +14,9 @@ const { toggleSidebar } = store
   <div class="sidebar-container" :class="{ 'sidebar-closed': !isSidebarOpen }">
     <div class="market-sidebar">
       <transition name="fade" mode="out-in">
-        <CityLevelView v-if="currentLevel === 'city'" />
-        <DistrictLevelView v-else-if="currentLevel === 'district'" />
-        <NeighborhoodLevelView v-else-if="currentLevel === 'neighborhood'" />
+        <RegionStatsView v-if="currentLevel === 'city'" />
+        <RegionStatsView v-else-if="currentLevel === 'district'" has-back-button />
+        <RegionStatsView v-else-if="currentLevel === 'neighborhood'" has-back-button />
         <ApartmentLevelView v-else-if="currentLevel === 'apartment'" />
       </transition>
     </div>
