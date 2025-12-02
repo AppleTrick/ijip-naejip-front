@@ -56,33 +56,6 @@ const renderMarkers = (items: Property[] | undefined) => {
     // Handle Click (Add event listener to the container)
     content.addEventListener('click', () => {
       emit('select-marker', item)
-      
-      // Center map on clicked marker and zoom in
-      if (map) {
-        const newCenter = new (window as any).kakao.maps.LatLng(item.latitude, item.longitude)
-        
-        // Determine target zoom level based on marker type
-        const currentLevel = map.getLevel()
-        let targetLevel = currentLevel
-        
-        if (item.aptSeq.startsWith('city-')) {
-          targetLevel = 9 // City → District level (wider view)
-        } else if (item.aptSeq.startsWith('gu-')) {
-          targetLevel = 5 // District → Neighborhood level (closer view)
-        } else if (item.aptSeq.startsWith('dong-')) {
-          targetLevel = 4 // Neighborhood → Apartment level (very close zoom)
-        }
-        
-        // Smooth pan to marker location first
-        map.panTo(newCenter)
-        
-        // Then zoom after pan animation completes (panTo takes ~300ms)
-        if (targetLevel < currentLevel) {
-          setTimeout(() => {
-            map.setLevel(targetLevel, { animate: true })
-          }, 400) // Wait for pan to complete
-        }
-      }
     })
 
     const customOverlay = new (window as any).kakao.maps.CustomOverlay({
@@ -211,25 +184,27 @@ watch(() => props.address, (newAddr) => {
 watch([() => props.center, () => props.level], ([newCenter, newLevel], [oldCenter, oldLevel]) => {
   if (!map) return
 
-  // 1. Handle Center Change (Pan)
-  let isPanning = false
-  if (newCenter && (!oldCenter || newCenter.lat !== oldCenter.lat || newCenter.lng !== oldCenter.lng)) {
+  const isCenterChanged = newCenter && (!oldCenter || newCenter.lat !== oldCenter.lat || newCenter.lng !== oldCenter.lng)
+  const isLevelChanged = newLevel && newLevel !== oldLevel
+
+  if (isCenterChanged && isLevelChanged) {
+    // 1. Both Changed: Move instantly then zoom (most robust for simultaneous update)
+    const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
+    map.setCenter(coords)
+    
+    // Use a small timeout to ensure setCenter is processed if needed, 
+    // but usually sequential calls work. 
+    // However, to be safe against Kakao's internal state updates:
+    requestAnimationFrame(() => {
+      map.setLevel(newLevel, { animate: true })
+    })
+  } else if (isCenterChanged) {
+    // 2. Only Center Changed: Pan smoothly
     const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
     map.panTo(coords)
-    isPanning = true
-  }
-
-  // 2. Handle Level Change (Zoom)
-  if (newLevel && newLevel !== oldLevel) {
-    if (isPanning) {
-      // If panning, wait for it to finish before zooming to avoid conflict
-      setTimeout(() => {
-        map.setLevel(newLevel, { animate: true })
-      }, 400)
-    } else {
-      // If only zooming, do it immediately
-      map.setLevel(newLevel, { animate: true })
-    }
+  } else if (isLevelChanged) {
+    // 3. Only Level Changed: Zoom smoothly
+    map.setLevel(newLevel, { animate: true })
   }
 })
 </script>

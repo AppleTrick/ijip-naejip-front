@@ -49,20 +49,15 @@ const handleFilter = (filters: any) => {
 const handleMarkerSelect = (property: Property) => {
   selectProperty(property)
   
-  // Update stats store based on property type (using aptSeq as ID)
   const id = property.aptSeq
   
   if (id.startsWith('city-')) {
-    // City clicked - load its districts
     statsStore.selectDistrict({ id: id })
   } else if (id.startsWith('gu-')) {
-    // District clicked - load its neighborhoods
     statsStore.selectDistrict({ id: id })
   } else if (id.startsWith('dong-')) {
-    // Neighborhood clicked - load its apartments
     statsStore.selectNeighborhood({ id: id })
   } else {
-    // Apartment clicked
     statsStore.selectApartment(property.aptSeq)
   }
 }
@@ -74,7 +69,7 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
 
 <template>
   <div class="market-page">
-    <!-- Left Sidebar (Hierarchical) -->
+    <!-- Left Sidebar -->
     <MarketSidebar />
 
     <!-- Map Area -->

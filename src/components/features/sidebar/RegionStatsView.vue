@@ -64,17 +64,19 @@ const handleSelect = (stat: any) => {
     </div>
 
     <template v-else>
-      <SidebarAccordionItem
-        v-for="stat in statsList"
-        :key="stat.id"
-        :id="stat.id"
-        :name="stat.name"
-        :avg-price="formatPrice(stat.avgPrice)"
-        :trend-data="stat.trend"
-        :is-expanded="expandedId === stat.id"
-        @toggle="toggleAccordion"
-        @select="handleSelect(stat)"
-      />
+      <div class="stats-list">
+        <SidebarAccordionItem
+          v-for="stat in statsList"
+          :key="stat.id"
+          :id="stat.id"
+          :name="stat.name"
+          :avg-price="formatPrice(stat.avgPrice)"
+          :trend-data="stat.trend"
+          :is-expanded="expandedId === stat.id"
+          @toggle="toggleAccordion"
+          @select="handleSelect(stat)"
+        />
+      </div>
     </template>
   </SidebarLayout>
 </template>
@@ -90,5 +92,11 @@ const handleSelect = (stat: any) => {
   padding: 2rem;
   text-align: center;
   color: var(--color-gray-500);
+}
+
+.stats-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 </style>
