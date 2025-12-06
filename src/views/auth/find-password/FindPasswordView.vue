@@ -39,7 +39,7 @@ const handleSend = () => {
           </div>
           <p class="header-desc">
             가입하신 이메일 주소를 입력해주시면<br>
-            비밀번호 재설정 링크를 보내드립니다.
+            임시 비밀번호를 보내드립니다.
           </p>
         </div>
 
@@ -66,7 +66,7 @@ const handleSend = () => {
             <h3>메일 전송 완료!</h3>
             <p>
               <strong>{{ email }}</strong>으로<br>
-              비밀번호 재설정 링크가 전송되었습니다.<br>
+              임시 비밀번호가 전송되었습니다.<br>
               메일함을 확인해주세요.
             </p>
           </div>

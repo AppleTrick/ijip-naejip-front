@@ -2,7 +2,7 @@
 import { ref, reactive } from 'vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
-
+import { sendVerificationCode, checkVerificationCode } from '@/api/authApi'
 
 const props = defineProps<{
   data: any
@@ -18,6 +18,8 @@ const isVerifying = ref(false)
 const isVerified = ref(false)
 const verificationCode = ref('')
 const sentCode = ref(false)
+const message = ref('')
+const isError = ref(false)
 
 const formData = reactive({
   email: props.data.email || '',
@@ -28,28 +30,58 @@ const formData = reactive({
 })
 
 const handleSendVerification = async () => {
-  if (!formData.email) return
+  if (!formData.email) {
+    message.value = '이메일을 입력해주세요.'
+    isError.value = true
+    return
+  }
+  
   isVerifying.value = true
-  // Mock sending email
-  await new Promise(resolve => setTimeout(resolve, 1000))
+  message.value = ''
+  isError.value = false
+  
+  // Optimistic UI: Show input immediately
   sentCode.value = true
-  isVerifying.value = false
-  alert(`인증번호가 ${formData.email}로 전송되었습니다. (테스트용: 아무 번호나 입력하세요)`)
+
+  try {
+    await sendVerificationCode(formData.email)
+    message.value = '인증번호가 전송되었습니다. 이메일을 확인해주세요.'
+    isError.value = false
+  } catch (error: any) {
+    // Revert if failed
+    sentCode.value = false
+    message.value = error.message
+    isError.value = true
+  } finally {
+    isVerifying.value = false
+  }
 }
 
-const handleVerifyCode = () => {
-  if (verificationCode.value.length > 0) {
-    isVerified.value = true
+const handleVerifyCode = async () => {
+  if (verificationCode.value.length === 0) return
+
+  try {
+    const success = await checkVerificationCode(formData.email, verificationCode.value)
+    if (success) {
+      isVerified.value = true
+      message.value = '이메일 인증이 완료되었습니다.'
+      isError.value = false
+    }
+  } catch (error: any) {
+    message.value = error.message
+    isError.value = true
   }
 }
 
 const handleNext = () => {
   if (formData.password !== formData.confirmPassword) {
-    alert('비밀번호가 일치하지 않습니다.')
+    message.value = '비밀번호가 일치하지 않습니다.'
+    isError.value = true
     return
   }
   if (!isVerified.value) {
-    alert('이메일 인증을 완료해주세요.')
+    message.value = '이메일 인증을 완료해주세요.'
+    isError.value = true
     return
   }
   
@@ -78,10 +110,11 @@ const handleNext = () => {
         <BaseButton 
           size="sm" 
           variant="outline"
+          class="action-btn"
           :disabled="isVerified || isVerifying"
           @click="handleSendVerification"
         >
-          {{ sentCode ? '재전송' : '인증번호 전송' }}
+          {{ isVerifying ? '전송중...' : (sentCode ? '재전송' : '인증번호 전송') }}
         </BaseButton>
       </div>
     </div>
@@ -95,6 +128,7 @@ const handleNext = () => {
         <BaseButton 
           size="sm" 
           variant="primary"
+          class="action-btn"
           @click="handleVerifyCode"
         >
           확인
@@ -102,8 +136,9 @@ const handleNext = () => {
       </div>
     </div>
 
-    <div v-if="isVerified" class="verified-msg">
-      ✓ 이메일 인증이 완료되었습니다.
+    <!-- 메시지 표시 영역 -->
+    <div v-if="message" :class="['message', isError ? 'error' : 'success']">
+      {{ message }}
     </div>
 
     <div class="form-group">
@@ -187,10 +222,30 @@ const handleNext = () => {
   flex: 1;
 }
 
+/* Fixed width for action buttons */
+.action-btn {
+  min-width: 6.5rem; /* 약 104px */
+  white-space: nowrap;
+}
+
 .verified-msg {
   color: var(--color-success);
   font-size: 0.875rem;
   font-weight: 600;
+}
+
+.message {
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+}
+
+.message.error {
+  color: #ef4444; /* Red-500 */
+}
+
+.message.success {
+  color: var(--color-success);
 }
 
 .mt-6 {

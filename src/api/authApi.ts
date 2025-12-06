@@ -1,66 +1,74 @@
 import type { User, LoginCredentials, SignUpData } from './types'
-
-// Mock User Data
-const MOCK_USER: User = {
-  id: '1',
-  email: 'user@example.com',
-  name: '김싸피',
-  phone: '010-1234-5678',
-  profileImage: null,
-  // Personal Info
-  gender: 'male',
-  ageGroup: '20s',
-  job: 'student',
-  maritalStatus: 'single',
-  // Preferences
-  budget: { min: 0, max: 10 }, // 억 단위
-  interestAreas: ['investment', 'residence'],
-  commuteLocation: 'Gangnam',
-  // Notifications
-  notifications: {
-    appPush: true,
-    email: true,
-    marketing: false
-  }
-}
-
-// Simulate API delay
-const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
+import http from '@/api/http'
 
 export const login = async (credentials: LoginCredentials): Promise<User> => {
-  await delay(1000)
-  if (credentials.email === 'user@example.com' && credentials.password === 'password') {
-    return MOCK_USER
+  try {
+    const response = await http.post('/user/login', credentials)
+    return response.data
+  } catch (error: any) {
+    throw new Error(error.response?.data || '로그인 실패')
   }
-  throw new Error('이메일 또는 비밀번호가 올바르지 않습니다.')
 }
 
 export const verifyEmail = async (email: string): Promise<boolean> => {
-  await delay(1500)
-  // Mock verification logic: always success for test emails
-  return email.includes('@')
+  // 이 함수는 더 이상 사용되지 않을 수 있음 (Step1에서 직접 sendVerificationCode 호출)
+  return true
+}
+
+export const sendVerificationCode = async (email: string): Promise<void> => {
+  try {
+    await http.post('/user/email-verification/request', { email })
+  } catch (error: any) {
+    throw new Error(error.response?.data || '인증 코드 전송 실패')
+  }
+}
+
+export const checkVerificationCode = async (email: string, code: string): Promise<boolean> => {
+  try {
+    await http.post('/user/email-verification/confirm', { email, code })
+    return true
+  } catch (error: any) {
+    throw new Error(error.response?.data || '인증 코드 확인 실패')
+  }
 }
 
 export const signup = async (data: SignUpData): Promise<User> => {
-  await delay(2000)
-  // Return a new user object based on input
-  return {
-    ...MOCK_USER,
+  // SignUpData를 백엔드 User DTO 형식에 맞게 변환
+  const userDto = {
     email: data.email,
+    password: data.password,
     name: data.name,
-    ...data.personalInfo,
-    gender: data.personalInfo.gender as 'male' | 'female' | 'other',
-    maritalStatus: data.personalInfo.maritalStatus as 'single' | 'married',
-    ...data.preferences
+    phone: data.phone,
+    // personalInfo 객체 평탄화
+    gender: data.personalInfo.gender,
+    ageGroup: data.personalInfo.ageGroup,
+    job: data.personalInfo.job,
+    maritalStatus: data.personalInfo.maritalStatus,
+
+    // 백엔드 미지원으로 인한 주석 처리
+    // budget: data.preferences.budget,
+    // interestAreas: data.preferences.interestAreas,
+    // commuteLocation: data.preferences.commuteLocation,
+  }
+
+  try {
+    const response = await http.post('/user/signup', userDto)
+    console.log('Signup response:', response.data)
+    
+    // 타입 요구사항을 만족시키기 위해 더미 사용자 객체 반환
+    // 실제 로그인은 별도로 진행됨
+    return { ...userDto, id: '0' } as unknown as User
+  } catch (error: any) {
+    throw new Error(error.response?.data || '회원가입 실패')
   }
 }
 
 export const updateProfile = async (user: Partial<User>): Promise<User> => {
-  await delay(1000)
-  return { ...MOCK_USER, ...user }
+  // 구현 예정
+  return user as User
 }
 
 export const updateNotifications = async (settings: any): Promise<void> => {
-  await delay(500)
-
+  // 구현 예정
+  console.log('Update notifications:', settings)
 }
