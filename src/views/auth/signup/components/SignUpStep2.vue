@@ -132,7 +132,7 @@ const handleNext = () => {
         :disabled="!formData.gender || !formData.ageGroup"
         @click="handleNext"
       >
-        다음 단계로
+        회원가입 완료
       </BaseButton>
     </div>
   </div>

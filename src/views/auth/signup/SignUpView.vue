@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router'
 import { useSignUp } from '@/composables/useSignUp'
 import SignUpStep1 from './components/SignUpStep1.vue'
 import SignUpStep2 from './components/SignUpStep2.vue'
-import SignUpStep3 from './components/SignUpStep3.vue'
+// import SignUpStep3 from './components/SignUpStep3.vue'
 
 const router = useRouter()
 const { 
@@ -13,7 +13,7 @@ const {
   updateData, 
   nextStep, 
   prevStep, 
-  submitSignup 
+  // submitSignup 
 } = useSignUp()
 </script>
 
@@ -56,13 +56,13 @@ const {
             @next="nextStep"
             @prev="prevStep"
           />
-          <SignUpStep3 
+          <!-- <SignUpStep3 
             v-if="currentStep === 3"
             :data="signupData.preferences"
             @update="(d) => updateData(3, d)"
             @submit="submitSignup"
             @prev="prevStep"
-          />
+          /> -->
 
         </div>
       </div>

@@ -8,7 +8,7 @@ export function useSignUp() {
   const authStore = useAuthStore()
 
   const currentStep = ref(1)
-  const totalSteps = 3
+  const totalSteps = 2
 
   const signupData = reactive<SignUpData>({
     email: '',
@@ -41,6 +41,9 @@ export function useSignUp() {
   const nextStep = () => {
     if (currentStep.value < totalSteps) {
       currentStep.value++
+    } else {
+      // Last step reached, submit
+      submitSignup()
     }
   }
 
