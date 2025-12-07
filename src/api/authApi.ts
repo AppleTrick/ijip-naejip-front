@@ -64,8 +64,12 @@ export const signup = async (data: SignUpData): Promise<User> => {
 }
 
 export const updateProfile = async (user: Partial<User>): Promise<User> => {
-  // 구현 예정
-  return user as User
+  try {
+    const response = await http.put('/user/update', user)
+    return response.data
+  } catch (error: any) {
+    throw new Error(error.response?.data || '회원 정보 수정 실패')
+  }
 }
 
 export const updateNotifications = async (settings: any): Promise<void> => {

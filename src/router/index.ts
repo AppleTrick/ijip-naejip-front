@@ -53,6 +53,16 @@ const routes: Array<RouteRecordRaw> = [
       component: () => import('../views/auth/signup/SignUpView.vue')
     },
     {
+      path: '/signup/social',
+      name: 'social-signup',
+      component: () => import('../views/auth/signup/SignUpView.vue')
+    },
+    {
+      path: '/oauth/callback',
+      name: 'oauth-callback',
+      component: () => import('../views/auth/oauth/OAuthCallback.vue')
+    },
+    {
       path: '/find-password',
       name: 'find-password',
       component: () => import('../views/auth/find-password/FindPasswordView.vue')

@@ -1,3 +1,5 @@
+<!-- 폐쇠함 -->
+
 <script setup lang="ts">
 import { reactive } from 'vue'
 import BaseInput from '@/components/common/BaseInput.vue'

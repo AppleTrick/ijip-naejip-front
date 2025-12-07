@@ -7,7 +7,7 @@ export function useSignUp() {
   const router = useRouter()
   const authStore = useAuthStore()
 
-  const currentStep = ref(1)
+  const currentStep = ref(0)
   const totalSteps = 2
 
   const signupData = reactive<SignUpData>({
@@ -63,6 +63,42 @@ export function useSignUp() {
     }
   }
 
+  const startEmailSignup = () => {
+    currentStep.value = 1
+  }
+
+  const isSocialSignup = ref(false)
+  const socialId = ref('')
+  const socialType = ref('')
+  const needsEmail = ref(false)
+
+  const submitSocialSignup = async () => {
+    try {
+      if (needsEmail.value) {
+        // 이메일이 없어서 입력받은 경우 (신규 가입)
+        await authStore.signup({
+          ...signupData,
+          socialId: socialId.value,
+          socialType: socialType.value
+        })
+      } else {
+        // 기존 가입자 추가 정보 입력
+        await authStore.updateUser({
+          // personalInfo 객체 평탄화하여 전달
+          gender: signupData.personalInfo.gender,
+          ageGroup: signupData.personalInfo.ageGroup,
+          job: signupData.personalInfo.job,
+          maritalStatus: signupData.personalInfo.maritalStatus
+        } as any)
+      }
+      
+      alert('회원가입이 완료되었습니다.')
+      router.push('/')
+    } catch (error: any) {
+      alert(error.message)
+    }
+  }
+
   return {
     currentStep,
     totalSteps,
@@ -70,6 +106,12 @@ export function useSignUp() {
     updateData,
     nextStep,
     prevStep,
-    submitSignup
+    submitSignup,
+    startEmailSignup,
+    isSocialSignup,
+    submitSocialSignup,
+    socialId,
+    socialType,
+    needsEmail
   }
 }

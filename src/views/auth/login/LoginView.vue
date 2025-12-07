@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import LoginForm from './components/LoginForm.vue'
+import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.vue'
 </script>
 
 <template>
@@ -22,6 +23,10 @@ import LoginForm from './components/LoginForm.vue'
             </p>
           </div>
           <LoginForm />
+          
+          <div class="social-login-section">
+            <SocialLoginButtons show-divider />
+          </div>
         </div>
       </div>
 
@@ -155,5 +160,8 @@ import LoginForm from './components/LoginForm.vue'
   font-size: 1.125rem;
   line-height: 1.6;
   opacity: 0.9;
+}
+.social-login-section {
+  margin-top: 2rem;
 }
 </style>

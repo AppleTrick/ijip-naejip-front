@@ -6,6 +6,7 @@ import { sendVerificationCode, checkVerificationCode } from '@/api/authApi'
 
 const props = defineProps<{
   data: any
+  isSocialSignup?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -79,7 +80,9 @@ const handleNext = () => {
     isError.value = true
     return
   }
-  if (!isVerified.value) {
+  
+  // 소셜 회원가입이 아닐 때만 이메일 인증 확인
+  if (!props.isSocialSignup && !isVerified.value) {
     message.value = '이메일 인증을 완료해주세요.'
     isError.value = true
     return
@@ -108,6 +111,7 @@ const handleNext = () => {
           :disabled="isVerified"
         />
         <BaseButton 
+          v-if="!isSocialSignup"
           size="sm" 
           variant="outline"
           class="action-btn"

@@ -60,7 +60,7 @@ const handleNext = () => {
 <template>
   <div class="step-container">
     <h3 class="step-title">개인 정보 입력</h3>
-    <p class="step-desc">더 정확한 매물 추천을 위해 정보를 입력해주세요.</p>
+    <p class="step-desc">더 정확한 정보 추천을 위해 정보를 입력해주세요.</p>
 
     <div class="form-group">
       <label class="label">성별</label>

@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { useSignUp } from '@/composables/useSignUp'
 import SignUpStep1 from './components/SignUpStep1.vue'
 import SignUpStep2 from './components/SignUpStep2.vue'
 // import SignUpStep3 from './components/SignUpStep3.vue'
+import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.vue'
+import BaseButton from '@/components/common/BaseButton.vue'
 
 const router = useRouter()
+const route = useRoute()
 const { 
   currentStep, 
   totalSteps, 
@@ -13,8 +16,35 @@ const {
   updateData, 
   nextStep, 
   prevStep, 
-  // submitSignup 
+  startEmailSignup,
+  isSocialSignup,
+  submitSocialSignup,
+  socialId,
+  socialType,
+  needsEmail
 } = useSignUp()
+
+// 소셜 회원가입 모드 체크
+if (route.path === '/signup/social') {
+  isSocialSignup.value = true
+  
+  if (route.query.needsEmail === 'true') {
+    needsEmail.value = true
+    socialId.value = route.query.socialId as string
+    socialType.value = route.query.socialType as string
+    currentStep.value = 1 // 이메일 입력부터 시작
+  } else {
+    currentStep.value = 2 // 바로 추가 정보 입력 단계로
+  }
+}
+
+const handleStep2Submit = () => {
+  if (isSocialSignup.value) {
+    submitSocialSignup()
+  } else {
+    nextStep()
+  }
+}
 </script>
 
 <template>
@@ -28,11 +58,34 @@ const {
             <span class="brand-name">이집내집</span>
           </div>
           
-          <div class="signup-header">
+          <!-- Step 0: Selection -->
+          <div v-if="currentStep === 0" class="selection-step">
+            <div class="signup-header">
+              <h2 class="signup-title">환영합니다!</h2>
+              <p class="signup-subtitle">이집내집과 함께 안전한 집을 찾아보세요.</p>
+            </div>
+
+            <div class="selection-content">
+              <SocialLoginButtons show-divider />
+              
+              <BaseButton 
+                variant="outline" 
+                full-width
+                class="email-signup-btn"
+                @click="startEmailSignup"
+              >
+                이메일로 회원가입
+              </BaseButton>
+            </div>
+          </div>
+
+          <!-- Steps 1~2 -->
+          <div v-else class="signup-header">
             <h2 class="signup-title">
-              회원가입
+              {{ isSocialSignup ? '추가 정보 입력' : '회원가입' }}
             </h2>
-            <div class="step-indicator">
+            
+            <div v-if="!isSocialSignup" class="step-indicator">
               <div 
                 v-for="step in totalSteps" 
                 :key="step"
@@ -43,26 +96,22 @@ const {
           </div>
 
           <!-- Steps -->
-          <SignUpStep1 
-            v-if="currentStep === 1"
-            :data="signupData"
-            @update="(d) => updateData(1, d)"
-            @next="nextStep"
-          />
-          <SignUpStep2 
-            v-if="currentStep === 2"
-            :data="signupData.personalInfo"
-            @update="(d) => updateData(2, d)"
-            @next="nextStep"
-            @prev="prevStep"
-          />
-          <!-- <SignUpStep3 
-            v-if="currentStep === 3"
-            :data="signupData.preferences"
-            @update="(d) => updateData(3, d)"
-            @submit="submitSignup"
-            @prev="prevStep"
-          /> -->
+          <div v-if="currentStep > 0" class="signup-form">
+            <SignUpStep1 
+              v-if="currentStep === 1"
+              :data="signupData"
+              :is-social-signup="isSocialSignup"
+              @update="(d) => updateData(1, d)"
+              @next="nextStep"
+            />
+            <SignUpStep2 
+              v-if="currentStep === 2"
+              :data="signupData.personalInfo"
+              @update="(d) => updateData(2, d)"
+              @next="handleStep2Submit"
+              @prev="prevStep"
+            />
+          </div>
 
         </div>
       </div>
@@ -137,7 +186,34 @@ const {
 }
 
 .signup-header {
-  margin-bottom: 2.5rem;
+  margin-bottom: 2rem;
+}
+
+.social-login-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 1.5rem;
+  color: var(--color-gray-400);
+  font-size: 0.875rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.divider span {
+  padding: 0 1rem;
 }
 
 .signup-title {
@@ -146,6 +222,24 @@ const {
   color: var(--color-text);
   margin-bottom: 0.75rem;
   letter-spacing: -0.02em;
+}
+
+.signup-subtitle {
+  font-size: 1rem;
+  color: var(--color-text-light);
+  line-height: 1.5;
+}
+
+.selection-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.email-signup-btn {
+  height: 3.5rem;
+  font-size: 1rem;
 }
 
 .step-indicator {
