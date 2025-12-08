@@ -13,8 +13,18 @@ export const useAuthStore = defineStore('auth', () => {
     isLoading.value = true
     error.value = null
     try {
-      const userData = await authApi.login(credentials)
+      const response = await authApi.login(credentials)
+      
+      // 1. 토큰 저장
+      if (response.token) {
+        localStorage.setItem('accessToken', response.token)
+      }
+
+      // 2. 사용자 정보 조회 (전체 정보 가져오기)
+      // login response에는 name만 있으므로, 전체 정보를 위해 getUserInfo 호출
+      const userData = await authApi.getUserInfo()
       user.value = userData
+      
       return true
     } catch (e: any) {
       error.value = e.message
@@ -41,6 +51,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   function logout() {
     user.value = null
+    localStorage.removeItem('accessToken')
   }
 
   async function verifyEmail(email: string) {
@@ -59,6 +70,22 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  async function checkAuth() {
+    const token = localStorage.getItem('accessToken')
+    if (!token) return
+
+    isLoading.value = true
+    try {
+      const userData = await authApi.getUserInfo()
+      user.value = userData
+    } catch (e) {
+      console.error('Failed to restore session:', e)
+      logout() // 토큰이 유효하지 않으면 로그아웃
+    } finally {
+      isLoading.value = false
+    }
+  }
+
   return {
     user,
     isAuthenticated,
@@ -68,6 +95,7 @@ export const useAuthStore = defineStore('auth', () => {
     signup,
     logout,
     verifyEmail,
-    updateUser
+    updateUser,
+    checkAuth
   }
 })

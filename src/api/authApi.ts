@@ -1,7 +1,7 @@
-import type { User, LoginCredentials, SignUpData } from './types'
+import type { User, LoginCredentials, SignUpData, LoginResponse } from './types'
 import http from '@/api/http'
 
-export const login = async (credentials: LoginCredentials): Promise<User> => {
+export const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
   try {
     const response = await http.post('/user/login', credentials)
     return response.data
@@ -55,8 +55,6 @@ export const signup = async (data: SignUpData): Promise<User> => {
     const response = await http.post('/user/signup', userDto)
     console.log('Signup response:', response.data)
     
-    // 타입 요구사항을 만족시키기 위해 더미 사용자 객체 반환
-    // 실제 로그인은 별도로 진행됨
     return { ...userDto, id: '0' } as unknown as User
   } catch (error: any) {
     throw new Error(error.response?.data || '회원가입 실패')
@@ -72,7 +70,32 @@ export const updateProfile = async (user: Partial<User>): Promise<User> => {
   }
 }
 
+export const getUserInfo = async (): Promise<User> => {
+  try {
+    const response = await http.get<User>('/user/info')
+    return response.data
+  } catch (error: any) {
+    throw new Error(error.response?.data || '사용자 정보 조회 실패')
+  }
+}
+
 export const updateNotifications = async (settings: any): Promise<void> => {
   // 구현 예정
   console.log('Update notifications:', settings)
+}
+
+export const changePassword = async (data: any): Promise<void> => {
+  try {
+    await http.post('/user/change-password', data)
+  } catch (error: any) {
+    throw new Error(error.response?.data || '비밀번호 변경 실패')
+  }
+}
+
+export const resetPassword = async (email: string): Promise<void> => {
+  try {
+    await http.post('/user/reset-password', { email })
+  } catch (error: any) {
+    throw new Error(error.response?.data || '비밀번호 초기화 실패')
+  }
 }

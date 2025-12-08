@@ -15,22 +15,20 @@ const settings = ref({
 })
 
 onMounted(() => {
-  if (authStore.user?.notifications) {
+  if (authStore.user) {
     settings.value = {
-      pushEnabled: authStore.user.notifications.appPush,
-      emailEnabled: authStore.user.notifications.email,
-      marketingEnabled: authStore.user.notifications.marketing
+      pushEnabled: authStore.user.appPush ?? true,
+      emailEnabled: authStore.user.emailNotification ?? false,
+      marketingEnabled: authStore.user.marketingNotification ?? false
     }
   }
 })
 
 const handleSave = async () => {
   await authStore.updateUser({
-    notifications: {
-      appPush: settings.value.pushEnabled,
-      email: settings.value.emailEnabled,
-      marketing: settings.value.marketingEnabled
-    }
+    appPush: settings.value.pushEnabled,
+    emailNotification: settings.value.emailEnabled,
+    marketingNotification: settings.value.marketingEnabled
   })
   alert('알림 설정이 저장되었습니다.')
   router.back()

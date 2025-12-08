@@ -14,16 +14,26 @@ export interface User {
   interestAreas?: string[]
   commuteLocation?: string
   // Notifications
-  notifications?: {
-    appPush: boolean
-    email: boolean
-    marketing: boolean
-  }
+  // Notifications
+  appPush?: boolean
+  emailNotification?: boolean
+  marketingNotification?: boolean
+  // My House
+  myHouseName?: string
+  myHouseAddress?: string
+  myHouseArea?: string
+  myHouseFloor?: string
+  myHousePrice?: string
+  
+  socialType?: 'NONE' | 'KAKAO' | 'NAVER' | 'GOOGLE'
 }
 
 export interface LoginCredentials {
-  email: string
-  password: string
+  email?: string
+  password?: string
+  socialType?: string
+  code?: string
+  state?: string
 }
 
 export interface SignUpData {
@@ -42,6 +52,11 @@ export interface SignUpData {
     interestAreas: string[]
     commuteLocation: string
   }
+}
+
+export interface LoginResponse {
+  token: string
+  name: string
 }
 
 export interface DongCode {

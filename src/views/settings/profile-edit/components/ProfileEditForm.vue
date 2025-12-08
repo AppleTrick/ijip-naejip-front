@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -11,7 +11,7 @@ const authStore = useAuthStore()
 
 const formData = ref({
   name: '',
-  email: '',
+
   phone: '',
   gender: '',
   ageGroup: '',
@@ -19,11 +19,10 @@ const formData = ref({
   maritalStatus: ''
 })
 
-onMounted(() => {
+const updateFormData = () => {
   if (authStore.user) {
     formData.value = {
       name: authStore.user.name,
-      email: authStore.user.email,
       phone: authStore.user.phone || '',
       gender: authStore.user.gender || '',
       ageGroup: authStore.user.ageGroup || '',
@@ -31,7 +30,15 @@ onMounted(() => {
       maritalStatus: authStore.user.maritalStatus || ''
     }
   }
+}
+
+onMounted(() => {
+  updateFormData()
 })
+
+watch(() => authStore.user, () => {
+  updateFormData()
+}, { immediate: true })
 
 const genderOptions = [
   { label: '남성', value: 'male' },
@@ -83,12 +90,7 @@ const goToSurvey = () => {
         label="이름" 
         placeholder="이름을 입력하세요" 
       />
-      <BaseInput 
-        v-model="formData.email" 
-        label="이메일" 
-        type="email" 
-        disabled
-      />
+
       <BaseInput 
         v-model="formData.phone" 
         label="전화번호" 

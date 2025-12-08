@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ArrowLeft, Camera } from 'lucide-vue-next'
 import { useAuthStore } from '@/stores/auth'
@@ -10,7 +10,13 @@ const authStore = useAuthStore()
 const fileInput = ref<HTMLInputElement | null>(null)
 
 const user = computed(() => authStore.user)
-const profileImage = ref(user.value?.profileImage || null)
+const profileImage = ref<string | null>(null)
+
+watch(() => authStore.user, (newUser) => {
+  if (newUser?.profileImage) {
+    profileImage.value = newUser.profileImage
+  }
+}, { immediate: true })
 
 const triggerFileInput = () => {
   fileInput.value?.click()

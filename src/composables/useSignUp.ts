@@ -76,11 +76,13 @@ export function useSignUp() {
     try {
       if (needsEmail.value) {
         // 이메일이 없어서 입력받은 경우 (신규 가입)
-        await authStore.signup({
+        const signupPayload = {
           ...signupData,
           socialId: socialId.value,
           socialType: socialType.value
-        })
+        } as any // SignUpData 타입에 없는 필드 추가를 위해 any로 캐스팅
+        
+        await authStore.signup(signupPayload)
       } else {
         // 기존 가입자 추가 정보 입력
         await authStore.updateUser({

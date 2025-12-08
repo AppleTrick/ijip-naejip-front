@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import AddressSearch from '@/components/features/address/AddressSearch.vue'
 import { ArrowLeft, Home } from 'lucide-vue-next'
-import { useSafeHomeStore } from '@/stores/safehome'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
-const store = useSafeHomeStore()
+const authStore = useAuthStore()
 
 const house = ref({
   name: '',
@@ -19,22 +19,44 @@ const house = ref({
   price: ''
 })
 
+const updateHouseData = () => {
+  if (authStore.user) {
+    house.value = {
+      name: authStore.user.myHouseName || '',
+      address: authStore.user.myHouseAddress || '',
+      detailAddress: '', // 상세 주소는 별도 필드로 없으면 address에 포함되거나 별도 처리 필요. 여기서는 일단 빈값 또는 address에서 분리해야 함. 단순화를 위해 address에 전체 주소 저장 가정.
+      area: authStore.user.myHouseArea || '',
+      floor: authStore.user.myHouseFloor || '',
+      price: authStore.user.myHousePrice || ''
+    }
+  }
+}
+
+onMounted(() => {
+  updateHouseData()
+})
+
+watch(() => authStore.user, () => {
+  updateHouseData()
+}, { immediate: true })
+
 const isSearching = ref(false)
 
 const handleAddressSelect = (address: any) => {
   house.value.address = address.roadAddress
-  house.value.name = address.bname // Default name to neighborhood
+  if (!house.value.name) {
+    house.value.name = address.bname
+  }
   isSearching.value = false
 }
 
-const handleSave = () => {
-  // Save to store
-  store.setMyHouse({
-    aptNm: house.value.name,
-    roadNm: `${house.value.address} ${house.value.detailAddress}`,
-    dealAmount: house.value.price,
-    excluUseAr: house.value.area,
-    floor: house.value.floor
+const handleSave = async () => {
+  await authStore.updateUser({
+    myHouseName: house.value.name,
+    myHouseAddress: house.value.address + (house.value.detailAddress ? ' ' + house.value.detailAddress : ''),
+    myHouseArea: house.value.area,
+    myHouseFloor: house.value.floor,
+    myHousePrice: house.value.price
   })
   
   alert('내 집 정보가 저장되었습니다.')

@@ -3,9 +3,13 @@ import { useRouter } from 'vue-router'
 import { User, Bell, Lock, Home, LogOut, ChevronRight, Trash2 } from 'lucide-vue-next'
 import BaseCard from '@/components/common/BaseCard.vue'
 
-const router = useRouter()
+import { computed } from 'vue'
+import { useAuthStore } from '@/stores/auth'
 
-const menuItems = [
+const router = useRouter()
+const authStore = useAuthStore()
+
+const allMenuItems = [
   { 
     id: 'profile', 
     label: '개인정보 수정', 
@@ -35,6 +39,18 @@ const menuItems = [
     desc: '계정 비밀번호를 주기적으로 변경하여 보안을 강화하세요.'
   }
 ]
+
+const menuItems = computed(() => {
+  return allMenuItems.filter(item => {
+    if (item.id === 'password') {
+      // 소셜 로그인 사용자는 비밀번호 변경 메뉴 숨김
+      // socialType이 'NONE'이거나 없으면(기존 유저 등) 일반 유저로 간주하여 표시
+      const isSocial = authStore.user?.socialType && authStore.user.socialType !== 'NONE'
+      return !isSocial
+    }
+    return true
+  })
+})
 
 const handleLogout = () => {
   // TODO: Implement logout logic

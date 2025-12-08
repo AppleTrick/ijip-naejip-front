@@ -12,14 +12,24 @@ const form = ref({
   confirmPassword: ''
 })
 
-const handleSave = () => {
+import { changePassword } from '@/api/authApi'
+
+const handleSave = async () => {
   if (form.value.newPassword !== form.value.confirmPassword) {
     alert('새 비밀번호가 일치하지 않습니다.')
     return
   }
-  // TODO: Implement password change logic
-  alert('비밀번호가 변경되었습니다.')
-  router.back()
+  
+  try {
+    await changePassword({
+      currentPassword: form.value.currentPassword,
+      newPassword: form.value.newPassword
+    })
+    alert('비밀번호가 변경되었습니다.')
+    router.back()
+  } catch (error: any) {
+    alert(error.message)
+  }
 }
 </script>
 

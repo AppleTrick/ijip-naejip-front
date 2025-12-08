@@ -41,26 +41,19 @@ onMounted(() => {
     // 보안을 위해 쿠키 삭제
     deleteCookie('accessToken')
     
-    // 2. 토큰 디코딩 및 사용자 정보 설정
-    const payload = decodeToken(token)
-    if (payload) {
-      // authStore의 user 상태 업데이트 (임시로 email과 role만 설정)
-      // 실제로는 백엔드에서 사용자 정보를 가져오는 API가 있으면 더 좋음
-      authStore.user = {
-        email: payload.sub,
-        role: payload.role,
-        name: payload.sub.split('@')[0], // 이메일 아이디를 이름으로 임시 사용
-        id: 0, // 임시 ID
-        password: '',
-        phone: '',
-        profileImage: '',
-        socialType: 'KAKAO', // 또는 GOOGLE, 토큰에서 알 수 없다면 추후 수정
-        socialId: '',
-        isEmailVerified: true,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      } as any
-    }
+    // 2. 사용자 정보 가져오기
+    // 임시 데이터 대신 백엔드에서 최신 정보 조회
+    authStore.checkAuth().then(() => {
+      // 3. 페이지 이동
+      const needsAdditionalInfo = route.query.needsAdditionalInfo === 'true'
+      
+      if (needsAdditionalInfo) {
+        router.replace('/signup/social')
+      } else {
+        router.replace('/')
+      }
+    })
+    return // 비동기 처리 대기
 
     // 3. 페이지 이동
     const needsAdditionalInfo = route.query.needsAdditionalInfo === 'true'

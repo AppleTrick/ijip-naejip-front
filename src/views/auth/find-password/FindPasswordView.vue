@@ -6,17 +6,28 @@ import BaseButton from '@/components/common/BaseButton.vue'
 import BaseCard from '@/components/common/BaseCard.vue'
 import { ArrowLeft, Mail } from 'lucide-vue-next'
 
+import { resetPassword } from '@/api/authApi'
+
 const router = useRouter()
 const email = ref('')
 const isSent = ref(false)
+const isLoading = ref(false)
 
-const handleSend = () => {
+const handleSend = async () => {
   if (!email.value) {
     alert('이메일을 입력해주세요.')
     return
   }
-  // TODO: Implement password reset email sending logic
-  isSent.value = true
+  
+  isLoading.value = true
+  try {
+    await resetPassword(email.value)
+    isSent.value = true
+  } catch (error: any) {
+    alert(error.message)
+  } finally {
+    isLoading.value = false
+  }
 }
 </script>
 
