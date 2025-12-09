@@ -54,9 +54,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('accessToken')
   }
 
-  async function verifyEmail(email: string) {
-    return await authApi.verifyEmail(email)
-  }
+
 
   async function updateUser(updates: Partial<User>) {
     isLoading.value = true
@@ -100,7 +98,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     signup,
     logout,
-    verifyEmail,
+
     updateUser,
     checkAuth,
     isAuthInitialized

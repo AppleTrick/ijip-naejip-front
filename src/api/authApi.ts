@@ -11,10 +11,7 @@ export const login = async (credentials: LoginCredentials): Promise<LoginRespons
   }
 }
 
-export const verifyEmail = async (email: string): Promise<boolean> => {
-  // 이 함수는 더 이상 사용되지 않을 수 있음 (Step1에서 직접 sendVerificationCode 호출)
-  return true
-}
+
 
 export const sendVerificationCode = async (email: string): Promise<void> => {
   try {
@@ -42,16 +39,10 @@ export const signup = async (data: SignUpData): Promise<User> => {
     password: data.password,
     name: data.name,
     phone: data.phone,
-    // personalInfo 객체 평탄화
     gender: data.personalInfo.gender,
     ageGroup: data.personalInfo.ageGroup,
     job: data.personalInfo.job,
     maritalStatus: data.personalInfo.maritalStatus,
-
-    // 백엔드 미지원으로 인한 주석 처리
-    // budget: data.preferences.budget,
-    // interestAreas: data.preferences.interestAreas,
-    // commuteLocation: data.preferences.commuteLocation,
   }
 
   try {

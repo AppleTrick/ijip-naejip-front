@@ -1,7 +1,9 @@
 import http from '@/api/http'
 import type { Property, MarketFilters } from './types'
+import { NEIGHBORHOODS, DISTRICTS, CITIES } from '@/data/marketData'
+import type { RegionStats } from '@/data/marketData'
 
-// Helper to fetch deals by bounds
+// 지도 영역(bounds) 내의 거래 정보를 가져오는 헬퍼 함수
 const fetchDealsByBounds = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }, limit: number = 100): Promise<any[]> => {
   try {
 
@@ -22,10 +24,10 @@ const fetchDealsByBounds = async (bounds: { minLat: number, maxLat: number, minL
   }
 }
 
-// Cache the data so we don't regenerate it on every call
-// Note: With bounds fetching, caching strategy might need to change (e.g., cache by bounds or clear on move)
-// For now, we will simply replace the cache with the new bounds data
-// Cache the data
+// 매 호출마다 재생성하지 않도록 데이터 캐싱
+// 참고: 영역 기반 조회 시 캐싱 전략 변경이 필요할 수 있음 (예: 영역별 캐시 또는 이동 시 초기화)
+// 현재는 단순히 새로운 영역 데이터로 캐시를 교체함
+// 데이터 캐시
 let cachedDeals: any[] = []
 let latestFetchId = 0
 
@@ -34,7 +36,7 @@ const fetchRawDeals = async (bounds?: { minLat: number, maxLat: number, minLng: 
     const fetchId = ++latestFetchId
     const data = await fetchDealsByBounds(bounds)
 
-    // Only update cache if this is the latest request
+    // 가장 최근 요청인 경우에만 캐시 업데이트
     if (fetchId === latestFetchId) {
       cachedDeals = data
     }
@@ -51,7 +53,7 @@ const groupDealsByAptComplex = (deals: any[]): Property[] => {
       propertiesMap.set(deal.aptSeq, {
         aptSeq: deal.aptSeq,
         aptNm: deal.aptNm,
-        dealAmount: deal.dealAmount.toLocaleString() + '만원', // Initial display amount (most recent)
+        dealAmount: deal.dealAmount.toLocaleString() + '만원', // 초기 표시 금액 (가장 최근 거래)
         latitude: parseFloat(deal.latitude),
         longitude: parseFloat(deal.longitude),
         roadNm: deal.roadNm,
@@ -82,16 +84,16 @@ const groupDealsByAptDong = (deals: any[]): Property[] => {
   const propertiesMap = new Map<string, Property>()
 
   for (const deal of deals) {
-    // Group by AptSeq + AptDong
+    // 아파트 일련번호 + 동 기준으로 그룹화
     const key = `${deal.aptSeq}-${deal.aptDong}`
 
     if (!propertiesMap.has(key)) {
       propertiesMap.set(key, {
-        aptSeq: deal.aptSeq, // Keep original aptSeq for reference
-        aptNm: `${deal.aptNm} ${deal.aptDong}동`, // Append Dong name
+        aptSeq: deal.aptSeq, // 참조용으로 원본 aptSeq 유지
+        aptNm: `${deal.aptNm} ${deal.aptDong}동`, // 동 이름 추가
         dealAmount: deal.dealAmount.toLocaleString() + '만원',
-        // Note: Using same lat/lng as complex. Markers might overlap if DB doesn't have dong-specific coords.
-        // In a real app, we might apply a small random offset or use specific dong coords.
+        // 참고: 단지와 동일한 위도/경도 사용. DB에 동별 좌표가 없으면 마커가 겹칠 수 있음.
+        // 실제 앱에서는 약간의 랜덤 오프셋을 적용하거나 구체적인 동 좌표를 사용해야 함.
         latitude: parseFloat(deal.latitude),
         longitude: parseFloat(deal.longitude),
         roadNm: deal.roadNm,
@@ -118,15 +120,12 @@ const groupDealsByAptDong = (deals: any[]): Property[] => {
   return Array.from(propertiesMap.values())
 }
 
-import { NEIGHBORHOODS, DISTRICTS, CITIES } from '@/data/marketData'
-import type { RegionStats } from '@/data/marketData'
-
-// Convert RegionStats to Property format for map display
+// 지도 표시를 위해 RegionStats를 Property 형식으로 변환
 const convertToProperty = (item: RegionStats): Property => {
   return {
     aptSeq: item.id,
     aptNm: item.name,
-    dealAmount: String(item.avgPrice), // Pass as string number, MapMarkerOverlay will format
+    dealAmount: String(item.avgPrice), // 문자열 숫자로 전달, MapMarkerOverlay에서 포맷팅 처리
     latitude: item.lat || 0,
     longitude: item.lng || 0,
     roadNm: item.name,
@@ -137,10 +136,10 @@ const convertToProperty = (item: RegionStats): Property => {
   }
 }
 
-// Mock API calls for aggregates
+// 집계 데이터를 위한 모의 API 호출
 const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
 
-  // Filter neighborhoods within bounds
+  // 영역 내의 동(Neighborhood) 필터링
   const filtered = NEIGHBORHOODS.filter(n =>
     n.lat && n.lng &&
     n.lat >= bounds.minLat && n.lat <= bounds.maxLat &&
@@ -150,7 +149,7 @@ const fetchDongAggregates = async (bounds: { minLat: number, maxLat: number, min
 }
 
 const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
-  // Filter districts within bounds
+  // 영역 내의 구(District) 필터링
   const filtered = DISTRICTS.filter(d =>
     d.lat && d.lng &&
     d.lat >= bounds.minLat && d.lat <= bounds.maxLat &&
@@ -160,7 +159,7 @@ const fetchGuAggregates = async (bounds: { minLat: number, maxLat: number, minLn
 }
 
 const fetchCityAggregates = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number }): Promise<Property[]> => {
-  // Filter cities within bounds
+  // 영역 내의 시(City) 필터링
   const filtered = CITIES.filter(c =>
     c.lat && c.lng &&
     c.lat >= bounds.minLat && c.lat <= bounds.maxLat &&
@@ -174,34 +173,34 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
 
   if (bounds) {
     if (bounds.level <= 2) {
-      // Level 1-2: Apartment Dong Level (Detailed)
+      // 레벨 1-2: 아파트 동 단위 (상세)
 
       const rawDeals = await fetchRawDeals(bounds)
       properties = groupDealsByAptDong(rawDeals)
     } else if (bounds.level <= 4) {
-      // Level 3-4: Apartment Complex Level (Average)
+      // 레벨 3-4: 아파트 단지 단위 (평균)
 
       const rawDeals = await fetchRawDeals(bounds)
       properties = groupDealsByAptComplex(rawDeals)
     } else if (bounds.level <= 5) {
-      // Level 5: Dong aggregates
+      // 레벨 5: 동 단위 집계
       properties = await fetchDongAggregates(bounds)
     } else if (bounds.level <= 7) {
-      // Level 6-7: Gu aggregates
+      // 레벨 6-7: 구 단위 집계
       properties = await fetchGuAggregates(bounds)
     } else {
-      // Level 8+: City (Do/Si) aggregates
+      // 레벨 8+: 시/도 단위 집계
       properties = await fetchCityAggregates(bounds)
     }
   } else {
-    // Fallback if no bounds (return cached complex view)
+    // 영역 정보가 없는 경우 대체 처리 (캐시된 단지 뷰 반환)
     const rawDeals = await fetchRawDeals()
     properties = groupDealsByAptComplex(rawDeals)
   }
 
   if (filters) {
-    // Apply client-side filters if needed
-    // Note: For aggregates, filtering might need to be different or disabled
+    // 필요한 경우 클라이언트 측 필터 적용
+    // 참고: 집계 데이터의 경우 필터링 방식이 다르거나 비활성화되어야 할 수 있음
   }
 
   return properties
