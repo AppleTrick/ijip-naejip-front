@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useSignUp } from '@/composables/useSignUp'
 import SignUpStep1 from './components/SignUpStep1.vue'
 import SignUpStep2 from './components/SignUpStep2.vue'
@@ -7,7 +7,6 @@ import SignUpStep2 from './components/SignUpStep2.vue'
 import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 
-const router = useRouter()
 const route = useRoute()
 const { 
   currentStep, 
@@ -53,10 +52,6 @@ const handleStep2Submit = () => {
       <!-- Left Side: Form -->
       <div class="form-section">
         <div class="form-container">
-          <div class="brand-header" @click="router.push('/')">
-            <img src="@/assets/logo.png" alt="이집내집" class="brand-logo" />
-            <span class="brand-name">이집내집</span>
-          </div>
           
           <!-- Step 0: Selection -->
           <div v-if="currentStep === 0" class="selection-step">
@@ -76,6 +71,13 @@ const handleStep2Submit = () => {
               >
                 이메일로 회원가입
               </BaseButton>
+
+              <div class="login-link-section">
+                <span class="login-text">이미 계정이 있으신가요?</span>
+                <router-link to="/login" class="login-link">
+                  로그인하기
+                </router-link>
+              </div>
             </div>
           </div>
 
@@ -120,10 +122,10 @@ const handleStep2Submit = () => {
       <div class="image-section">
         <div class="image-overlay">
           <div class="overlay-content">
-            <h3 class="overlay-title">Join Our Community</h3>
+            <h3 class="overlay-title">Start Your Journey</h3>
             <p class="overlay-desc">
-              이미 10,000명 이상의 사용자가<br>
-              이집내집을 통해 안전한 집을 찾았습니다.
+              빅데이터 기반 안전도 분석으로<br>
+              당신에게 딱 맞는 안전한 집을 찾아드립니다.
             </p>
           </div>
         </div>
@@ -158,8 +160,8 @@ const handleStep2Submit = () => {
   width: 100%;
   max-width: 28rem;
   animation: slideInLeft 0.5s ease-out;
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-top: 1rem; /* Reduced from 2rem */
+  padding-bottom: 1rem; /* Reduced from 2rem */
 }
 
 @keyframes slideInLeft {
@@ -171,7 +173,7 @@ const handleStep2Submit = () => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem; /* Reduced from 3rem */
 }
 
 .brand-logo {
@@ -186,7 +188,7 @@ const handleStep2Submit = () => {
 }
 
 .signup-header {
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem; /* Reduced from 2rem */
 }
 
 .social-login-group {
@@ -306,5 +308,30 @@ const handleStep2Submit = () => {
   font-size: 1.125rem;
   line-height: 1.6;
   opacity: 0.9;
+}
+
+.login-link-section {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.login-text {
+  color: var(--color-text-light);
+}
+
+.login-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.login-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
 }
 </style>

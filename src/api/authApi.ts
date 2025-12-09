@@ -6,7 +6,8 @@ export const login = async (credentials: LoginCredentials): Promise<LoginRespons
     const response = await http.post('/user/login', credentials)
     return response.data
   } catch (error: any) {
-    throw new Error(error.response?.data || '로그인 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '로그인 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -19,7 +20,8 @@ export const sendVerificationCode = async (email: string): Promise<void> => {
   try {
     await http.post('/user/email-verification/request', { email })
   } catch (error: any) {
-    throw new Error(error.response?.data || '인증 코드 전송 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '인증 코드 전송 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -28,7 +30,8 @@ export const checkVerificationCode = async (email: string, code: string): Promis
     await http.post('/user/email-verification/confirm', { email, code })
     return true
   } catch (error: any) {
-    throw new Error(error.response?.data || '인증 코드 확인 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '인증 코드 확인 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -57,7 +60,8 @@ export const signup = async (data: SignUpData): Promise<User> => {
     
     return { ...userDto, id: '0' } as unknown as User
   } catch (error: any) {
-    throw new Error(error.response?.data || '회원가입 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '회원가입 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -66,7 +70,8 @@ export const updateProfile = async (user: Partial<User>): Promise<User> => {
     const response = await http.put('/user/update', user)
     return response.data
   } catch (error: any) {
-    throw new Error(error.response?.data || '회원 정보 수정 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '회원 정보 수정 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -75,7 +80,8 @@ export const getUserInfo = async (): Promise<User> => {
     const response = await http.get<User>('/user/info')
     return response.data
   } catch (error: any) {
-    throw new Error(error.response?.data || '사용자 정보 조회 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '사용자 정보 조회 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -88,7 +94,8 @@ export const changePassword = async (data: any): Promise<void> => {
   try {
     await http.post('/user/change-password', data)
   } catch (error: any) {
-    throw new Error(error.response?.data || '비밀번호 변경 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '비밀번호 변경 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
 
@@ -96,6 +103,7 @@ export const resetPassword = async (email: string): Promise<void> => {
   try {
     await http.post('/user/reset-password', { email })
   } catch (error: any) {
-    throw new Error(error.response?.data || '비밀번호 초기화 실패')
+    const errorMessage = error.response?.data?.message || error.response?.data || '비밀번호 초기화 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }

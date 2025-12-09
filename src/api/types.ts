@@ -55,7 +55,7 @@ export interface SignUpData {
 }
 
 export interface LoginResponse {
-  token: string
+  accessToken: string
   name: string
 }
 

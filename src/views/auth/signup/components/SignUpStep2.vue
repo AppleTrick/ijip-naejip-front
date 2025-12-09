@@ -123,12 +123,14 @@ const handleNext = () => {
     <div class="button-group">
       <BaseButton 
         variant="outline" 
+        class="step-btn"
         @click="emit('prev')"
       >
         이전
       </BaseButton>
       <BaseButton 
         variant="primary" 
+        class="step-btn"
         :disabled="!formData.gender || !formData.ageGroup"
         @click="handleNext"
       >
@@ -142,7 +144,7 @@ const handleNext = () => {
 .step-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem; /* Reduced from 1.5rem */
 }
 
 .step-title {
@@ -155,13 +157,13 @@ const handleNext = () => {
 .step-desc {
   font-size: 0.875rem;
   color: var(--color-text-light);
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reduced from 1rem */
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem; /* Reduced from 0.5rem */
 }
 
 .label {
@@ -203,5 +205,11 @@ const handleNext = () => {
   grid-template-columns: 1fr 2fr;
   gap: 0.75rem;
   margin-top: 1rem;
+}
+
+.step-btn {
+  height: 3.5rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 </style>

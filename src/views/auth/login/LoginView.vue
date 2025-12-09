@@ -9,11 +9,6 @@ import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.v
       <!-- Left Side: Form -->
       <div class="form-section">
         <div class="form-container">
-          <div class="brand-header">
-            <img src="@/assets/logo.png" alt="이집내집" class="brand-logo" />
-            <span class="brand-name">이집내집</span>
-          </div>
-          
           <div class="login-header">
             <h2 class="login-title">
               환영합니다!
@@ -27,6 +22,13 @@ import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.v
           <div class="social-login-section">
             <SocialLoginButtons show-divider />
           </div>
+
+          <div class="signup-link-section">
+            <span class="signup-text">아직 계정이 없으신가요?</span>
+            <router-link to="/signup" class="signup-link">
+              회원가입하기
+            </router-link>
+          </div>
         </div>
       </div>
 
@@ -34,10 +36,10 @@ import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.v
       <div class="image-section">
         <div class="image-overlay">
           <div class="overlay-content">
-            <h3 class="overlay-title">Premium Real Estate</h3>
+            <h3 class="overlay-title">Smart & Safe</h3>
             <p class="overlay-desc">
-              빅데이터 분석으로 안전하고<br>
-              신뢰할 수 있는 매물만을 추천해드립니다.
+              투명한 실거래가 정보와 AI 전세사기 위험성 검증으로<br>
+              안심할 수 있는 내 집 마련을 도와드립니다.
             </p>
           </div>
         </div>
@@ -163,5 +165,30 @@ import SocialLoginButtons from '@/components/features/OAuth/SocialLoginButtons.v
 }
 .social-login-section {
   margin-top: 2rem;
+}
+
+.signup-link-section {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.signup-text {
+  color: var(--color-text-light);
+}
+
+.signup-link {
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.signup-link:hover {
+  color: var(--color-primary-hover);
+  text-decoration: underline;
 }
 </style>

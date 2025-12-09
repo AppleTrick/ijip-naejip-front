@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
+import { reactive } from 'vue'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
-import { sendVerificationCode, checkVerificationCode } from '@/api/authApi'
+import { useEmailVerification } from '@/composables/useEmailVerification'
 
 const props = defineProps<{
   data: any
@@ -14,13 +14,16 @@ const emit = defineEmits<{
   (e: 'next'): void
 }>()
 
-
-const isVerifying = ref(false)
-const isVerified = ref(false)
-const verificationCode = ref('')
-const sentCode = ref(false)
-const message = ref('')
-const isError = ref(false)
+const {
+  isVerifying,
+  isVerified,
+  verificationCode,
+  sentCode,
+  message,
+  isError,
+  sendCode,
+  verifyCode
+} = useEmailVerification()
 
 const formData = reactive({
   email: props.data.email || '',
@@ -31,47 +34,11 @@ const formData = reactive({
 })
 
 const handleSendVerification = async () => {
-  if (!formData.email) {
-    message.value = '이메일을 입력해주세요.'
-    isError.value = true
-    return
-  }
-  
-  isVerifying.value = true
-  message.value = ''
-  isError.value = false
-  
-  // Optimistic UI: Show input immediately
-  sentCode.value = true
-
-  try {
-    await sendVerificationCode(formData.email)
-    message.value = '인증번호가 전송되었습니다. 이메일을 확인해주세요.'
-    isError.value = false
-  } catch (error: any) {
-    // Revert if failed
-    sentCode.value = false
-    message.value = error.message
-    isError.value = true
-  } finally {
-    isVerifying.value = false
-  }
+  await sendCode(formData.email)
 }
 
 const handleVerifyCode = async () => {
-  if (verificationCode.value.length === 0) return
-
-  try {
-    const success = await checkVerificationCode(formData.email, verificationCode.value)
-    if (success) {
-      isVerified.value = true
-      message.value = '이메일 인증이 완료되었습니다.'
-      isError.value = false
-    }
-  } catch (error: any) {
-    message.value = error.message
-    isError.value = true
-  }
+  await verifyCode(formData.email)
 }
 
 const handleNext = () => {
@@ -182,7 +149,7 @@ const handleNext = () => {
     <BaseButton 
       full-width 
       variant="primary" 
-      class="mt-6"
+      class="next-btn"
       :disabled="!isVerified || !formData.password || !formData.name"
       @click="handleNext"
     >
@@ -195,20 +162,20 @@ const handleNext = () => {
 .step-container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.25rem; /* Increased slightly for better breathing room between distinct sections, but will tighten groups */
 }
 
 .step-title {
   font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem; /* Reduced from 1rem */
   color: var(--color-text);
 }
 
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.375rem; /* Reduced from 0.5rem */
 }
 
 .label {
@@ -228,7 +195,7 @@ const handleNext = () => {
 
 /* Fixed width for action buttons */
 .action-btn {
-  min-width: 6.5rem; /* 약 104px */
+  min-width: 6.5rem;
   white-space: nowrap;
 }
 
@@ -239,20 +206,23 @@ const handleNext = () => {
 }
 
 .message {
-  font-size: 0.875rem;
+  font-size: 0.8125rem; /* Slightly smaller */
   font-weight: 500;
-  margin-top: 0.5rem;
+  margin-top: 0.25rem; /* Reduced from 0.5rem */
 }
 
 .message.error {
-  color: #ef4444; /* Red-500 */
+  color: #ef4444;
 }
 
 .message.success {
   color: var(--color-success);
 }
 
-.mt-6 {
-  margin-top: 1.5rem;
+.next-btn {
+  margin-top: 1rem;
+  height: 3.5rem; /* Increased height */
+  font-size: 1rem;
+  font-weight: 600;
 }
 </style>

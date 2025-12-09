@@ -11,6 +11,7 @@ const isMenuOpen = ref<boolean>(false)
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const user = computed(() => authStore.user)
+const isAuthInitialized = computed(() => authStore.isAuthInitialized)
 
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
@@ -86,36 +87,38 @@ const handleLogout = () => {
 
           <!-- Auth & User -->
           <div class="auth-group">
-            <template v-if="isAuthenticated">
-              <div class="user-info">
-                <span class="user-name">{{ user?.name }}님</span>
-              </div>
-              <router-link to="/settings" class="icon-btn" title="설정">
-                <Settings class="icon-sm" />
-              </router-link>
-              <button @click="handleLogout" class="icon-btn" title="로그아웃">
-                <LogOut class="icon-sm" />
-              </button>
-            </template>
-            <template v-else>
-              <div class="auth-buttons">
-                <BaseButton 
-                  variant="outline" 
-                  size="sm" 
-                  class="auth-btn"
-                  @click="router.push('/login')"
-                >
-                  로그인
-                </BaseButton>
-                <BaseButton 
-                  variant="primary" 
-                  size="sm" 
-                  class="auth-btn shadow-btn"
-                  @click="router.push('/signup')"
-                >
-                  회원가입
-                </BaseButton>
-              </div>
+            <template v-if="isAuthInitialized">
+              <template v-if="isAuthenticated">
+                <div class="user-info">
+                  <span class="user-name">{{ user?.name }}님</span>
+                </div>
+                <router-link to="/settings" class="icon-btn" title="설정">
+                  <Settings class="icon-sm" />
+                </router-link>
+                <button @click="handleLogout" class="icon-btn" title="로그아웃">
+                  <LogOut class="icon-sm" />
+                </button>
+              </template>
+              <template v-else>
+                <div class="auth-buttons">
+                  <BaseButton 
+                    variant="outline" 
+                    size="sm" 
+                    class="auth-btn"
+                    @click="router.push('/login')"
+                  >
+                    로그인
+                  </BaseButton>
+                  <BaseButton 
+                    variant="primary" 
+                    size="sm" 
+                    class="auth-btn shadow-btn"
+                    @click="router.push('/signup')"
+                  >
+                    회원가입
+                  </BaseButton>
+                </div>
+              </template>
             </template>
           </div>
         </div>
@@ -176,45 +179,47 @@ const handleLogout = () => {
         </router-link>
         
         <div class="mobile-divider">
-          <template v-if="isAuthenticated">
-            <div class="mobile-user-info">
-              <span class="mobile-user-name">{{ user?.name }}님 안녕하세요</span>
-            </div>
-            <router-link 
-              to="/settings"
-              class="mobile-user-link"
-              @click="closeMenu"
-            >
-              <Settings class="mobile-user-icon" />
-              설정
-            </router-link>
-            <button 
-              class="mobile-user-link"
-              @click="handleLogout"
-            >
-              <LogOut class="mobile-user-icon" />
-              로그아웃
-            </button>
-          </template>
-          <template v-else>
-            <div class="mobile-auth-buttons">
-              <BaseButton 
-                variant="outline" 
-                :full-width="true" 
-                class="mobile-auth-btn"
-                @click="router.push('/login'); closeMenu()"
+          <template v-if="isAuthInitialized">
+            <template v-if="isAuthenticated">
+              <div class="mobile-user-info">
+                <span class="mobile-user-name">{{ user?.name }}님 안녕하세요</span>
+              </div>
+              <router-link 
+                to="/settings"
+                class="mobile-user-link"
+                @click="closeMenu"
               >
-                로그인
-              </BaseButton>
-              <BaseButton 
-                variant="primary" 
-                :full-width="true" 
-                class="mobile-auth-btn"
-                @click="router.push('/signup'); closeMenu()"
+                <Settings class="mobile-user-icon" />
+                설정
+              </router-link>
+              <button 
+                class="mobile-user-link"
+                @click="handleLogout"
               >
-                회원가입
-              </BaseButton>
-            </div>
+                <LogOut class="mobile-user-icon" />
+                로그아웃
+              </button>
+            </template>
+            <template v-else>
+              <div class="mobile-auth-buttons">
+                <BaseButton 
+                  variant="outline" 
+                  :full-width="true" 
+                  class="mobile-auth-btn"
+                  @click="router.push('/login'); closeMenu()"
+                >
+                  로그인
+                </BaseButton>
+                <BaseButton 
+                  variant="primary" 
+                  :full-width="true" 
+                  class="mobile-auth-btn"
+                  @click="router.push('/signup'); closeMenu()"
+                >
+                  회원가입
+                </BaseButton>
+              </div>
+            </template>
           </template>
         </div>
       </div>

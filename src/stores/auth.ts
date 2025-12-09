@@ -16,8 +16,8 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authApi.login(credentials)
       
       // 1. 토큰 저장
-      if (response.token) {
-        localStorage.setItem('accessToken', response.token)
+      if (response.accessToken) {
+        localStorage.setItem('accessToken', response.accessToken)
       }
 
       // 2. 사용자 정보 조회 (전체 정보 가져오기)
@@ -70,9 +70,14 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
+  const isAuthInitialized = ref(false)
+
   async function checkAuth() {
     const token = localStorage.getItem('accessToken')
-    if (!token) return
+    if (!token) {
+      isAuthInitialized.value = true
+      return
+    }
 
     isLoading.value = true
     try {
@@ -83,6 +88,7 @@ export const useAuthStore = defineStore('auth', () => {
       logout() // 토큰이 유효하지 않으면 로그아웃
     } finally {
       isLoading.value = false
+      isAuthInitialized.value = true
     }
   }
 
@@ -96,6 +102,7 @@ export const useAuthStore = defineStore('auth', () => {
     logout,
     verifyEmail,
     updateUser,
-    checkAuth
+    checkAuth,
+    isAuthInitialized
   }
 })
