@@ -13,7 +13,7 @@ defineProps<{
 
 const store = useMarketStatsStore()
 const { statsList, isLoading, currentRegion } = storeToRefs(store)
-const { selectDistrict, selectNeighborhood, selectApartment, goBack, closeSidebar } = store
+const { selectDistrict, selectNeighborhood, selectDong, selectApartment, goBack, closeSidebar } = store
 
 const expandedId = ref<string | null>(null)
 
@@ -30,9 +30,9 @@ const handleSelect = (stat: any) => {
   if (stat.id.startsWith('city-')) {
     selectDistrict(stat)
   } else if (stat.id.startsWith('gu-')) {
-    selectDistrict(stat)
-  } else if (stat.id.startsWith('dong-')) {
     selectNeighborhood(stat)
+  } else if (stat.id.startsWith('dong-')) {
+    selectDong(stat)
   } else if (stat.id.startsWith('apt-')) {
     selectApartment(stat.id)
   }

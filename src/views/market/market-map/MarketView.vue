@@ -54,9 +54,9 @@ const handleMarkerSelect = (property: Property) => {
   if (id.startsWith('city-')) {
     statsStore.selectDistrict({ id: id })
   } else if (id.startsWith('gu-')) {
-    statsStore.selectDistrict({ id: id })
-  } else if (id.startsWith('dong-')) {
     statsStore.selectNeighborhood({ id: id })
+  } else if (id.startsWith('dong-')) {
+    statsStore.selectDong({ id: id })
   } else {
     statsStore.selectApartment(property.aptSeq)
   }

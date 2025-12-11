@@ -17,6 +17,7 @@ const { toggleSidebar } = store
         <RegionStatsView v-if="currentLevel === 'city'" />
         <RegionStatsView v-else-if="currentLevel === 'district'" has-back-button />
         <RegionStatsView v-else-if="currentLevel === 'neighborhood'" has-back-button />
+        <RegionStatsView v-else-if="currentLevel === 'dong'" has-back-button />
         <ApartmentLevelView v-else-if="currentLevel === 'apartment'" />
       </transition>
     </div>

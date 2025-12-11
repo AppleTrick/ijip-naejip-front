@@ -4,21 +4,20 @@ export interface User {
   email: string
   phone?: string
   profileImage?: string | null
-  // Personal Info
+  // 개인 정보
   gender?: 'male' | 'female' | 'other'
   ageGroup?: string
   job?: string
   maritalStatus?: 'single' | 'married'
-  // Preferences
+  // 선호도
   budget?: { min: number, max: number }
   interestAreas?: string[]
   commuteLocation?: string
-  // Notifications
-  // Notifications
+  // 알림
   appPush?: boolean
   emailNotification?: boolean
   marketingNotification?: boolean
-  // My House
+  // 내 집 정보
   myHouseName?: string
   myHouseAddress?: string
   myHouseArea?: string
@@ -119,4 +118,34 @@ export interface MarketFilters {
   type?: string
   minPrice?: number
   maxPrice?: number
+}
+
+export interface PriceTrend {
+  date: string
+  price: number // 만원 단위
+}
+
+export interface RegionStats {
+  id: string
+  name: string
+  avgPrice: number // 만원 단위 (예: 125000 = 12.5억)
+  trend: PriceTrend[]
+  volume?: number
+  lat?: number
+  lng?: number
+  parentId?: string
+}
+
+export interface AddressResponse {
+  dongCode: string
+  sidoName: string
+  gugunName: string
+  dongName: string
+  aptSeq: string
+  aptName: string
+  aptDong: string
+  latitude: number
+  longitude: number
+  avgPrice: number
+  primaryPyung: number
 }
