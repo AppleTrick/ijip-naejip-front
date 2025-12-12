@@ -103,6 +103,7 @@ export interface Property {
   buildYear?: number
   jibunAddress?: string
   deals?: HouseDeal[]
+  priceTrend?: PriceTrend[]
   type?: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'
 }
 
@@ -149,4 +150,39 @@ export interface AddressResponse {
   longitude: number
   avgPrice: number
   primaryPyung: number
+}
+
+export interface ApartmentInfoDto {
+  aptSeq: number
+  aptName: string
+  address: string
+  avgPrice: number
+  buildYear: number
+  pyungTypes: string[]
+}
+
+export interface RecentTransactionDto {
+  transactionDate: string
+  pyungType: string
+  dealAmount: number
+  floor: number
+  aptDong: string
+}
+
+export interface PriceDataPointDto {
+  month: string
+  avgPrice: number
+  transactionCount: number
+}
+
+export interface PriceTrendDto {
+  unit: string
+  dataPoints: PriceDataPointDto[]
+}
+
+export interface ApartmentDetailResponse {
+  selectedPyung: string
+  apartmentInfo: ApartmentInfoDto
+  recentTransactions: RecentTransactionDto[]
+  priceTrend: PriceTrendDto
 }

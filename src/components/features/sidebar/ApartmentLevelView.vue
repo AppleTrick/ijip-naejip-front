@@ -1,19 +1,31 @@
 <script setup lang="ts">
-
+import { watch } from 'vue'
 import { useSafeHomeStore } from '@/stores/safehome'
 import { useMarketStatsStore } from '@/stores/marketStats'
+import { useMarket } from '@/composables/useMarket'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { ShieldCheck, Check, Plus, ArrowLeft } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
+import TrendGraph from './common/TrendGraph.vue'
 
 const router = useRouter()
 const store = useSafeHomeStore()
 const statsStore = useMarketStatsStore()
+const { fetchPropertyDetail, isLoading } = useMarket()
 const { selectedProperty } = storeToRefs(store)
 const { addToComparison, removeFromComparison, isInComparison } = store
 const { goBack } = statsStore
+
+// 선택된 아파트가 변경되면 상세 정보 가져오기
+watch(() => selectedProperty.value?.aptSeq, (newId) => {
+  if (newId) {
+    // 이미 상세 정보(거래 내역 등)가 있는지 확인 후, 없으면 요청
+    // 또는 항상 최신 정보를 위해 요청
+    fetchPropertyDetail(newId)
+  }
+}, { immediate: true })
 
 const goToAnalysis = () => {
   router.push('/analysis')
@@ -23,6 +35,13 @@ const goToDetail = () => {
   if (selectedProperty.value) {
     router.push(`/price/${selectedProperty.value.aptSeq}`)
   }
+}
+
+const formatDate = (dateNum: number) => {
+  if (!dateNum) return '-'
+  const str = String(dateNum)
+  if (str.length !== 8) return str
+  return `${str.substring(0, 4)}.${str.substring(4, 6)}.${str.substring(6, 8)}`
 }
 </script>
 
@@ -65,15 +84,23 @@ const goToDetail = () => {
 
       <div class="price-grid">
         <div class="price-card">
-          <p class="price-label">매매가</p>
-          <p class="price-value">{{ formatPrice(selectedProperty.dealAmount) }}</p>
+          <p class="price-label">최근 매매가</p>
+          <p class="price-value">{{ selectedProperty.dealAmount }}</p>
+        </div>
+      </div>
+
+      <!-- Price Trend Graph -->
+      <div v-if="selectedProperty.priceTrend && selectedProperty.priceTrend.length > 0" class="chart-section">
+        <h3 class="section-title">가격 추이</h3>
+        <div class="chart-wrapper">
+          <TrendGraph :data="selectedProperty.priceTrend" :height="150" color="#E84545" />
         </div>
       </div>
 
       <!-- Info Grid -->
       <div class="info-grid">
         <div class="info-card">
-          <p class="info-label">전용면적</p>
+          <p class="info-label">평형</p>
           <p class="info-value">{{ selectedProperty.excluUseAr }}</p>
         </div>
         <div class="info-card">
@@ -89,6 +116,21 @@ const goToDetail = () => {
           <p class="description-text">
             {{ selectedProperty.description }}
           </p>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div v-if="selectedProperty.deals && selectedProperty.deals.length > 0" class="deals-section">
+        <h3 class="section-title">최근 실거래 내역</h3>
+        <div class="deals-list">
+          <div v-for="(deal, index) in selectedProperty.deals" :key="index" class="deal-item">
+            <div class="deal-date">{{ formatDate(deal.dealDate) }}</div>
+            <div class="deal-info">
+              <span class="deal-floor">{{ deal.floor }}층</span>
+              <span class="deal-area">{{ deal.excluUseAr }}평</span>
+            </div>
+            <div class="deal-price">{{ formatPrice(deal.dealAmount) }}</div>
+          </div>
         </div>
       </div>
 
@@ -346,5 +388,62 @@ const goToDetail = () => {
 
 .cta-btn:hover {
   background-color: var(--color-gray-100) !important;
+}
+
+.deals-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.deals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.deal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.75rem;
+}
+
+.deal-date {
+  font-size: 0.875rem;
+  color: var(--color-gray-500);
+}
+
+.deal-info {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-gray-700);
+}
+
+.deal-price {
+  font-weight: 700;
+  color: var(--color-primary);
+  font-size: 1rem;
+}
+
+.chart-section {
+  margin-bottom: 2rem;
+}
+
+.chart-wrapper {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  height: 180px;
 }
 </style>

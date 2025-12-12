@@ -8,18 +8,29 @@ const props = defineProps<{
   isSelected?: boolean
 }>()
 
+// 마커 표시 여부를 결정하는 함수 (나중에 필터 로직 등으로 확장 가능)
+const shouldShowMarker = (price: string | number) => {
+  if (!price) return false
+  if (price === 0 || price === '0' || price === '0만원') return false
+  return true
+}
+
+const isVisible = computed(() => {
+  return shouldShowMarker(props.price)
+})
+
 const formattedPrice = computed(() => {
-  if (!props.price || props.price === '0' || props.price === 0 || props.price === '0만원') return ''
+  if (!isVisible.value) return ''
   return formatPrice(props.price)
 })
 
 onMounted(() => {
-  console.log('MapMarkerOverlay mounted:', props.name, props.price)
+  // console.log('MapMarkerOverlay mounted:', props.name, props.price)
 })
 </script>
 
 <template>
-  <div class="marker-overlay">
+  <div v-if="isVisible" class="marker-overlay">
     <span v-if="name" class="region-name">{{ name }}</span>
     <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
   </div>

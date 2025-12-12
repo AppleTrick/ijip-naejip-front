@@ -36,6 +36,11 @@ export function useMarket() {
     try {
       const data = await marketApi.getPropertyDetail(id)
       if (data) {
+        // 기존 선택된 매물이 있고 ID가 같다면 좌표 유지 (상세 API에는 좌표가 없을 수 있음)
+        if (store.selectedProperty && store.selectedProperty.aptSeq === id) {
+          if (data.latitude === 0) data.latitude = store.selectedProperty.latitude
+          if (data.longitude === 0) data.longitude = store.selectedProperty.longitude
+        }
         store.selectProperty(data)
       }
     } catch (e: any) {

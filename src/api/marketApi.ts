@@ -53,8 +53,48 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
   return areas.map(item => convertToProperty(item, propertyType))
 }
 
+import http from '@/api/http'
+import type { CommonResponse } from '@/api/http'
+import type { ApartmentDetailResponse } from '@/api/types'
+
 export const getPropertyDetail = async (id: string): Promise<Property | undefined> => {
-  // TODO: HouseDealController API를 사용하여 getPropertyDetail 구현
-  console.log('getPropertyDetail called with id:', id)
-  return undefined
+  try {
+    const response = await http.get<CommonResponse<ApartmentDetailResponse>>(`/api/v1/apartments/${id}`)
+    const data = response.data.data
+    
+    if (!data) return undefined
+
+    // ApartmentDetailResponse를 Property 형식으로 변환
+    const property: Property = {
+      aptSeq: String(data.apartmentInfo.aptSeq),
+      aptNm: data.apartmentInfo.aptName,
+      dealAmount: data.apartmentInfo.avgPrice ? (data.apartmentInfo.avgPrice / 10000).toFixed(1) + '억' : '0억', // 예: 245000 -> 24.5억
+      latitude: 0, // 상세 정보에는 좌표가 없으므로 0 또는 기존 값 유지 필요 (여기서는 0으로 설정)
+      longitude: 0,
+      roadNm: data.apartmentInfo.address,
+      excluUseAr: data.apartmentInfo.pyungTypes.join(', ') + '평',
+      floor: '-', // 상세 정보에 층수 요약은 없음
+      description: `건축년도: ${data.apartmentInfo.buildYear}년, 평형: ${data.apartmentInfo.pyungTypes.join(', ')}`,
+      buildYear: data.apartmentInfo.buildYear,
+      deals: data.recentTransactions.map((deal, index) => ({
+        no: index,
+        aptSeq: String(data.apartmentInfo.aptSeq),
+        aptDong: deal.aptDong,
+        floor: String(deal.floor),
+        dealDate: Number(deal.transactionDate.replace(/-/g, '')), // YYYY-MM-DD -> YYYYMMDD
+        excluUseAr: Number(deal.pyungType),
+        dealAmount: deal.dealAmount
+      })),
+      priceTrend: data.priceTrend ? data.priceTrend.dataPoints.map(point => ({
+        date: point.month,
+        price: point.avgPrice
+      })) : [],
+      type: 'APT'
+    }
+    
+    return property
+  } catch (error) {
+    console.error('아파트 상세 정보 조회 실패:', error)
+    return undefined
+  }
 }
