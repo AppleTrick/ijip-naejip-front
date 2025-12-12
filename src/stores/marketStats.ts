@@ -45,11 +45,16 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     }
   }
 
-  // district는 id만 있으면 됨
-  const selectDistrict = async (district: { id: string }) => {
+  const selectDistrict = async (district: { id: string, name?: string, avgPrice?: number }) => {
     isLoading.value = true
     try {
       const data = await statsApi.getDistrictStats(district.id)
+      console.log('[[DEBUG]] selectDistrict API Response:', data)
+      
+      // 마커에서 전달받은 정보로 덮어쓰기
+      if (district.name) data.self.name = district.name
+      if (district.avgPrice) data.self.avgPrice = district.avgPrice
+
       currentRegion.value = data.self
       statsList.value = data.children
       currentLevel.value = 'district'
@@ -60,10 +65,16 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     }
   }
 
-  const selectNeighborhood = async (neighborhood: { id: string }) => {
+  const selectNeighborhood = async (neighborhood: { id: string, name?: string, avgPrice?: number }) => {
     isLoading.value = true
     try {
       const data = await statsApi.getNeighborhoodStats(neighborhood.id)
+      console.log('[[DEBUG]] selectNeighborhood API Response:', data)
+
+      // 마커에서 전달받은 정보로 덮어쓰기
+      if (neighborhood.name) data.self.name = neighborhood.name
+      if (neighborhood.avgPrice) data.self.avgPrice = neighborhood.avgPrice
+
       currentRegion.value = data.self
       statsList.value = data.children
       currentLevel.value = 'neighborhood'
@@ -74,10 +85,16 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     }
   }
 
-  const selectDong = async (dong: { id: string }) => {
+  const selectDong = async (dong: { id: string, name?: string, avgPrice?: number }) => {
     isLoading.value = true
     try {
       const data = await statsApi.getDongStats(dong.id)
+      console.log('[[DEBUG]] selectDong API Response:', data)
+
+      // 마커에서 전달받은 정보로 덮어쓰기
+      if (dong.name) data.self.name = dong.name
+      if (dong.avgPrice) data.self.avgPrice = dong.avgPrice
+
       currentRegion.value = data.self
       statsList.value = data.children
       currentLevel.value = 'dong'

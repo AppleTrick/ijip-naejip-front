@@ -10,13 +10,13 @@ const emit = defineEmits<{
 
 const searchQuery = ref<string>('')
 
-// Filter States
+// 필터 상태 관리
 const filters = reactive({
-  priceRange: { min: 0, max: 20 }, // Unit: 100 Million (Eok)
+  priceRange: { min: 0, max: 20 }, // 단위: 억 원
   area: [] as string[]
 })
 
-// Options
+// 평형 옵션 정의
 const areaOptions = [
   { label: '10평대', value: '10' },
   { label: '20평대', value: '20' },
@@ -32,9 +32,8 @@ const applyFilters = () => {
   emit('filter', { ...filters })
 }
 
-// Watch for changes to auto-apply or just rely on explicit apply button?
-// For now, let's emit on change for better UX, or we can add an "Apply" button in dropdowns.
-// Let's emit on change for checkboxes, maybe debounce for sliders if we had them.
+// 필터 변경 감지: 변경 시 즉시 필터 적용 (UX 향상)
+// 체크박스나 슬라이더 변경 시 실시간으로 반영
 watch(filters, () => {
   applyFilters()
 }, { deep: true })
@@ -47,7 +46,7 @@ const formatPrice = (val: number) => {
 
 <template>
   <div class="filter-container">
-    <!-- Search Bar -->
+    <!-- 검색바 -->
     <div class="search-wrapper">
       <input 
         v-model="searchQuery"
@@ -65,9 +64,9 @@ const formatPrice = (val: number) => {
       </button>
     </div>
 
-    <!-- Filters -->
+    <!-- 필터 버튼 목록 -->
     <div class="filter-buttons">
-      <!-- Price Filter -->
+      <!-- 가격대 필터 -->
       <BaseFilterDropdown label="가격대" :is-active="filters.priceRange.min > 0 || filters.priceRange.max < 20">
         <div class="dropdown-content w-64">
           <div class="price-range-inputs">
@@ -105,7 +104,7 @@ const formatPrice = (val: number) => {
         </div>
       </BaseFilterDropdown>
 
-      <!-- Area Filter -->
+      <!-- 평형 필터 -->
       <BaseFilterDropdown label="평형" :is-active="filters.area.length > 0">
         <div class="dropdown-content">
           <div class="checkbox-group">
@@ -222,7 +221,7 @@ const formatPrice = (val: number) => {
   margin-right: 0.5rem;
 }
 
-/* Dropdown Content Styles */
+/* 드롭다운 컨텐츠 스타일 */
 .dropdown-content {
   min-width: 12rem;
 }
@@ -257,7 +256,7 @@ const formatPrice = (val: number) => {
   color: var(--color-text);
 }
 
-/* Price Range Styles */
+/* 가격 범위 입력 스타일 */
 .price-range-inputs {
   display: flex;
   align-items: center;

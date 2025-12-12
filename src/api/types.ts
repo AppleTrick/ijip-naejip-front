@@ -103,6 +103,7 @@ export interface Property {
   buildYear?: number
   jibunAddress?: string
   deals?: HouseDeal[]
+  type?: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'
 }
 
 export interface AuthResponse {

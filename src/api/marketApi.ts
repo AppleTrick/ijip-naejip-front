@@ -2,7 +2,7 @@ import type { Property, MarketFilters, AddressResponse } from '@/api/types'
 import { searchAreaAddress } from '@/api/regionApi'
 
 // 지도 표시를 위해 AddressResponse를 Property로 변환
-const convertToProperty = (item: AddressResponse): Property => {
+const convertToProperty = (item: AddressResponse, type: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'): Property => {
   return {
     aptSeq: item.aptSeq || item.dongCode, // 지역의 경우 동코드를 대체 ID로 사용
     aptNm: item.aptName || item.dongName || item.gugunName || item.sidoName,
@@ -14,7 +14,8 @@ const convertToProperty = (item: AddressResponse): Property => {
     floor: '-',
     description: `${item.sidoName} ${item.gugunName} ${item.dongName}`,
     buildYear: 0,
-    deals: []
+    deals: [],
+    type: type
   }
 }
 
@@ -48,7 +49,8 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
     // 필터가 지원되면 minPyung, maxPyung 추가 가능
   })
 
-  return areas.map(convertToProperty)
+  const propertyType = (scope === 'APT_DONG' || scope === 'APT') ? 'APT' : scope
+  return areas.map(item => convertToProperty(item, propertyType))
 }
 
 export const getPropertyDetail = async (id: string): Promise<Property | undefined> => {

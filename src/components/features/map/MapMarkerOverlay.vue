@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { formatPrice } from '@/utils/formatters'
 
 const props = defineProps<{
@@ -8,13 +8,20 @@ const props = defineProps<{
   isSelected?: boolean
 }>()
 
-const formattedPrice = computed(() => formatPrice(props.price))
+const formattedPrice = computed(() => {
+  if (!props.price || props.price === '0' || props.price === 0 || props.price === '0만원') return ''
+  return formatPrice(props.price)
+})
+
+onMounted(() => {
+  console.log('MapMarkerOverlay mounted:', props.name, props.price)
+})
 </script>
 
 <template>
   <div class="marker-overlay">
     <span v-if="name" class="region-name">{{ name }}</span>
-    <span class="price-text">{{ formattedPrice }}</span>
+    <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
   </div>
 </template>
 

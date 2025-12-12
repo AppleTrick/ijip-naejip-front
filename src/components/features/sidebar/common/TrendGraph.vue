@@ -150,13 +150,36 @@ watch(() => props.data, () => {
 </script>
 
 <template>
-  <div ref="chartRef" class="trend-chart"></div>
+  <div class="chart-container">
+    <div v-if="!data || data.length === 0" class="no-data">
+      <p>데이터 준비중입니다.</p>
+    </div>
+    <div v-else ref="chartRef" class="trend-chart"></div>
+  </div>
 </template>
 
 <style scoped>
-.trend-chart {
+.chart-container {
   width: 100%;
   height: 100%;
   min-height: 100px;
+  position: relative;
+}
+
+.trend-chart {
+  width: 100%;
+  height: 100%;
+}
+
+.no-data {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-50);
+  border-radius: 0.5rem;
+  color: var(--color-gray-500);
+  font-size: 0.875rem;
 }
 </style>

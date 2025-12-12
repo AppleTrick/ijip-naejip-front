@@ -39,6 +39,7 @@ const { toggleSidebar } = store
   display: flex;
   align-items: center;
   transition: transform 0.3s ease-in-out;
+  pointer-events: none; /* Don't block map interactions */
 }
 
 .sidebar-container.sidebar-closed {
@@ -56,6 +57,7 @@ const { toggleSidebar } = store
   border: 1px solid rgba(255, 255, 255, 0.5);
   display: flex;
   flex-direction: column;
+  pointer-events: auto; /* Re-enable pointer events for content */
 }
 
 /* Ensure the transition wrapper takes full height so children can flex */
@@ -77,6 +79,7 @@ const { toggleSidebar } = store
   cursor: pointer;
   box-shadow: 2px 0 5px rgba(0,0,0,0.1);
   margin-left: -1px; /* Overlap border */
+  pointer-events: auto; /* Re-enable pointer events for button */
 }
 
 .toggle-icon {

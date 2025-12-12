@@ -1,11 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, createVNode, render } from 'vue'
-import MapMarkerOverlay from './MapMarkerOverlay.vue'
-
+import { ref, onMounted, watch, createVNode, render, markRaw, toRaw } from 'vue'
 import type { Property } from '@/api/types'
+import MapMarkerOverlay from '@/components/features/map/MapMarkerOverlay.vue'
+import { DEFAULT_MAP_CENTER } from '@/constants/map'
+
+declare global {
+  interface Window {
+    kakao: any
+  }
+}
 
 const props = defineProps<{
-  address?: string
   markers?: Property[]
   center?: { lat: number, lng: number }
   level?: number
@@ -17,14 +22,14 @@ const emit = defineEmits<{
 }>()
 
 const mapContainer = ref<HTMLElement | null>(null)
-let map: any = null
-let geocoder: any = null
-let mainMarker: any = null
+const map = ref<any>(null)
 let mapMarkers: any[] = []
 
+// --- 지도 로직 ---
+
+// 마커 초기화: 지도에 표시된 모든 마커를 제거하고 배열을 비움
 const clearMarkers = () => {
   mapMarkers.forEach(m => {
-    // Unmount Vue component to prevent memory leaks
     if (m.vueContainer) {
       render(null, m.vueContainer)
     }
@@ -33,178 +38,231 @@ const clearMarkers = () => {
   mapMarkers = []
 }
 
-const renderMarkers = (items: Property[] | undefined) => {
-  clearMarkers()
-  if (!map || !items) {
-    return
+// 개별 마커 생성: 커스텀 오버레이를 사용하여 마커를 생성하고 클릭 이벤트를 연결
+const createMarker = (item: Property) => {
+  const lat = Number(item.latitude)
+  const lng = Number(item.longitude)
+
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    console.warn('Invalid coordinates for marker:', item.aptNm, item.latitude, item.longitude)
+    return null
   }
 
-  items.forEach(item => {
-    const position = new (window as any).kakao.maps.LatLng(item.latitude, item.longitude)
-    
-    // Create container for Vue component
-    const content = document.createElement('div')
-    content.className = 'custom-overlay-marker'
-    
-    // Create Vue VNode and render it to the container
-    const vnode = createVNode(MapMarkerOverlay, {
-      price: item.dealAmount,
-      name: item.aptNm
-    })
-    render(vnode, content)
-    
-    // Handle Click (Add event listener to the container)
-    content.addEventListener('click', () => {
-      emit('select-marker', item)
-    })
+  let position
+  try {
+    position = new window.kakao.maps.LatLng(lat, lng)
+  } catch (e) {
+    console.error('Error creating LatLng for marker:', item, e)
+    return null
+  }
+  
+  const content = document.createElement('div')
+  content.className = 'custom-overlay-marker'
+  
+  if (!MapMarkerOverlay) {
+    console.error('MapMarkerOverlay component is missing')
+    return null
+  }
 
-    const customOverlay = new (window as any).kakao.maps.CustomOverlay({
-      position: position,
-      content: content,
-      yAnchor: 1.2,
-      zIndex: 3
-    })
-    
-    // Store container reference for cleanup
-    ;(customOverlay as any).vueContainer = content
-    
-    customOverlay.setMap(map)
-    mapMarkers.push(customOverlay)
+  const vnode = createVNode(MapMarkerOverlay, {
+    price: item.dealAmount,
+    name: item.aptNm
+  })
+  render(vnode, content)
+  
+  content.addEventListener('click', () => {
+    emit('select-marker', item)
+  })
+
+  const customOverlay = new window.kakao.maps.CustomOverlay({
+    position: position,
+    content: content,
+    yAnchor: 1.2,
+    zIndex: 3,
+    clickable: true // 클릭 가능하도록 설정
+  })
+  
+  ;(customOverlay as any).vueContainer = content
+  
+  // markRaw를 사용하여 오버레이 객체의 반응성을 제거 (성능 최적화 및 오류 방지)
+  return markRaw(customOverlay)
+}
+
+// 마커 목록 렌더링: 기존 마커를 지우고 새로운 마커 목록을 지도에 표시
+const renderMarkers = (items: Property[] | undefined) => {
+  clearMarkers()
+  if (!map.value || !items) return
+
+  const rawMap = toRaw(map.value)
+
+  items.forEach(item => {
+    const marker = createMarker(item)
+    if (marker) {
+      marker.setMap(rawMap)
+      mapMarkers.push(marker)
+    }
   })
 }
 
-onMounted(() => {
-  const loadMap = () => {
-    if ((window as any).kakao && (window as any).kakao.maps) {
-      (window as any).kakao.maps.load(() => {
+// 지도 영역 정보 방출: 현재 지도의 레벨과 남서/북동 좌표를 부모 컴포넌트로 전달
+const emitBounds = () => {
+  if (!map.value) return
 
-        const options = {
-          center: new (window as any).kakao.maps.LatLng(37.566826, 126.9786567), // Seoul City Hall
-          level: 5
-        }
-        map = new (window as any).kakao.maps.Map(mapContainer.value, options)
-        geocoder = new (window as any).kakao.maps.services.Geocoder()
-        
-        const emitBounds = () => {
-          if (!map) return
-          const level = map.getLevel()
-          const bounds = map.getBounds()
-          const swLatlng = bounds.getSouthWest()
-          const neLatlng = bounds.getNorthEast()
+  const rawMap = toRaw(map.value)
+  const level = rawMap.getLevel()
+  const bounds = rawMap.getBounds()
+  const swLatlng = bounds.getSouthWest()
+  const neLatlng = bounds.getNorthEast()
 
-          const boundsData = {
-            minLat: swLatlng.getLat(),
-            maxLat: neLatlng.getLat(),
-            minLng: swLatlng.getLng(),
-            maxLng: neLatlng.getLng(),
-            level: level
-          }
-          
+  const boundsData = {
+    minLat: swLatlng.getLat(),
+    maxLat: neLatlng.getLat(),
+    minLng: swLatlng.getLng(),
+    maxLng: neLatlng.getLng(),
+    level: level
+  }
+  
+  emit('update-bounds', boundsData)
+}
 
-          emit('update-bounds', boundsData)
-        }
+// 지도 이벤트 초기화: 지도 이동/줌 종료(idle) 시 영역 정보를 갱신하도록 리스너 등록
+const initMapEvents = () => {
+  if (!map.value) return
 
-        // Initial Relayout
-        window.requestAnimationFrame(() => {
+  const rawMap = toRaw(map.value)
+  emitBounds()
 
-          map.relayout()
-          map.setCenter(options.center)
-          
-          // Emit initial bounds
+  window.kakao.maps.event.addListener(rawMap, 'idle', function() {
+    emitBounds()
+  })
+}
 
-          emitBounds()
+// 지도 초기화: 카카오맵 인스턴스를 생성하고 초기 설정(중심좌표, 레벨 등)을 적용
+const initializeMap = (options: { center: { lat: number, lng: number }, level: number }) => {
+  if (!mapContainer.value) return
 
-          if (props.markers && props.markers.length > 0) {
-            renderMarkers(props.markers)
-          }
-        })
+  let centerLat = options.center.lat
+  let centerLng = options.center.lng
 
-        // Add idle event listener
+  if (!Number.isFinite(centerLat) || !Number.isFinite(centerLng)) {
+    console.warn('Invalid center coordinates for initializeMap:', centerLat, centerLng)
+    centerLat = DEFAULT_MAP_CENTER.lat
+    centerLng = DEFAULT_MAP_CENTER.lng
+  }
 
-        ;(window as any).kakao.maps.event.addListener(map, 'idle', function() {
+  const mapOptions = {
+    center: new window.kakao.maps.LatLng(centerLat, centerLng),
+    level: options.level,
+    draggable: true,
+    scrollwheel: true,
+    disableDoubleClickZoom: false
+  }
+  
+  // markRaw를 사용하여 지도 인스턴스의 반응성을 제거 (Vue Proxy 간섭 방지)
+  const mapInstance = new window.kakao.maps.Map(mapContainer.value, mapOptions)
+  map.value = markRaw(mapInstance)
+  
+  window.requestAnimationFrame(() => {
+    const rawMap = toRaw(map.value)
+    rawMap.relayout()
+    rawMap.setCenter(mapOptions.center)
+    initMapEvents()
+  })
 
-          emitBounds()
-        })
+  // 리사이즈 옵저버: 컨테이너 크기 변경 시 지도 레이아웃 재설정
+  const resizeObserver = new ResizeObserver(() => {
+    if (map.value) {
+      const rawMap = toRaw(map.value)
+      rawMap.relayout()
+      const center = rawMap.getCenter()
+      rawMap.setCenter(center)
+    }
+  })
+  resizeObserver.observe(mapContainer.value)
+}
 
-        // Resize Observer for Responsive Layout
-        const resizeObserver = new ResizeObserver(() => {
-          if (map) {
-            map.relayout()
-            const center = map.getCenter()
-            map.setCenter(center)
-          }
-        })
-        if (mapContainer.value) {
-          resizeObserver.observe(mapContainer.value)
-        }
-      })
+// 카카오맵 SDK 로드: 스크립트가 없으면 동적으로 로드하고, 로드 완료 시 콜백 실행
+const loadKakaoMap = (apiKey: string, onLoad: () => void) => {
+  const scriptId = 'kakao-map-sdk'
+  
+  const load = () => {
+    if (window.kakao && window.kakao.maps) {
+      window.kakao.maps.load(onLoad)
     } else {
       console.warn('Kakao Map SDK not found. Retrying...')
-      setTimeout(loadMap, 500)
+      setTimeout(() => loadKakaoMap(apiKey, onLoad), 500)
     }
   }
 
-  // Dynamic Script Loading
-  const scriptId = 'kakao-map-sdk'
   if (!document.getElementById(scriptId)) {
     const script = document.createElement('script')
     script.id = scriptId
-    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_API_KEY}&libraries=services&autoload=false`
-    script.onload = () => loadMap()
+    script.src = `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${apiKey}&libraries=services&autoload=false`
+    script.onload = load
     document.head.appendChild(script)
   } else {
-    loadMap()
+    load()
   }
-})
+}
+
+// 지도 중심 이동 (즉시): 지정된 좌표로 지도의 중심을 즉시 이동
+const setCenter = (lat: number, lng: number) => {
+  if (!map.value || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    console.warn('Invalid coordinates for setCenter:', lat, lng)
+    return
+  }
+  try {
+    const rawMap = toRaw(map.value)
+    const coords = new window.kakao.maps.LatLng(lat, lng)
+    rawMap.setCenter(coords)
+  } catch (e) {
+    console.error('Error in setCenter:', e)
+  }
+}
+
+// 지도 중심 이동 (부드럽게): 지정된 좌표로 지도의 중심을 부드럽게 이동
+const panTo = (lat: number, lng: number) => {
+  if (!map.value || !Number.isFinite(lat) || !Number.isFinite(lng)) {
+    console.warn('Invalid coordinates for panTo:', lat, lng)
+    return
+  }
+  try {
+    const rawMap = toRaw(map.value)
+    const coords = new window.kakao.maps.LatLng(lat, lng)
+    rawMap.panTo(coords)
+  } catch (e) {
+    console.error('Error in panTo:', e)
+  }
+}
 
 
-watch(() => props.markers, (newMarkers) => {
 
-  renderMarkers(newMarkers)
-}, { deep: true })
+// --- 라이프사이클 및 감시자 ---
+onMounted(() => {
+  loadKakaoMap(import.meta.env.VITE_KAKAO_API_KEY, () => {
+    const options = {
+      center: props.center || DEFAULT_MAP_CENTER, // 기본값: 서울시청
+      level: props.level || 5
+    }
+    initializeMap(options)
 
-watch(() => props.address, (newAddr) => {
-  if (!map || !geocoder || !newAddr) return
-
-  geocoder.addressSearch(newAddr, function(result: any[], status: any) {
-    if (status === (window as any).kakao.maps.services.Status.OK) {
-      const coords = new (window as any).kakao.maps.LatLng(result[0].y, result[0].x)
-      map.setCenter(coords)
-      map.setLevel(3)
-      
-      if (mainMarker) mainMarker.setMap(null)
-      mainMarker = new (window as any).kakao.maps.Marker({
-        map: map,
-        position: coords
-      })
+    if (props.markers && props.markers.length > 0) {
+      renderMarkers(props.markers)
     }
   })
 })
 
-watch([() => props.center, () => props.level], ([newCenter, newLevel], [oldCenter, oldLevel]) => {
-  if (!map) return
+watch(() => props.markers, (newMarkers) => {
+  renderMarkers(newMarkers)
+}, { deep: true })
 
-  const isCenterChanged = newCenter && (!oldCenter || newCenter.lat !== oldCenter.lat || newCenter.lng !== oldCenter.lng)
-  const isLevelChanged = newLevel && newLevel !== oldLevel
+watch(() => props.center, (newCenter, oldCenter) => {
+  if (!map.value || !newCenter) return
 
-  if (isCenterChanged && isLevelChanged) {
-    // 1. Both Changed: Move instantly then zoom (most robust for simultaneous update)
-    const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
-    map.setCenter(coords)
-    
-    // Use a small timeout to ensure setCenter is processed if needed, 
-    // but usually sequential calls work. 
-    // However, to be safe against Kakao's internal state updates:
-    requestAnimationFrame(() => {
-      map.setLevel(newLevel, { animate: true })
-    })
-  } else if (isCenterChanged) {
-    // 2. Only Center Changed: Pan smoothly
-    const coords = new (window as any).kakao.maps.LatLng(newCenter.lat, newCenter.lng)
-    map.panTo(coords)
-  } else if (isLevelChanged) {
-    // 3. Only Level Changed: Zoom smoothly
-    map.setLevel(newLevel, { animate: true })
+  const isCenterChanged = !oldCenter || newCenter.lat !== oldCenter.lat || newCenter.lng !== oldCenter.lng
+
+  if (isCenterChanged) {
+    panTo(newCenter.lat, newCenter.lng)
   }
 })
 </script>

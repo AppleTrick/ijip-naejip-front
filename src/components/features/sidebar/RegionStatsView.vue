@@ -45,14 +45,14 @@ const handleSelect = (stat: any) => {
       <SidebarHeader 
         v-if="currentRegion"
         :title="currentRegion.name"
-        :avg-price="formatPrice(currentRegion.avgPrice)"
-        subtitle="최근 6개월 가격 추이"
+        :avg-price="currentRegion.avgPrice > 0 ? formatPrice(currentRegion.avgPrice) : undefined"
+        :subtitle="currentRegion.trend && currentRegion.trend.length > 0 ? '최근 6개월 가격 추이' : undefined"
         :show-back-btn="hasBackButton"
         @back="goBack"
         @close="closeSidebar"
       >
         <template #content>
-          <div class="main-graph-wrapper">
+          <div v-if="currentRegion.trend && currentRegion.trend.length > 0" class="main-graph-wrapper">
             <TrendGraph :data="currentRegion.trend" :height="180" color="#E84545" />
           </div>
         </template>
@@ -65,17 +65,30 @@ const handleSelect = (stat: any) => {
 
     <template v-else>
       <div class="stats-list">
-        <SidebarAccordionItem
-          v-for="stat in statsList"
-          :key="stat.id"
-          :id="stat.id"
-          :name="stat.name"
-          :avg-price="formatPrice(stat.avgPrice)"
-          :trend-data="stat.trend"
-          :is-expanded="expandedId === stat.id"
-          @toggle="toggleAccordion"
-          @select="handleSelect(stat)"
-        />
+        <!-- 데이터가 있을 때는 아코디언, 없을 때는 단순 리스트 -->
+        <template v-for="stat in statsList" :key="stat.id">
+          <SidebarAccordionItem
+            v-if="stat.avgPrice > 0 || (stat.trend && stat.trend.length > 0)"
+            :id="stat.id"
+            :name="stat.name"
+            :avg-price="formatPrice(stat.avgPrice)"
+            :trend-data="stat.trend"
+            :is-expanded="expandedId === stat.id"
+            @toggle="toggleAccordion"
+            @select="handleSelect(stat)"
+          />
+          
+          <div 
+            v-else 
+            class="simple-item"
+            @click="handleSelect(stat)"
+          >
+            <span class="region-name">{{ stat.name }}</span>
+            <button class="go-btn">
+              이동
+            </button>
+          </div>
+        </template>
       </div>
     </template>
   </SidebarLayout>
@@ -98,5 +111,40 @@ const handleSelect = (stat: any) => {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  padding: 0 1rem 1rem 1rem; /* Add padding for better spacing */
+}
+
+.simple-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.simple-item:hover {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-primary);
+}
+
+.region-name {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.go-btn {
+  padding: 0.25rem 0.75rem;
+  background-color: var(--color-primary-light);
+  color: var(--color-primary);
+  border: none;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 </style>
