@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, computed } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '@/stores/safehome'
+import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
 import type { Property } from '@/api/types'
 import KakaoMap from '@/components/features/map/KakaoMap.vue'
@@ -9,8 +9,9 @@ import MarketFilter from './components/MarketFilter.vue'
 import MarketSidebar from './components/sidebar/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
+import { parseKoreanPrice } from '@/utils/formatters'
 
-const store = useSafeHomeStore()
+const store = useMainDataStore()
 const { filteredProperties } = storeToRefs(store)
 const { selectProperty, setSearchQuery } = store
 const { fetchProperties } = useMarket()
@@ -22,9 +23,8 @@ const mapCenter = computed(() => {
   if (store.selectedProperty) {
     const lat = Number(store.selectedProperty.latitude)
     const lng = Number(store.selectedProperty.longitude)
-    if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      return { lat, lng }
-    }
+    return { lat, lng }
+    
   }
 
   // 2. 선택된 아파트가 없으면 현재 지역(시/군/구)의 중심으로 이동
@@ -66,24 +66,10 @@ const handleMarkerSelect = (property: Property) => {
   console.log(`Clicked Marker: ${property.aptNm}, ${property.dealAmount}`)
   selectProperty(property)
   
-  // 가격 정보 파싱
-  // dealAmount가 "10억" 또는 "10,000만원" 형태임.
-  // RegionStatsView는 만원 단위의 숫자를 받아서 10000으로 나눠 '억'으로 표시함.
-  // 따라서 avgPrice는 '만원' 단위의 숫자여야 함.
+  // 가격 정보 파싱 (utils/formatters.ts 사용)
   let avgPrice = 0
   if (property.dealAmount) {
-    const numericString = property.dealAmount.replace(/[^0-9]/g, '')
-    const price = parseInt(numericString, 10)
-    
-    if (!isNaN(price)) {
-      if (property.dealAmount.includes('억')) {
-        // "10억" -> 10 * 10000 = 100,000만원
-        avgPrice = price * 10000
-      } else {
-        // "10,000만원" -> 10000만원 (이미 만원 단위)
-        avgPrice = price
-      }
-    }
+    avgPrice = parseKoreanPrice(property.dealAmount)
   }
 
   // 마커 타입에 따라 적절한 스토어 액션 호출 (사이드바 상태 변경 등)

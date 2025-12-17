@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
-import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '@/stores/safehome'
 import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useMainDataStore } from '@/stores/mainData'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter } from 'lucide-vue-next'
 
 const router = useRouter()
-const store = useSafeHomeStore()
+const store = useMainDataStore()
 const { myHouse, comparisonList } = storeToRefs(store)
 const { removeFromComparison } = store
 

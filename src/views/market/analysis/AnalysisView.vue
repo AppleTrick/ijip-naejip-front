@@ -1,12 +1,11 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
-import { useSafeHomeStore } from '@/stores/safehome'
-import AnalysisForm from './components/AnalysisForm.vue'
-import KakaoMap from '@/components/features/map/KakaoMap.vue'
+import { useMainDataStore } from '@/stores/mainData'
 import AnalysisMapOverlay from './components/AnalysisMapOverlay.vue'
+import KakaoMap from '@/components/features/map/KakaoMap.vue'
 
-const store = useSafeHomeStore()
+const store = useMainDataStore()
 const { currentAddress } = storeToRefs(store)
 const { setAddress } = store
 

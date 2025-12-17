@@ -1,15 +1,23 @@
 import { ref } from 'vue'
 import * as marketApi from '@/api/marketApi'
 import type { MarketFilters } from '@/api/types'
-import { useSafeHomeStore } from '@/stores/safehome'
+import { useMainDataStore } from '@/stores/mainData'
+
+// [서비스 로직/중계자] UI(화면)와 API(서버 통신) 사이를 연결하는 역할
+// 로딩 상태(isLoading)와 에러(error)를 관리하며, API 결과를 Store에 저장합니다.
 
 export function useMarket() {
-  const store = useSafeHomeStore()
+  const store = useMainDataStore()
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
   let lastRequestId = 0
 
+  /**
+   * [지도 매물 목록 로딩]
+   * 지도가 움직일 때마다 호출되어 화면에 보일 아파트/지역 마커 데이터를 가져옵니다.
+   * 빠르게 여러 번 호출될 때 마지막 요청만 처리하여 데이터 꼬임을 방지합니다.
+   */
   const fetchProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
     const requestId = ++lastRequestId
     isLoading.value = true
@@ -30,6 +38,12 @@ export function useMarket() {
     }
   }
 
+  /**
+   * [단일 매물 상세 정보 로딩]
+   * 사용자가 특정 마커를 클릭했을 때 호출됩니다.
+   * 아파트의 상세 정보(거래 내역, 평형 리스트 등)를 가져와서 Store의 selectedProperty에 저장합니다.
+   * 상세 정보에 좌표가 없는 경우, 기존 마커의 좌표를 유지해줍니다.
+   */
   const fetchPropertyDetail = async (id: string) => {
     isLoading.value = true
     error.value = null

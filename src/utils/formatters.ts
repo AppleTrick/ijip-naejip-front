@@ -20,6 +20,24 @@ export const formatPrice = (price: string | number): string => {
   }
 }
 
+/**
+ * [가격 파싱]
+ * "10억", "10,000만원" 등의 문자열을 숫자(만원 단위)로 변환합니다.
+ * 예: "10억" -> 100000, "5,000만원" -> 5000
+ */
+export const parseKoreanPrice = (priceStr: string): number => {
+  const numericString = priceStr.replace(/[^0-9]/g, '')
+  const price = parseInt(numericString, 10)
+  
+  if (isNaN(price)) return 0
+
+  if (priceStr.includes('억')) {
+    return price * 10000
+  } else {
+    return price
+  }
+}
+
 export const formatDate = (date: Date | string): string => {
   const d = new Date(date)
   return d.toLocaleDateString('ko-KR', {

@@ -1,19 +1,19 @@
 <script setup lang="ts">
-import { watch } from 'vue'
-import { useSafeHomeStore } from '@/stores/safehome'
+import {  watch } from 'vue'
+import { storeToRefs } from 'pinia'
+import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
 import { useMarket } from '@/composables/useMarket'
 import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { ShieldCheck, Check, Plus, ArrowLeft } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
 import TrendGraph from './common/TrendGraph.vue'
 
 const router = useRouter()
-const store = useSafeHomeStore()
+const store = useMainDataStore()
 const statsStore = useMarketStatsStore()
-const { fetchPropertyDetail, isLoading } = useMarket()
+const { fetchPropertyDetail } = useMarket()
 const { selectedProperty } = storeToRefs(store)
 const { addToComparison, removeFromComparison, isInComparison } = store
 const { goBack } = statsStore
@@ -43,11 +43,11 @@ const formatDate = (dateNum: number) => {
   if (str.length !== 8) return str
   return `${str.substring(0, 4)}.${str.substring(4, 6)}.${str.substring(6, 8)}`
 }
+
 </script>
 
 <template>
   <div v-if="selectedProperty" class="apartment-view">
-    <!-- Header Image -->
     <div class="sidebar-header">
       <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
            alt="Property" class="header-image">
@@ -57,7 +57,6 @@ const formatDate = (dateNum: number) => {
       </button>
     </div>
 
-    <!-- Content -->
     <div class="sidebar-content">
       <div class="property-header">
         <div class="title-row">
@@ -77,10 +76,35 @@ const formatDate = (dateNum: number) => {
         </p>
         <div class="action-row">
           <BaseButton full-width variant="primary" @click="goToDetail">
-            매물 상세 정보 보기
+            아파트 실거래 상세 정보 보기
           </BaseButton>
         </div>
       </div>
+
+      <!-- 평형 선택하는 카드 -->
+      <div class="pyung-selector-container">
+        <div class="pyung-selector-scroll">
+          <button 
+            class="pyung-tab" 
+          >
+            전체
+          </button>
+          <button 
+            v-for="pyung in selectedProperty.pyungList" 
+            :key="pyung" 
+            class="pyung-tab"
+           >
+            {{ pyung }}평
+          </button>
+        </div>
+      </div>
+
+      <!-- :class="{ 'pyung-tab--active': currentPyung === 'all' }"
+            @click="handlePyungSelect('all')" -->
+
+      <!-- :class="{ 'pyung-tab--active': currentPyung === pyung }"
+            @click="handlePyungSelect(pyung)"
+          > -->
 
       <div class="price-grid">
         <div class="price-card">
@@ -445,5 +469,77 @@ const formatDate = (dateNum: number) => {
   border-radius: 0.75rem;
   padding: 1rem;
   height: 180px;
+}
+
+.pyung-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pyung-tag {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.85rem;
+  background-color: var(--color-gray-100);
+  color: var(--color-gray-700);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pyung-tag:hover {
+  background-color: var(--color-primary-light, rgba(144, 55, 73, 0.1));
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.pyung-selector-container {
+  margin-bottom: 1.5rem;
+  overflow: hidden; /* Hide scrollbar for container */
+}
+
+.pyung-selector-scroll {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem; /* Space for scrollbar if visible */
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+
+.pyung-selector-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+
+.pyung-tab {
+  flex: 0 0 auto; /* Don't shrink */
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background-color: var(--color-white);
+  border: 1px solid var(--color-gray-200);
+  color: var(--color-gray-600);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pyung-tab:hover {
+  background-color: var(--color-gray-50);
+  border-color: var(--color-gray-300);
+}
+
+.pyung-tab--active {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  border-color: var(--color-primary);
+  font-weight: 700;
+}
+
+.pyung-tab--active:hover {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+  opacity: 0.9;
 }
 </style>

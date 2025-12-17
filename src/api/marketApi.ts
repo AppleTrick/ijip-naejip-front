@@ -1,10 +1,17 @@
 import type { Property, MarketFilters, AddressResponse } from '@/api/types'
 import { searchAreaAddress } from '@/api/regionApi'
+import http from '@/api/http'
+import type { CommonResponse } from '@/api/http'
+import type { ApartmentDetailResponse } from '@/api/types'
 
-// 지도 표시를 위해 AddressResponse를 Property로 변환
+/**
+ * [데이터 변환 헬퍼]
+ * 백엔드에서 받은 주소/단지 정보(AddressResponse)를 지도 마커와 UI에서 사용하는
+ * 통합 형식(Property)으로 변환해주는 도구입니다.
+ */
 const convertToProperty = (item: AddressResponse, type: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'): Property => {
   return {
-    aptSeq: item.aptSeq || item.dongCode, // 지역의 경우 동코드를 대체 ID로 사용
+    aptSeq: item.aptSeq ? String(item.aptSeq) : item.dongCode, // 지역의 경우 동코드를 대체 ID로 사용
     aptNm: item.aptName || item.dongName || item.gugunName || item.sidoName,
     dealAmount: item.avgPrice ? item.avgPrice.toLocaleString() + '만원' : '0만원',
     latitude: item.latitude,
@@ -19,6 +26,11 @@ const convertToProperty = (item: AddressResponse, type: 'APT' | 'DONG' | 'GUGUN'
   }
 }
 
+/**
+ * [매물 목록 조회 (지도 영역 기준)]
+ * 현재 지도가 보고 있는 영역(bounds) 내의 아파트/지역 목록을 가져옵니다.
+ * 줌 레벨에 따라 scope(단지, 동, 구, 시)를 결정하여 적절한 데이터를 요청합니다.
+ */
 export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }): Promise<Property[]> => {
   if (!bounds) {
     return []
@@ -53,29 +65,37 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
   return areas.map(item => convertToProperty(item, propertyType))
 }
 
-import http from '@/api/http'
-import type { CommonResponse } from '@/api/http'
-import type { ApartmentDetailResponse } from '@/api/types'
 
-export const getPropertyDetail = async (id: string): Promise<Property | undefined> => {
+// [API 담당] 서버와 직접 통신하여 데이터를 가져오는 역할
+// 지도에 표시할 데이터나 상세 정보를 가져와서 프론트엔드 형식에 맞게 변환합니다.
+
+/**
+ * [상세 정보 조회]
+ * 특정 아파트의 구체적인 정보(평형 리스트, 실거래가 내역, 가격 추이 등)를 가져옵니다.
+ * 이 정보는 사이드바 상세 뷰에 표시됩니다.
+ */
+export const getPropertyDetail = async (id: string, pyung: string = 'all'): Promise<Property | undefined> => {
   try {
-    const response = await http.get<CommonResponse<ApartmentDetailResponse>>(`/api/v1/apartments/${id}`)
+    const response = await http.get<CommonResponse<ApartmentDetailResponse>>(`/api/v1/apartments/${id}`, {
+      params: { pyung }
+    })
     const data = response.data.data
+    console.log('[[DEBUG]] getPropertyDetail response:', data)
     
     if (!data) return undefined
 
-    // ApartmentDetailResponse를 Property 형식으로 변환
     const property: Property = {
       aptSeq: String(data.apartmentInfo.aptSeq),
       aptNm: data.apartmentInfo.aptName,
       dealAmount: data.apartmentInfo.avgPrice ? (data.apartmentInfo.avgPrice / 10000).toFixed(1) + '억' : '0억', // 예: 245000 -> 24.5억
-      latitude: 0, // 상세 정보에는 좌표가 없으므로 0 또는 기존 값 유지 필요 (여기서는 0으로 설정)
+      latitude: 0, 
       longitude: 0,
       roadNm: data.apartmentInfo.address,
-      excluUseAr: data.apartmentInfo.pyungTypes.join(', ') + '평',
+      excluUseAr: (data.apartmentInfo.pyungTypes || []).join(', ') + '평',
       floor: '-', // 상세 정보에 층수 요약은 없음
-      description: `건축년도: ${data.apartmentInfo.buildYear}년, 평형: ${data.apartmentInfo.pyungTypes.join(', ')}`,
+      description: `건축년도: ${data.apartmentInfo.buildYear}년, 평형: ${(data.apartmentInfo.pyungTypes || []).join(', ')}`,
       buildYear: data.apartmentInfo.buildYear,
+      pyungList: data.apartmentInfo.pyungTypes || [],
       deals: data.recentTransactions.map((deal, index) => ({
         no: index,
         aptSeq: String(data.apartmentInfo.aptSeq),

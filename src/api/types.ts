@@ -102,6 +102,7 @@ export interface Property {
   description: string
   buildYear?: number
   jibunAddress?: string
+  pyungList?: string[]
   deals?: HouseDeal[]
   priceTrend?: PriceTrend[]
   type?: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'
