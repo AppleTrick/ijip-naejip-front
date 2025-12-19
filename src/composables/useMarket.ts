@@ -51,7 +51,6 @@ export function useMarket() {
     error.value = null
     try {
       const pyung = statsStore.selectedPyung || 'all'
-      console.log('[DEBUG] fetchPropertyDetail - id:', id, 'pyung:', pyung, 'statsStore.selectedPyung:', statsStore.selectedPyung)
       const data = await marketApi.getPropertyDetail(id, pyung)
       if (data) {
         // 기존 선택된 매물이 있고 ID가 같다면 좌표 유지 (상세 API에는 좌표가 없을 수 있음)

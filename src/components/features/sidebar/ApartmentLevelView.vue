@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -20,34 +20,18 @@ const { addToComparison, removeFromComparison, isInComparison } = store
 const { goBack } = statsStore
 
 // 현재 선택된 평형 (statsStore의 selectedPyung과 동기화)
-const currentPyung = computed(() => {
-  const value = selectedPyung.value || 'all'
-  console.log('[DEBUG] currentPyung computed:', value, typeof value)
-  return value
-})
+const currentPyung = computed(() => selectedPyung.value || 'all')
 
-// 선택된 아파트가 변경되면 상세 정보 가져오기
-watch(() => selectedProperty.value?.aptSeq, (newId) => {
-  if (newId) {
+watch(() => selectedProperty.value?.aptSeq, (newId, oldId) => {
+  if (newId && newId !== oldId) {  // ← oldId 비교 추가
     fetchPropertyDetail(newId)
-  }
-}, { immediate: true })
-
-// pyungList 변경 감지 및 디버깅
-watch(() => selectedProperty.value?.pyungList, (pyungList) => {
-  if (pyungList) {
-    console.log('[DEBUG] pyungList:', pyungList, 'types:', pyungList.map(p => typeof p))
-    console.log('[DEBUG] currentPyung:', currentPyung.value, 'type:', typeof currentPyung.value)
   }
 }, { immediate: true })
 
 // 평형 선택 핸들러
 const handlePyungSelect = (pyung: string) => {
   if (!selectedProperty.value) return
-  
-  console.log('[DEBUG] handlePyungSelect:', pyung)
   statsStore.selectApartment(selectedProperty.value.aptSeq, pyung)
-  
   // selectedPyung이 변경된 후 즉시 새 데이터 요청
   fetchPropertyDetail(selectedProperty.value.aptSeq)
 }
@@ -155,7 +139,7 @@ const formatDate = (dateNum: number) => {
 
       <div class="price-grid">
         <div class="price-card">
-          <p class="price-label">최근 매매가</p>
+          <p class="price-label">아파트 대표 가격</p>
           <p class="price-value">{{ displayPrice }}</p>
         </div>
       </div>

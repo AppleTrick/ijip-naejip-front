@@ -88,7 +88,6 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
       params: { pyung }
     })
     const data = response.data.data
-    console.log('[[DEBUG]] getPropertyDetail response:', data)
     
     if (!data) return undefined
 

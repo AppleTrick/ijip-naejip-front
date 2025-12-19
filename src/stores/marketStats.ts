@@ -65,7 +65,6 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     isLoading.value = true
     try {
       const data = await statsApi.getDistrictStats(district.id)
-      console.log('[[DEBUG]] selectDistrict API Response:', data)
       
       // 마커에서 전달받은 정보로 덮어쓰기
       if (district.name) data.self.name = district.name
@@ -89,7 +88,6 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     isLoading.value = true
     try {
       const data = await statsApi.getNeighborhoodStats(neighborhood.id)
-      console.log('[[DEBUG]] selectNeighborhood API Response:', data)
 
       // 마커에서 전달받은 정보로 덮어쓰기
       if (neighborhood.name) data.self.name = neighborhood.name
@@ -131,10 +129,8 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
 
   // 아파트 단지를 선택했을 때 (실제 데이터 로딩은 safehome.ts에서 함)
   const selectApartment = (aptId: string, pyung: string = 'all') => {
-    console.log('[DEBUG] selectApartment - aptId:', aptId, 'pyung:', pyung)
     selectedApartmentId.value = aptId
     selectedPyung.value = pyung
-    console.log('[DEBUG] selectedPyung set to:', selectedPyung.value)
     currentLevel.value = 'apartment'
     openSidebar()
   }

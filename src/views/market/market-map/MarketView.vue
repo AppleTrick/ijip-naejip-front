@@ -63,11 +63,9 @@ const handleFilter = (filters: any) => {
 }
 
 const handleMarkerSelect = (property: Property) => {
-  console.log(`Clicked Marker: ${property.aptNm}, ${property.dealAmount}, Type: ${property.type}`)
-  selectProperty(property)
-  
-  // 가격 정보 파싱 (utils/formatters.ts 사용)
-  let avgPrice = 0
+  selectProperty(property)  // ← 이 줄 추가!
+
+    let avgPrice = 0
   if (property.dealAmount) {
     avgPrice = parseKoreanPrice(property.dealAmount)
   }
@@ -81,23 +79,21 @@ const handleMarkerSelect = (property: Property) => {
   } else if (property.type === 'DONG') {
     statsStore.selectDong({ id: property.aptSeq, name: property.aptNm, avgPrice })
   } else if (property.type === 'APT' || property.type === 'APT_DONG') {
-    // APT와 APT_DONG 모두 아파트 상세 정보 조회
-    // APT_DONG의 경우 primaryPyung이 있으면 해당 평형 데이터 요청
     const pyung = property.primaryPyung ? String(property.primaryPyung) : 'all'
     statsStore.selectApartment(property.aptSeq, pyung)
-  } else {
-    // 타입 정보가 누락된 경우, ID 접두사를 기반으로 추론하여 처리 (Fallback 로직)
-    const id = property.aptSeq
-    if (id.startsWith('city-')) {
-      statsStore.selectDistrict({ id: id, name: property.aptNm, avgPrice })
-    } else if (id.startsWith('gu-')) {
-      statsStore.selectNeighborhood({ id: id, name: property.aptNm, avgPrice })
-    } else if (id.startsWith('dong-')) {
-      statsStore.selectDong({ id: id, name: property.aptNm, avgPrice })
-    } else {
-      statsStore.selectApartment(property.aptSeq, 'all')
-    }
-  }
+  } 
+  // else {
+  //   const id = property.aptSeq
+  //   if (id.startsWith('city-')) {
+  //     statsStore.selectDistrict({ id: id, name: property.aptNm, avgPrice })
+  //   } else if (id.startsWith('gu-')) {
+  //     statsStore.selectNeighborhood({ id: id, name: property.aptNm, avgPrice })
+  //   } else if (id.startsWith('dong-')) {
+  //     statsStore.selectDong({ id: id, name: property.aptNm, avgPrice })
+  //   } else {
+  //     statsStore.selectApartment(property.aptSeq, 'all')
+  //   }
+  // }
 }
 
 // 지도 영역 변경 시 호출: 변경된 영역(bounds)에 해당하는 매물 데이터를 다시 가져옴
