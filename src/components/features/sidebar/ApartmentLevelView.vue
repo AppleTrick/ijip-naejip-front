@@ -22,9 +22,16 @@ const { goBack } = statsStore
 // 현재 선택된 평형 (statsStore의 selectedPyung과 동기화)
 const currentPyung = computed(() => selectedPyung.value || 'all')
 
-watch(() => selectedProperty.value?.aptSeq, (newId, oldId) => {
-  if (newId && newId !== oldId) {  // ← oldId 비교 추가
-    fetchPropertyDetail(newId)
+// 선택된 아파트가 변경되면 상세 정보 가져오기
+// 선택된 아파트나 평형이 변경되면 상세 정보 가져오기
+watch([() => selectedProperty.value?.aptSeq, selectedPyung], async ([newId, newPyung], [oldId, oldPyung]) => {
+  // ID가 없으면 리턴
+  if (!newId) return
+
+  // ID가 바뀌었거나, 같은 ID인데 평형이 바뀌었을 때만 재요청
+  // (이전 ID와 같고 평형도 같으면 요청 안 함 -> 초기 진입 등 방어)
+  if (newId !== oldId || newPyung !== oldPyung) {
+    await fetchPropertyDetail(newId)
   }
 }, { immediate: true })
 
@@ -32,33 +39,12 @@ watch(() => selectedProperty.value?.aptSeq, (newId, oldId) => {
 const handlePyungSelect = (pyung: string) => {
   if (!selectedProperty.value) return
   statsStore.selectApartment(selectedProperty.value.aptSeq, pyung)
-  // selectedPyung이 변경된 후 즉시 새 데이터 요청
-  fetchPropertyDetail(selectedProperty.value.aptSeq)
+  // watcher가 변경을 감지하여 데이터를 가져오므로 여기서는 호출하지 않음
 }
 
-// 선택된 평형에 따른 표시 가격 계산
+// 선택된 평형에 따른 표시 가격
 const displayPrice = computed(() => {
-  if (!selectedProperty.value) return '0억'
-  
-  const pyung = currentPyung.value
-  
-  // '전체' 선택 시 또는 거래 내역이 없을 때: 기본 평균가 사용
-  if (pyung === 'all' || !selectedProperty.value.deals || selectedProperty.value.deals.length === 0) {
-    return selectedProperty.value.dealAmount
-  }
-  
-  // 특정 평형 선택 시: 해당 평형의 거래만 필터링하여 평균 계산
-  const pyungNum = parseInt(pyung)
-  const pyungDeals = selectedProperty.value.deals.filter(deal => deal.excluUseAr === pyungNum)
-  
-  if (pyungDeals.length === 0) {
-    // 해당 평형의 거래가 없으면 전체 평균 표시
-    return selectedProperty.value.dealAmount
-  }
-  
-  // 해당 평형 거래의 평균 계산
-  const avgPrice = pyungDeals.reduce((sum, deal) => sum + deal.dealAmount, 0) / pyungDeals.length
-  return formatPrice(avgPrice)
+  return selectedProperty.value?.dealAmount || '0억'
 })
 
 const goToAnalysis = () => {

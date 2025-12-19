@@ -63,8 +63,11 @@ const handleFilter = (filters: any) => {
 }
 
 const handleMarkerSelect = (property: Property) => {
-  selectProperty(property)  // ← 이 줄 추가!
-
+  // 이미 선택된 매물과 같은 매물을 클릭한 경우, 상세 정보를 덮어쓰지 않도록 함
+  if (store.selectedProperty?.aptSeq !== property.aptSeq) {
+    selectProperty(property)
+  }
+  
     let avgPrice = 0
   if (property.dealAmount) {
     avgPrice = parseKoreanPrice(property.dealAmount)

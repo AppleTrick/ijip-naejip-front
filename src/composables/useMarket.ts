@@ -54,14 +54,20 @@ export function useMarket() {
       const data = await marketApi.getPropertyDetail(id, pyung)
       if (data) {
         // 기존 선택된 매물이 있고 ID가 같다면 좌표 유지 (상세 API에는 좌표가 없을 수 있음)
-        if (store.selectedProperty && store.selectedProperty.aptSeq === id) {
-          if (data.latitude === 0) data.latitude = store.selectedProperty.latitude
-          if (data.longitude === 0) data.longitude = store.selectedProperty.longitude
+        if (store.selectedProperty && store.selectedProperty.aptSeq === data.aptSeq) {
+          data.latitude = store.selectedProperty.latitude
+          data.longitude = store.selectedProperty.longitude
         }
+        
+        // API 응답으로 selectedProperty 업데이트 (깜빡임 방지)
         store.selectProperty(data)
+        
+        return data
       }
-    } catch (e: any) {
-      error.value = e.message || '매물 상세 정보를 불러오는데 실패했습니다.'
+      return undefined
+    } catch (err) {
+      error.value = err instanceof Error ? err.message : '매물 상세 정보를 불러오는데 실패했습니다.'
+      return undefined
     } finally {
       isLoading.value = false
     }
