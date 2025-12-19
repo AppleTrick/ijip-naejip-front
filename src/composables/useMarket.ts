@@ -2,12 +2,14 @@ import { ref } from 'vue'
 import * as marketApi from '@/api/marketApi'
 import type { MarketFilters } from '@/api/types'
 import { useMainDataStore } from '@/stores/mainData'
+import { useMarketStatsStore } from '@/stores/marketStats'
 
 // [서비스 로직/중계자] UI(화면)와 API(서버 통신) 사이를 연결하는 역할
 // 로딩 상태(isLoading)와 에러(error)를 관리하며, API 결과를 Store에 저장합니다.
 
 export function useMarket() {
   const store = useMainDataStore()
+  const statsStore = useMarketStatsStore()
   const isLoading = ref(false)
   const error = ref<string | null>(null)
 
@@ -48,7 +50,9 @@ export function useMarket() {
     isLoading.value = true
     error.value = null
     try {
-      const data = await marketApi.getPropertyDetail(id)
+      const pyung = statsStore.selectedPyung || 'all'
+      console.log('[DEBUG] fetchPropertyDetail - id:', id, 'pyung:', pyung, 'statsStore.selectedPyung:', statsStore.selectedPyung)
+      const data = await marketApi.getPropertyDetail(id, pyung)
       if (data) {
         // 기존 선택된 매물이 있고 ID가 같다면 좌표 유지 (상세 API에는 좌표가 없을 수 있음)
         if (store.selectedProperty && store.selectedProperty.aptSeq === id) {

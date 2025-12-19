@@ -20,6 +20,7 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
   const statsList = ref<RegionStats[]>([])
 
   const selectedApartmentId = ref<string | null>(null)
+  const selectedPyung = ref<string>('all')
   const isLoading = ref(false)
 
   // [Actions] 지역 이동 및 데이터 로딩 함수들
@@ -129,8 +130,11 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
   }
 
   // 아파트 단지를 선택했을 때 (실제 데이터 로딩은 safehome.ts에서 함)
-  const selectApartment = (aptId: string) => {
+  const selectApartment = (aptId: string, pyung: string = 'all') => {
+    console.log('[DEBUG] selectApartment - aptId:', aptId, 'pyung:', pyung)
     selectedApartmentId.value = aptId
+    selectedPyung.value = pyung
+    console.log('[DEBUG] selectedPyung set to:', selectedPyung.value)
     currentLevel.value = 'apartment'
     openSidebar()
   }
@@ -170,6 +174,7 @@ export const useMarketStatsStore = defineStore('marketStats', () => {
     currentRegion,
     statsList,
     selectedApartmentId,
+    selectedPyung,
     isLoading,
     toggleSidebar,
     openSidebar,

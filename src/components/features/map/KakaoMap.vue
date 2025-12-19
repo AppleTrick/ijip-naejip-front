@@ -66,7 +66,9 @@ const createMarker = (item: Property) => {
 
   const vnode = createVNode(MapMarkerOverlay, {
     price: item.dealAmount,
-    name: item.aptNm
+    name: item.aptNm,
+    pyung: item.excluUseAr,
+    aptDong: item.aptDong
   })
   render(vnode, content)
   

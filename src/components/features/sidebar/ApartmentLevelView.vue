@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {  watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -15,17 +15,67 @@ const store = useMainDataStore()
 const statsStore = useMarketStatsStore()
 const { fetchPropertyDetail } = useMarket()
 const { selectedProperty } = storeToRefs(store)
+const { selectedPyung } = storeToRefs(statsStore)
 const { addToComparison, removeFromComparison, isInComparison } = store
 const { goBack } = statsStore
+
+// 현재 선택된 평형 (statsStore의 selectedPyung과 동기화)
+const currentPyung = computed(() => {
+  const value = selectedPyung.value || 'all'
+  console.log('[DEBUG] currentPyung computed:', value, typeof value)
+  return value
+})
 
 // 선택된 아파트가 변경되면 상세 정보 가져오기
 watch(() => selectedProperty.value?.aptSeq, (newId) => {
   if (newId) {
-    // 이미 상세 정보(거래 내역 등)가 있는지 확인 후, 없으면 요청
-    // 또는 항상 최신 정보를 위해 요청
     fetchPropertyDetail(newId)
   }
 }, { immediate: true })
+
+// pyungList 변경 감지 및 디버깅
+watch(() => selectedProperty.value?.pyungList, (pyungList) => {
+  if (pyungList) {
+    console.log('[DEBUG] pyungList:', pyungList, 'types:', pyungList.map(p => typeof p))
+    console.log('[DEBUG] currentPyung:', currentPyung.value, 'type:', typeof currentPyung.value)
+  }
+}, { immediate: true })
+
+// 평형 선택 핸들러
+const handlePyungSelect = (pyung: string) => {
+  if (!selectedProperty.value) return
+  
+  console.log('[DEBUG] handlePyungSelect:', pyung)
+  statsStore.selectApartment(selectedProperty.value.aptSeq, pyung)
+  
+  // selectedPyung이 변경된 후 즉시 새 데이터 요청
+  fetchPropertyDetail(selectedProperty.value.aptSeq)
+}
+
+// 선택된 평형에 따른 표시 가격 계산
+const displayPrice = computed(() => {
+  if (!selectedProperty.value) return '0억'
+  
+  const pyung = currentPyung.value
+  
+  // '전체' 선택 시 또는 거래 내역이 없을 때: 기본 평균가 사용
+  if (pyung === 'all' || !selectedProperty.value.deals || selectedProperty.value.deals.length === 0) {
+    return selectedProperty.value.dealAmount
+  }
+  
+  // 특정 평형 선택 시: 해당 평형의 거래만 필터링하여 평균 계산
+  const pyungNum = parseInt(pyung)
+  const pyungDeals = selectedProperty.value.deals.filter(deal => deal.excluUseAr === pyungNum)
+  
+  if (pyungDeals.length === 0) {
+    // 해당 평형의 거래가 없으면 전체 평균 표시
+    return selectedProperty.value.dealAmount
+  }
+  
+  // 해당 평형 거래의 평균 계산
+  const avgPrice = pyungDeals.reduce((sum, deal) => sum + deal.dealAmount, 0) / pyungDeals.length
+  return formatPrice(avgPrice)
+})
 
 const goToAnalysis = () => {
   router.push('/analysis')
@@ -85,7 +135,9 @@ const formatDate = (dateNum: number) => {
       <div class="pyung-selector-container">
         <div class="pyung-selector-scroll">
           <button 
-            class="pyung-tab" 
+            class="pyung-tab"
+            :class="{ 'pyung-tab--active': currentPyung === 'all' }"
+            @click="handlePyungSelect('all')"
           >
             전체
           </button>
@@ -93,23 +145,18 @@ const formatDate = (dateNum: number) => {
             v-for="pyung in selectedProperty.pyungList" 
             :key="pyung" 
             class="pyung-tab"
-           >
+            :class="{ 'pyung-tab--active': currentPyung === pyung }"
+            @click="handlePyungSelect(pyung)"
+          >
             {{ pyung }}평
           </button>
         </div>
       </div>
 
-      <!-- :class="{ 'pyung-tab--active': currentPyung === 'all' }"
-            @click="handlePyungSelect('all')" -->
-
-      <!-- :class="{ 'pyung-tab--active': currentPyung === pyung }"
-            @click="handlePyungSelect(pyung)"
-          > -->
-
       <div class="price-grid">
         <div class="price-card">
           <p class="price-label">최근 매매가</p>
-          <p class="price-value">{{ selectedProperty.dealAmount }}</p>
+          <p class="price-value">{{ displayPrice }}</p>
         </div>
       </div>
 
@@ -123,10 +170,6 @@ const formatDate = (dateNum: number) => {
 
       <!-- Info Grid -->
       <div class="info-grid">
-        <div class="info-card">
-          <p class="info-label">평형</p>
-          <p class="info-value">{{ selectedProperty.excluUseAr }}</p>
-        </div>
         <div class="info-card">
           <p class="info-label">층수</p>
           <p class="info-value">{{ selectedProperty.floor }}</p>

@@ -1,4 +1,4 @@
-import type { User, LoginCredentials, SignUpData, LoginResponse } from './types'
+import type { User, LoginCredentials, SignUpData, LoginResponse, ChangePasswordRequest, NotificationSettings } from './types'
 import http from '@/api/http'
 
 export const login = async (credentials: LoginCredentials): Promise<LoginResponse> => {
@@ -10,8 +10,6 @@ export const login = async (credentials: LoginCredentials): Promise<LoginRespons
     throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }
-
-
 
 export const sendVerificationCode = async (email: string): Promise<void> => {
   try {
@@ -76,12 +74,7 @@ export const getUserInfo = async (): Promise<User> => {
   }
 }
 
-export const updateNotifications = async (settings: any): Promise<void> => {
-  // 구현 예정
-  console.log('Update notifications:', settings)
-}
-
-export const changePassword = async (data: any): Promise<void> => {
+export const changePassword = async (data: ChangePasswordRequest): Promise<void> => {
   try {
     await http.post('/user/change-password', data)
   } catch (error: any) {
@@ -95,6 +88,15 @@ export const resetPassword = async (email: string): Promise<void> => {
     await http.post('/user/reset-password', { email })
   } catch (error: any) {
     const errorMessage = error.response?.data?.message || error.response?.data || '비밀번호 초기화 실패';
+    throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
+  }
+}
+
+export const updateNotifications = async (settings: NotificationSettings): Promise<void> => {
+  try {
+    await http.put('/user/notifications', settings)
+  } catch (error: any) {
+    const errorMessage = error.response?.data?.message || error.response?.data || '알림 설정 업데이트 실패';
     throw new Error(typeof errorMessage === 'object' ? JSON.stringify(errorMessage) : errorMessage);
   }
 }

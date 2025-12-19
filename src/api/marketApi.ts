@@ -3,21 +3,29 @@ import { searchAreaAddress } from '@/api/regionApi'
 import http from '@/api/http'
 import type { CommonResponse } from '@/api/http'
 import type { ApartmentDetailResponse } from '@/api/types'
+import { formatPrice } from '@/utils/formatters'
 
 /**
  * [데이터 변환 헬퍼]
  * 백엔드에서 받은 주소/단지 정보(AddressResponse)를 지도 마커와 UI에서 사용하는
  * 통합 형식(Property)으로 변환해주는 도구입니다.
  */
-const convertToProperty = (item: AddressResponse, type: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'): Property => {
+const convertToProperty = (item: AddressResponse, type: 'APT' | 'APT_DONG' | 'DONG' | 'GUGUN' | 'SIDO'): Property => {
+  // APT_DONG의 경우: "아파트명 (동)" 형식으로 표시
+  const displayName = type === 'APT_DONG' && item.aptDong 
+    ? `${item.aptName} (${item.aptDong}동)` 
+    : (item.aptName || item.dongName || item.gugunName || item.sidoName)
+  
   return {
     aptSeq: item.aptSeq ? String(item.aptSeq) : item.dongCode, // 지역의 경우 동코드를 대체 ID로 사용
-    aptNm: item.aptName || item.dongName || item.gugunName || item.sidoName,
+    aptNm: displayName,
+    aptDong: item.aptDong || undefined,
     dealAmount: item.avgPrice ? item.avgPrice.toLocaleString() + '만원' : '0만원',
     latitude: item.latitude,
     longitude: item.longitude,
     roadNm: item.dongName || '',
     excluUseAr: item.primaryPyung ? item.primaryPyung + '평' : '-',
+    primaryPyung: item.primaryPyung || undefined,
     floor: '-',
     description: `${item.sidoName} ${item.gugunName} ${item.dongName}`,
     buildYear: 0,
@@ -87,7 +95,7 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
     const property: Property = {
       aptSeq: String(data.apartmentInfo.aptSeq),
       aptNm: data.apartmentInfo.aptName,
-      dealAmount: data.apartmentInfo.avgPrice ? (data.apartmentInfo.avgPrice / 10000).toFixed(1) + '억' : '0억', // 예: 245000 -> 24.5억
+      dealAmount: data.apartmentInfo.avgPrice ? formatPrice(data.apartmentInfo.avgPrice) : '0억',
       latitude: 0, 
       longitude: 0,
       roadNm: data.apartmentInfo.address,

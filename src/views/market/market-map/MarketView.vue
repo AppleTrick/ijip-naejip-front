@@ -6,7 +6,7 @@ import { useMarketStatsStore } from '@/stores/marketStats'
 import type { Property } from '@/api/types'
 import KakaoMap from '@/components/features/map/KakaoMap.vue'
 import MarketFilter from './components/MarketFilter.vue'
-import MarketSidebar from './components/sidebar/MarketSidebar.vue'
+import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
@@ -63,7 +63,7 @@ const handleFilter = (filters: any) => {
 }
 
 const handleMarkerSelect = (property: Property) => {
-  console.log(`Clicked Marker: ${property.aptNm}, ${property.dealAmount}`)
+  console.log(`Clicked Marker: ${property.aptNm}, ${property.dealAmount}, Type: ${property.type}`)
   selectProperty(property)
   
   // 가격 정보 파싱 (utils/formatters.ts 사용)
@@ -80,8 +80,11 @@ const handleMarkerSelect = (property: Property) => {
     statsStore.selectNeighborhood({ id: property.aptSeq, name: property.aptNm, avgPrice })
   } else if (property.type === 'DONG') {
     statsStore.selectDong({ id: property.aptSeq, name: property.aptNm, avgPrice })
-  } else if (property.type === 'APT') {
-    statsStore.selectApartment(property.aptSeq)
+  } else if (property.type === 'APT' || property.type === 'APT_DONG') {
+    // APT와 APT_DONG 모두 아파트 상세 정보 조회
+    // APT_DONG의 경우 primaryPyung이 있으면 해당 평형 데이터 요청
+    const pyung = property.primaryPyung ? String(property.primaryPyung) : 'all'
+    statsStore.selectApartment(property.aptSeq, pyung)
   } else {
     // 타입 정보가 누락된 경우, ID 접두사를 기반으로 추론하여 처리 (Fallback 로직)
     const id = property.aptSeq
@@ -92,7 +95,7 @@ const handleMarkerSelect = (property: Property) => {
     } else if (id.startsWith('dong-')) {
       statsStore.selectDong({ id: id, name: property.aptNm, avgPrice })
     } else {
-      statsStore.selectApartment(property.aptSeq)
+      statsStore.selectApartment(property.aptSeq, 'all')
     }
   }
 }

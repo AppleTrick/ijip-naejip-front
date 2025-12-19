@@ -5,6 +5,8 @@ import { formatPrice } from '@/utils/formatters'
 const props = defineProps<{
   price: string | number
   name?: string
+  pyung?: string
+  aptDong?: string
   isSelected?: boolean
 }>()
 
@@ -32,6 +34,8 @@ onMounted(() => {
 <template>
   <div v-if="isVisible" class="marker-overlay">
     <span v-if="name" class="region-name">{{ name }}</span>
+    <span v-if="aptDong" class="dong-text">{{ aptDong }}동</span>
+    <span v-if="pyung" class="pyung-text">{{ pyung }}</span>
     <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
   </div>
 </template>
@@ -64,6 +68,24 @@ onMounted(() => {
   margin-bottom: 0.125rem;
   white-space: nowrap;
   opacity: 0.9;
+}
+
+.pyung-text {
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 400;
+  margin-bottom: 0.125rem;
+  white-space: nowrap;
+  opacity: 0.8;
+}
+
+.dong-text {
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 500;
+  margin-bottom: 0.125rem;
+  white-space: nowrap;
+  opacity: 0.85;
 }
 
 .price-text {

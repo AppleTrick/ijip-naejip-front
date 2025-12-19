@@ -53,6 +53,22 @@ export interface SignUpData {
   }
 }
 
+export interface SocialSignUpData extends SignUpData {
+  socialId: string
+  socialType: 'KAKAO' | 'NAVER' | 'GOOGLE'
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface NotificationSettings {
+  appPush?: boolean
+  emailNotification?: boolean
+  marketingNotification?: boolean
+}
+
 export interface LoginResponse {
   accessToken: string
   name: string
@@ -93,11 +109,13 @@ export interface HouseDeal {
 export interface Property {
   aptSeq: string
   aptNm: string
+  aptDong?: string
   dealAmount: string
   latitude: number
   longitude: number
   roadNm: string
   excluUseAr: string
+  primaryPyung?: number
   floor: string
   description: string
   buildYear?: number
@@ -105,7 +123,7 @@ export interface Property {
   pyungList?: string[]
   deals?: HouseDeal[]
   priceTrend?: PriceTrend[]
-  type?: 'APT' | 'DONG' | 'GUGUN' | 'SIDO'
+  type?: 'APT' | 'APT_DONG' | 'DONG' | 'GUGUN' | 'SIDO'
 }
 
 export interface AuthResponse {
