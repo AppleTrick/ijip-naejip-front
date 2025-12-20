@@ -134,7 +134,7 @@ const formatDate = (dateNum: number) => {
       <div v-if="selectedProperty.priceTrend && selectedProperty.priceTrend.length > 0" class="chart-section">
         <h3 class="section-title">가격 추이</h3>
         <div class="chart-wrapper">
-          <TrendGraph :data="selectedProperty.priceTrend" :height="150" color="#E84545" />
+          <TrendGraph :data="selectedProperty.priceTrend" :height="150" color="var(--color-primary)" />
         </div>
       </div>
 
@@ -282,7 +282,7 @@ const formatDate = (dateNum: number) => {
 }
 
 .compare-btn--active {
-  background-color: rgba(144, 55, 73, 0.2);
+  background-color: var(--color-primary-transparent-20);
   color: var(--color-primary);
 }
 
@@ -341,8 +341,8 @@ const formatDate = (dateNum: number) => {
 }
 
 .price-value {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 1.5rem;
+  font-weight: 800;
   color: var(--color-primary);
 }
 
@@ -389,9 +389,10 @@ const formatDate = (dateNum: number) => {
 .safety-cta {
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   padding: 1.5rem;
-  border-radius: 1rem;
+  border-radius: 1.25rem;
   color: var(--color-white);
   text-align: center;
+  box-shadow: var(--glass-shadow);
 }
 
 .cta-title {

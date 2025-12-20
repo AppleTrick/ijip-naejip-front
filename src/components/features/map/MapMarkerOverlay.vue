@@ -57,7 +57,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="isVisible" class="marker-overlay">
+  <div v-if="isVisible" class="marker-overlay" :class="{ 'selected': isSelected }">
     <span v-if="name" class="region-name">{{ name }}</span>
     <span v-if="displayAptDong" class="dong-text">{{ displayAptDong }}</span>
     <span v-if="displayPyung" class="pyung-text">{{ displayPyung }}</span>
@@ -67,57 +67,85 @@ onMounted(() => {
 
 <style scoped>
 .marker-overlay {
-  padding: 0.5rem 0.75rem;
-  background-color: var(--color-soft-red);
-  border: 2px solid var(--color-primary);
-  border-radius: 1rem;
+  padding: 0.6rem 0.9rem;
+  /* Glassmorphism Effect */
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  
+  border: 1.5px solid var(--color-primary);
+  border-radius: 1.25rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 10px rgba(43, 46, 74, 0.3); /* primaryTransparent30 */
-  transition: transform 0.2s;
-  min-width: 60px;
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 70px;
 }
 
 .marker-overlay:hover {
-  transform: scale(1.1);
-  z-index: 10;
+  transform: translateY(-5px) scale(1.05);
+  background: var(--color-primary);
+  border-color: var(--color-white);
+  z-index: 100;
+}
+
+.marker-overlay:hover span {
+  color: var(--color-white);
+  opacity: 1;
 }
 
 .region-name {
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-bottom: 0.125rem;
-  white-space: nowrap;
-  opacity: 0.9;
-}
-
-.pyung-text {
-  color: white;
-  font-size: 0.7rem;
-  font-weight: 400;
-  margin-bottom: 0.125rem;
+  color: var(--color-text);
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
   white-space: nowrap;
   opacity: 0.8;
 }
 
+.pyung-text {
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 400;
+  margin-bottom: 0.2rem;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
 .dong-text {
-  color: white;
-  font-size: 0.7rem;
+  color: var(--color-text);
+  font-size: 0.75rem;
   font-weight: 500;
-  margin-bottom: 0.125rem;
+  margin-bottom: 0.2rem;
   white-space: nowrap;
   opacity: 0.85;
 }
 
 .price-text {
-  color: white;
-  font-weight: 700;
-  font-size: 0.9rem;
+  color: var(--color-primary);
+  font-weight: 800;
+  font-size: 1rem;
   white-space: nowrap;
   font-family: 'Pretendard', sans-serif;
+  transition: color 0.3s;
+}
+
+.marker-overlay:hover .price-text {
+  color: var(--color-white);
+}
+
+/* Selected State */
+.marker-overlay.selected {
+  background: var(--color-primary);
+  border-color: var(--color-white);
+  box-shadow: 0 0 15px var(--color-primary-transparent-30);
+}
+
+.marker-overlay.selected span {
+  color: var(--color-white);
+  opacity: 1;
 }
 </style>

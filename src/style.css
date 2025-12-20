@@ -2,42 +2,48 @@
 @import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css");
 
 :root {
-  /* Colors from colors.ts */
-  --color-primary: #E84545;
-  --color-primary-hover: #D63939;
-  --color-primary-light: #FFE5E5;
-  --color-soft-red: #FF6B6B;
-  --color-primary-hover: #D63939;
-  --color-secondary: #903749;
-  --color-secondary-hover: #7A2F3E;
-  --color-secondary-light: #90374933;
-  --color-accent: #53354A;
-  --color-accent-hover: #3E2838;
+  /* Premium Lavender/Violet Palette */
+  --color-primary: #7C3AED;        /* Violet 600 */
+  --color-primary-hover: #6D28D9;  /* Violet 700 */
+  --color-primary-light: #EDE9FE;  /* Violet 100 */
+  --color-primary-soft: #F5F3FF;   /* Violet 50 */
+  
+  --color-secondary: #6366F1;      /* Indigo 500 */
+  --color-secondary-hover: #4F46E5;
+  --color-secondary-light: rgba(99, 102, 241, 0.1);
+  
+  --color-accent: #A855F7;         /* Purple 500 */
+  --color-accent-hover: #9333EA;
+  
+  --color-background: #F9FAFB;
+  --color-background-dark: #1F2937;
 
-  --color-background: #F5F5F5;
-  --color-background-dark: #2B2E4A;
-
-  --color-text: #2B2E4A;
+  --color-text: #1E1B4B;           /* Deep Indigo/Ink */
   --color-text-light: #6B7280;
 
   --color-white: #FFFFFF;
 
+  --color-gray-50: #F9FAFB;
   --color-gray-100: #F3F4F6;
   --color-gray-200: #E5E7EB;
   --color-gray-400: #9CA3AF;
   --color-gray-500: #6B7280;
   --color-gray-700: #374151;
 
-  --color-danger: #E84545;
-  --color-danger-hover: #D63939;
+  --color-danger: #EF4444;
+  --color-danger-hover: #DC2626;
 
-  /* Transparent versions */
-  --color-primary-transparent-10: rgba(232, 69, 69, 0.1);
-  --color-primary-transparent-20: rgba(232, 69, 69, 0.2);
-  --color-primary-transparent-30: rgba(232, 69, 69, 0.3);
-  --color-secondary-transparent-20: rgba(144, 55, 73, 0.2);
-  --color-secondary-transparent-30: rgba(144, 55, 73, 0.3);
-  --color-accent-transparent-20: rgba(83, 53, 74, 0.2);
+  /* Glassmorphism Tokens */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-dark: rgba(31, 41, 55, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-blur: 12px;
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+
+  /* Transparent versions for effects */
+  --color-primary-transparent-10: rgba(124, 58, 237, 0.1);
+  --color-primary-transparent-20: rgba(124, 58, 237, 0.2);
+  --color-primary-transparent-30: rgba(124, 58, 237, 0.3);
 
   /* Aliases */
   --color-bg: var(--color-background);

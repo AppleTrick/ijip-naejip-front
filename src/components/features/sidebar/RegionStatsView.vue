@@ -53,7 +53,7 @@ const handleSelect = (stat: any) => {
       >
         <template #content>
           <div v-if="currentRegion.trend && currentRegion.trend.length > 0" class="main-graph-wrapper">
-            <TrendGraph :data="currentRegion.trend" :height="180" color="#E84545" />
+            <TrendGraph :data="currentRegion.trend" :height="180" color="var(--color-primary)" />
           </div>
         </template>
       </SidebarHeader>
