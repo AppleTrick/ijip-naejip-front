@@ -312,7 +312,7 @@ const formatPrice = (val: number) => {
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--color-primary);
-  background-color: rgba(232, 69, 69, 0.1);
+  background-color: var(--color-primary-transparent-10);
   padding: 0.5rem;
   border-radius: 0.5rem;
 }

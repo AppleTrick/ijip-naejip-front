@@ -471,12 +471,12 @@ const analyze = async () => {
 }
 
 .radio-card:hover {
-  border-color: rgba(144, 55, 73, 0.3); /* secondary/30 */
+  border-color: var(--color-primary-transparent-30); /* secondary/30 */
 }
 
 input[type="radio"]:checked + .radio-card--safe {
   border-color: var(--color-primary);
-  background-color: rgba(144, 55, 73, 0.1); /* secondary/10 */
+  background-color: var(--color-primary-transparent-10); /* secondary/10 */
 }
 
 input[type="radio"]:checked + .radio-card--danger {
@@ -495,7 +495,7 @@ input[type="radio"]:checked + .radio-card--danger {
 }
 
 .safe-icon {
-  background-color: rgba(144, 55, 73, 0.2); /* secondary/20 */
+  background-color: var(--color-primary-transparent-20); /* secondary/20 */
   color: var(--color-primary);
 }
 
@@ -593,7 +593,7 @@ input[type="radio"]:checked + .radio-card--danger {
 
 .result-card--safe {
   border-color: var(--color-primary);
-  background-color: rgba(144, 55, 73, 0.05); /* secondary/10/30 approx */
+  background-color: var(--color-primary-transparent-10); /* secondary/10/30 approx */
 }
 
 .result-card--warning {
@@ -624,7 +624,7 @@ input[type="radio"]:checked + .radio-card--danger {
 }
 
 .grade-icon--safe {
-  background-color: rgba(144, 55, 73, 0.2);
+  background-color: var(--color-primary-transparent-20);
   color: var(--color-primary);
 }
 
@@ -715,7 +715,7 @@ input[type="radio"]:checked + .radio-card--danger {
 .zone-safe {
   left: 0;
   width: 70%;
-  background-color: rgba(144, 55, 73, 0.15); /* secondary/30/50 */
+  background-color: var(--color-primary-transparent-10); /* secondary/30/50 */
 }
 
 .zone-warning {

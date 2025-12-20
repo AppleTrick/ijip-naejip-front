@@ -222,7 +222,7 @@ const handleSave = async () => {
 .icon-wrapper {
   width: 4rem;
   height: 4rem;
-  background-color: rgba(144, 55, 73, 0.1);
+  background-color: var(--color-primary-transparent-10);
   border-radius: 50%;
   display: flex;
   align-items: center;

@@ -97,7 +97,7 @@ defineProps<{
   left: 0;
   width: 100%;
   height: 8px;
-  background-color: rgba(232, 69, 69, 0.1);
+  background-color: var(--color-primary-transparent-10);
   z-index: -1;
 }
 

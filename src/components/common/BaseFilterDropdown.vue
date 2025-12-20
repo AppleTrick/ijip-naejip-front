@@ -70,7 +70,7 @@ onUnmounted(() => document.removeEventListener('click', close))
 
 .filter-btn.active {
   border-color: var(--color-primary);
-  background-color: #FEF2F2; /* primary-50 equivalent, solid */
+  background-color: var(--color-primary-soft);
   color: var(--color-primary);
 }
 
