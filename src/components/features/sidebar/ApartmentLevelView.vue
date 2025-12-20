@@ -287,7 +287,7 @@ const formatDate = (dateNum: number) => {
 }
 
 .compare-btn--active:hover {
-  background-color: rgba(144, 55, 73, 0.3);
+  background-color: var(--color-primary-transparent-30);
 }
 
 .compare-btn--inactive {
@@ -503,7 +503,7 @@ const formatDate = (dateNum: number) => {
 }
 
 .pyung-tag:hover {
-  background-color: var(--color-primary-light, rgba(144, 55, 73, 0.1));
+  background-color: var(--color-primary-light);
   color: var(--color-primary);
   border-color: var(--color-primary);
 }

@@ -156,8 +156,8 @@ const navigateToMap = () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.5rem 1rem;
-  background: linear-gradient(135deg, rgba(232, 69, 69, 0.1), rgba(144, 55, 73, 0.1));
-  border: 1px solid rgba(232, 69, 69, 0.2);
+  background: linear-gradient(135deg, var(--color-primary-transparent-10), var(--color-primary-transparent-10));
+  border: 1px solid var(--color-primary-transparent-20);
   border-radius: 2rem;
   color: var(--color-primary);
   font-size: 0.875rem;
@@ -182,7 +182,7 @@ const navigateToMap = () => {
 }
 
 .highlight {
-  background: linear-gradient(135deg, #E84545 0%, #903749 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -255,14 +255,14 @@ const navigateToMap = () => {
 .glass-button {
   background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(232, 69, 69, 0.2);
+  border: 1px solid var(--color-primary-transparent-20);
 }
 
 .glass-button:hover {
   background: rgba(255, 255, 255, 0.95);
   border-color: var(--color-primary);
   transform: translateY(-2px);
-  box-shadow: 0 10px 25px rgba(232, 69, 69, 0.2);
+  box-shadow: 0 10px 25px var(--color-primary-transparent-20);
 }
 
 /* Quick Stats */
@@ -274,7 +274,7 @@ const navigateToMap = () => {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(20px);
   border-radius: 1.5rem;
-  border: 1px solid rgba(232, 69, 69, 0.1);
+  border: 1px solid var(--color-primary-transparent-10);
 }
 
 .stat-item {
@@ -324,7 +324,7 @@ const navigateToMap = () => {
 .orb-1 {
   width: 300px;
   height: 300px;
-  background: linear-gradient(135deg, #E84545, #903749);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   top: 10%;
   right: 10%;
 }
@@ -362,7 +362,7 @@ const navigateToMap = () => {
 
 .floating-card:hover {
   transform: translateY(-10px) scale(1.05);
-  box-shadow: 0 30px 60px -12px rgba(232, 69, 69, 0.3);
+  box-shadow: 0 30px 60px -12px var(--color-primary-transparent-30);
 }
 
 .card-glow {
@@ -371,7 +371,7 @@ const navigateToMap = () => {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(232, 69, 69, 0.1), transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-transparent-10), transparent 70%);
   animation: glow-rotate 4s linear infinite;
 }
 

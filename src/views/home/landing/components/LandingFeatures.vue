@@ -108,7 +108,7 @@ const handleMouseLeave = (e: MouseEvent) => {
 }
 
 .gradient-text-alt {
-  background: linear-gradient(135deg, #E84545 0%, #903749 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -147,7 +147,7 @@ const handleMouseLeave = (e: MouseEvent) => {
   bottom: 0;
   border-radius: 2rem;
   padding: 2px;
-  background: linear-gradient(135deg, rgba(232, 69, 69, 0.1), rgba(144, 55, 73, 0.1));
+  background: linear-gradient(135deg, var(--color-primary-transparent-10), var(--color-primary-transparent-10));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -161,8 +161,8 @@ const handleMouseLeave = (e: MouseEvent) => {
 }
 
 .feature-card.featured {
-  background: linear-gradient(135deg, rgba(232, 69, 69, 0.05), rgba(144, 55, 73, 0.05));
-  border-color: rgba(232, 69, 69, 0.2);
+  background: linear-gradient(135deg, var(--color-primary-transparent-10), var(--color-primary-transparent-10));
+  border-color: var(--color-primary-transparent-20);
   transform: scale(1.05);
 }
 
@@ -170,13 +170,13 @@ const handleMouseLeave = (e: MouseEvent) => {
   position: absolute;
   top: 1.5rem;
   right: 1.5rem;
-  background: linear-gradient(135deg, #E84545, #903749);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 1rem;
   font-size: 0.75rem;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(232, 69, 69, 0.3);
+  box-shadow: 0 4px 12px var(--color-primary-transparent-30);
 }
 
 .feature-bg {
