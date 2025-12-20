@@ -19,12 +19,12 @@ const convertToProperty = (item: AddressResponse, type: 'APT' | 'APT_DONG' | 'DO
   return {
     aptSeq: item.aptSeq ? String(item.aptSeq) : item.dongCode, // 지역의 경우 동코드를 대체 ID로 사용
     aptNm: displayName,
-    aptDong: item.aptDong && item.aptDong !== '-' ? item.aptDong : '',
+    aptDong: item.aptDong || undefined,
     dealAmount: item.avgPrice ? item.avgPrice.toLocaleString() + '만원' : '0만원',
     latitude: item.latitude,
     longitude: item.longitude,
     roadNm: item.dongName || '',
-    excluUseAr: item.primaryPyung && item.primaryPyung > 0 ? String(item.primaryPyung) : '',
+    excluUseAr: item.primaryPyung ? item.primaryPyung + '평' : '-',
     primaryPyung: item.primaryPyung || undefined,
     floor: '-',
     description: `${item.sidoName} ${item.gugunName} ${item.dongName}`,

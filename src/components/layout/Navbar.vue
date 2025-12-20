@@ -275,7 +275,7 @@ const handleLogout = () => {
 }
 
 .logo-icon-wrapper {
-  background-color: var(--color-primary-transparent-10); /* primary/10 */
+  background-color: rgba(144, 55, 73, 0.15); /* secondary/15 */
   padding: 0.375rem;
   border-radius: 0.5rem;
   margin-right: 0.625rem;
@@ -283,7 +283,7 @@ const handleLogout = () => {
 }
 
 .logo-group:hover .logo-icon-wrapper {
-  background-color: var(--color-primary-transparent-20);
+  background-color: rgba(144, 55, 73, 0.25);
 }
 
 .logo-icon {
@@ -338,7 +338,7 @@ const handleLogout = () => {
 }
 
 .nav-link--active {
-  background-color: var(--color-primary-transparent-10);
+  background-color: rgba(144, 55, 73, 0.15);
   color: var(--color-primary);
   font-weight: 700;
 }
@@ -468,7 +468,7 @@ const handleLogout = () => {
 }
 
 .mobile-nav-link--active {
-  background-color: var(--color-primary-transparent-10);
+  background-color: rgba(144, 55, 73, 0.15);
   color: var(--color-primary);
   font-weight: 700;
 }

@@ -114,7 +114,7 @@ const emit = defineEmits<{
 .go-to-btn:hover {
   color: var(--color-primary);
   border-color: var(--color-primary);
-  background-color: var(--color-primary-soft);
+  background-color: var(--color-red-50); /* Assuming this exists or falls back */
 }
 
 .region-name {
