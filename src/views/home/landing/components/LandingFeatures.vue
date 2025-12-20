@@ -84,7 +84,7 @@ const handleMouseLeave = (e: MouseEvent) => {
 .features-section {
   position: relative;
   padding: 8rem 2rem;
-  background: linear-gradient(180deg, transparent 0%, rgba(232, 69, 69, 0.02) 100%);
+  background: linear-gradient(180deg, transparent 0%, rgba(124, 58, 237, 0.02) 100%);
   z-index: 1;
 }
 
@@ -185,7 +185,7 @@ const handleMouseLeave = (e: MouseEvent) => {
   right: -50%;
   width: 200%;
   height: 200%;
-  background: radial-gradient(circle, rgba(232, 69, 69, 0.03), transparent 70%);
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.03), transparent 70%);
   opacity: 0;
   transition: opacity 0.4s ease;
 }
@@ -202,7 +202,7 @@ const handleMouseLeave = (e: MouseEvent) => {
 
 .feature-card.hovered {
   transform: translateY(-12px) scale(1.02);
-  box-shadow: 0 25px 50px -12px rgba(232, 69, 69, 0.25);
+  box-shadow: 0 25px 50px -12px rgba(124, 58, 237, 0.25);
 }
 
 .icon-wrapper {
@@ -226,7 +226,7 @@ const handleMouseLeave = (e: MouseEvent) => {
 }
 
 .shield-gradient {
-  background: linear-gradient(135deg, rgba(232, 69, 69, 0.15), rgba(144, 55, 73, 0.15));
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.15), var(--color-primary-transparent-10));
 }
 
 .scale-gradient {

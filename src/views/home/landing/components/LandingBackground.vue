@@ -38,7 +38,7 @@
   position: absolute;
   width: 4px;
   height: 4px;
-  background: radial-gradient(circle, rgba(232, 69, 69, 0.5), transparent);
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.5), transparent);
   border-radius: 50%;
   animation: particle-float linear infinite;
 }

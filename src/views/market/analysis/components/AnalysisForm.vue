@@ -715,7 +715,7 @@ input[type="radio"]:checked + .radio-card--danger {
 .zone-safe {
   left: 0;
   width: 70%;
-  background-color: rgba(144, 55, 73, 0.15); /* secondary/30/50 */
+  background-color: var(--color-primary-transparent-10); /* secondary/30/50 */
 }
 
 .zone-warning {
