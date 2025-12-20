@@ -26,16 +26,41 @@ const formattedPrice = computed(() => {
   return formatPrice(props.price)
 })
 
+const displayAptDong = computed(() => {
+  const val = props.aptDong?.trim()
+  if (!val || val === '' || val === '-' || val === 'null' || val === 'undefined') return ''
+  
+  const nameVal = props.name?.trim() || ''
+  
+  // 1. 중복 체크: 아파트 이름과 동 정보가 같거나 이름에 이미 포함된 경우 숨김
+  if (nameVal && (val === nameVal || nameVal.includes(val))) return ''
+
+  // 2. 이미 '동'으로 끝나면 그대로 반환
+  if (val.endsWith('동')) return val
+  
+  // 3. 숫자가 포함되어 있거나, 아주 짧은 문자열(A, B, 가, 나 등)인 경우 -> '동' 추가
+  if (/\d/.test(val) || val.length <= 2) return `${val}동`
+  
+  // 4. 그 외 문자열(건물명/단지명 등)은 그대로 반환
+  return val
+})
+
+const displayPyung = computed(() => {
+  const val = props.pyung?.trim()
+  if (!val || val === '' || val === '-' || val === 'null' || val === 'undefined') return ''
+  return val.endsWith('평') ? val : `${val}평`
+})
+
 onMounted(() => {
-  // console.log('MapMarkerOverlay mounted:', props.name, props.price)
+  // console.log('MapMarkerOverlay mounted:', props.name, props.aptDong);
 })
 </script>
 
 <template>
   <div v-if="isVisible" class="marker-overlay">
     <span v-if="name" class="region-name">{{ name }}</span>
-    <span v-if="aptDong" class="dong-text">{{ aptDong }}동</span>
-    <span v-if="pyung" class="pyung-text">{{ pyung }}</span>
+    <span v-if="displayAptDong" class="dong-text">{{ displayAptDong }}</span>
+    <span v-if="displayPyung" class="pyung-text">{{ displayPyung }}</span>
     <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
   </div>
 </template>

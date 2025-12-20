@@ -258,7 +258,7 @@ const sortedComparisonList = computed(() => {
                       <!-- Area Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">면적</p>
-                        <p class="stat-value">{{ property.excluUseAr }}</p>
+                        <p class="stat-value">{{ property.excluUseAr }}평</p>
                         <div v-if="myHouse" class="diff-text"
                              :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'text-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'text-red' : 'text-gray'">
                           {{ formatAreaDiff(property.excluUseAr, myHouse.excluUseAr) }}
