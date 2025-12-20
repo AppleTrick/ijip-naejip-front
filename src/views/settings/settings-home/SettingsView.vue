@@ -144,7 +144,7 @@ const handleDeleteAccount = () => {
 .item-icon-wrapper {
   width: 3rem;
   height: 3rem;
-  background-color: rgba(144, 55, 73, 0.1);
+  background-color: var(--color-primary-transparent-10);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;

@@ -33,7 +33,7 @@ withDefaults(defineProps<Props>(), {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 0.5rem;
+  border-radius: 0.75rem;
   font-weight: 700;
   transition: all 0.2s;
   transform: scale(1);
@@ -54,7 +54,7 @@ withDefaults(defineProps<Props>(), {
 .btn--primary {
   background-color: var(--color-primary);
   color: var(--color-white);
-  box-shadow: 0 4px 6px -1px rgba(232, 69, 69, 0.3);
+  box-shadow: 0 4px 12px var(--color-primary-transparent-30);
 }
 
 .btn--primary:hover {
@@ -64,7 +64,7 @@ withDefaults(defineProps<Props>(), {
 .btn--secondary {
   background-color: var(--color-secondary);
   color: var(--color-white);
-  box-shadow: 0 4px 6px -1px rgba(144, 55, 73, 0.2);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .btn--secondary:hover {
@@ -85,7 +85,7 @@ withDefaults(defineProps<Props>(), {
 .btn--danger {
   background-color: var(--color-danger);
   color: var(--color-white);
-  box-shadow: 0 4px 6px -1px rgba(232, 69, 69, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
 }
 
 .btn--danger:hover {

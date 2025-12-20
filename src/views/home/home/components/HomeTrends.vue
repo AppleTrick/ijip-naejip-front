@@ -89,7 +89,7 @@ import BaseCard from '@/components/common/BaseCard.vue'
 
 .graph-placeholder {
   height: 200px;
-  background: linear-gradient(180deg, rgba(232, 69, 69, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+  background: linear-gradient(180deg, var(--color-primary-transparent-10) 0%, rgba(255, 255, 255, 0) 100%);
   border-bottom: 1px solid var(--color-gray-200);
   position: relative;
   margin-bottom: 1rem;

@@ -32,7 +32,7 @@ const navigateToMap = () => {
 .cta-section {
   padding: 8rem 2rem;
   text-align: center;
-  background: linear-gradient(135deg, rgba(232, 69, 69, 0.05), rgba(144, 55, 73, 0.05));
+  background: linear-gradient(135deg, var(--color-primary-transparent-10), var(--color-primary-transparent-10));
 }
 
 .cta-content {

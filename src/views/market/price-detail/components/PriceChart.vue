@@ -115,7 +115,7 @@ const hoveredIndex = ref<number | null>(null)
 .bar.active {
   opacity: 1;
   transform: scaleY(1.05);
-  box-shadow: 0 4px 12px rgba(232, 69, 69, 0.3);
+  box-shadow: 0 4px 12px var(--color-primary-transparent-30);
 }
 
 .x-label {
