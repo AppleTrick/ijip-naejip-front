@@ -58,38 +58,102 @@ onMounted(() => {
 
 <template>
   <div v-if="isVisible" class="marker-overlay" :class="{ 'selected': isSelected }">
-    <span v-if="name" class="region-name">{{ name }}</span>
-    <span v-if="displayAptDong" class="dong-text">{{ displayAptDong }}</span>
-    <span v-if="displayPyung" class="pyung-text">{{ displayPyung }}</span>
-    <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
+    <div class="marker-body">
+      <span v-if="name" class="region-name">{{ name }}</span>
+      <div v-if="displayAptDong || displayPyung" class="sub-info">
+        <span v-if="displayAptDong">{{ displayAptDong }}</span>
+        <span v-if="displayAptDong && displayPyung">•</span>
+        <span v-if="displayPyung">{{ displayPyung }}</span>
+      </div>
+      <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
+    </div>
   </div>
 </template>
 
 <style scoped>
 .marker-overlay {
-  padding: 0.6rem 0.9rem;
-  /* Glassmorphism Effect */
-  background: var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur));
-  -webkit-backdrop-filter: blur(var(--glass-blur));
-  
-  border: 1.5px solid var(--color-primary);
-  border-radius: 1.25rem;
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  filter: drop-shadow(0 4px 12px rgba(31, 38, 135, 0.2));
   cursor: pointer;
-  box-shadow: var(--glass-shadow);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  min-width: 70px;
+  transform-origin: bottom center;
 }
 
+/* Main Marker Body */
+.marker-body {
+  padding: 0.5rem 0.75rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1.5px solid var(--color-primary);
+  border-radius: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  min-width: 65px;
+  z-index: 2;
+  transition: all 0.3s ease;
+}
+
+/* Pin Tail (Pointer) */
+.marker-overlay::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 12px;
+  height: 12px;
+  background: var(--color-white);
+  border-right: 1.5px solid var(--color-primary);
+  border-bottom: 1.5px solid var(--color-primary);
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+/* Typography Hierarchy */
+.region-name {
+  color: var(--color-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  letter-spacing: -0.02em;
+}
+
+.sub-info {
+  display: flex;
+  gap: 0.25rem;
+  font-size: 0.65rem;
+  color: var(--color-text-light);
+  font-weight: 500;
+}
+
+.price-text {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--color-primary);
+  font-family: 'Pretendard', sans-serif;
+  margin-top: 0.125rem;
+}
+
+/* Interaction States */
 .marker-overlay:hover {
-  transform: translateY(-5px) scale(1.05);
+  transform: translateY(-8px) scale(1.08);
+  z-index: 100;
+}
+
+.marker-overlay:hover .marker-body {
   background: var(--color-primary);
   border-color: var(--color-white);
-  z-index: 100;
+}
+
+.marker-overlay:hover::after {
+  background: var(--color-primary);
+  border-color: var(--color-white);
 }
 
 .marker-overlay:hover span {
@@ -97,55 +161,27 @@ onMounted(() => {
   opacity: 1;
 }
 
-.region-name {
-  color: var(--color-text);
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 0.2rem;
-  white-space: nowrap;
-  opacity: 0.8;
-}
-
-.pyung-text {
-  color: var(--color-text);
-  font-size: 0.75rem;
-  font-weight: 400;
-  margin-bottom: 0.2rem;
-  white-space: nowrap;
-  opacity: 0.7;
-}
-
-.dong-text {
-  color: var(--color-text);
-  font-size: 0.75rem;
-  font-weight: 500;
-  margin-bottom: 0.2rem;
-  white-space: nowrap;
-  opacity: 0.85;
-}
-
-.price-text {
-  color: var(--color-primary);
-  font-weight: 800;
-  font-size: 1rem;
-  white-space: nowrap;
-  font-family: 'Pretendard', sans-serif;
-  transition: color 0.3s;
-}
-
 .marker-overlay:hover .price-text {
   color: var(--color-white);
 }
 
 /* Selected State */
-.marker-overlay.selected {
+.marker-overlay.selected .marker-body {
   background: var(--color-primary);
   border-color: var(--color-white);
   box-shadow: 0 0 15px var(--color-primary-transparent-30);
 }
 
+.marker-overlay.selected::after {
+  background: var(--color-primary);
+  border-color: var(--color-white);
+}
+
 .marker-overlay.selected span {
   color: var(--color-white);
-  opacity: 1;
+}
+
+.marker-overlay.selected .price-text {
+  color: var(--color-white);
 }
 </style>
