@@ -138,7 +138,7 @@ const handleFileChange = (event: Event) => {
 .avatar-placeholder {
   width: 6rem;
   height: 6rem;
-  background-color: var(--color-primary-transparent-20);
+  background-color: rgba(144, 55, 73, 0.2);
   color: var(--color-primary);
   border-radius: 50%;
   display: flex;

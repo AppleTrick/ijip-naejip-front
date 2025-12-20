@@ -258,7 +258,7 @@ const sortedComparisonList = computed(() => {
                       <!-- Area Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">면적</p>
-                        <p class="stat-value">{{ property.excluUseAr }}평</p>
+                        <p class="stat-value">{{ property.excluUseAr }}</p>
                         <div v-if="myHouse" class="diff-text"
                              :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'text-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'text-red' : 'text-gray'">
                           {{ formatAreaDiff(property.excluUseAr, myHouse.excluUseAr) }}
@@ -556,7 +556,7 @@ const sortedComparisonList = computed(() => {
 }
 
 .my-house-card {
-  background-color: var(--color-primary-soft);
+  background-color: rgba(144, 55, 73, 0.1); /* secondary/10 */
   border: 2px solid var(--color-primary);
 }
 
@@ -564,14 +564,13 @@ const sortedComparisonList = computed(() => {
   position: absolute;
   top: 0;
   left: 0;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  background-color: var(--color-secondary);
   color: var(--color-white);
-  padding: 0.35rem 1rem;
+  padding: 0.25rem 0.75rem;
   font-size: 0.75rem;
-  font-weight: 800;
-  border-bottom-right-radius: 0.75rem;
+  font-weight: 700;
+  border-bottom-right-radius: 0.5rem;
   z-index: 10;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
 }
 
 .card-image-wrapper {
@@ -650,8 +649,8 @@ const sortedComparisonList = computed(() => {
 .stat-item {
   background-color: var(--color-white);
   padding: 0.75rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--color-primary-transparent-20);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(144, 55, 73, 0.2); /* secondary-transparent20 */
 }
 
 .highlight-bg {

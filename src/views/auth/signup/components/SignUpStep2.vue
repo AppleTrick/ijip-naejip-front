@@ -191,7 +191,7 @@ const handleNext = () => {
 
 .radio-label.active {
   border-color: var(--color-primary);
-  background-color: var(--color-primary-transparent-10);
+  background-color: rgba(232, 69, 69, 0.05);
   color: var(--color-primary);
   font-weight: 600;
 }

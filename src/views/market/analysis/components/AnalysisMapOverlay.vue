@@ -208,7 +208,7 @@ onMounted(() => {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 1rem;
-  background-color: var(--color-primary-light, var(--color-primary-transparent-10));
+  background-color: var(--color-primary-light, rgba(144, 55, 73, 0.1));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -328,7 +328,7 @@ onMounted(() => {
   border-radius: 0.375rem;
 }
 
-.status-badge.safe { background-color: var(--color-primary-transparent-10); color: var(--color-primary); }
+.status-badge.safe { background-color: rgba(144, 55, 73, 0.1); color: var(--color-primary); }
 .status-badge.warning { background-color: #fef9c3; color: #ca8a04; }
 .status-badge.danger { background-color: #fee2e2; color: #dc2626; }
 

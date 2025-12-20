@@ -20,7 +20,7 @@
   pointer-events: none;
   z-index: 0;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--color-primary-transparent-10) 0%, var(--color-primary-transparent-10) 100%);
+  background: linear-gradient(135deg, rgba(232, 69, 69, 0.05) 0%, rgba(144, 55, 73, 0.05) 100%);
 }
 
 .particles {
@@ -38,7 +38,7 @@
   position: absolute;
   width: 4px;
   height: 4px;
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.5), transparent);
+  background: radial-gradient(circle, rgba(232, 69, 69, 0.5), transparent);
   border-radius: 50%;
   animation: particle-float linear infinite;
 }

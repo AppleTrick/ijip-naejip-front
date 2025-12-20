@@ -79,7 +79,7 @@ const drawChart = async () => {
   svg.append('path')
     .datum(props.data)
     .attr('fill', 'none')
-    .attr('stroke', props.color || '#7C3AED')
+    .attr('stroke', props.color || '#E84545')
     .attr('stroke-width', 2)
     .attr('d', line)
 
@@ -101,12 +101,12 @@ const drawChart = async () => {
 
   gradient.append('stop')
     .attr('offset', '0%')
-    .attr('stop-color', props.color || '#7C3AED')
+    .attr('stop-color', props.color || '#E84545')
     .attr('stop-opacity', 0.2)
 
   gradient.append('stop')
     .attr('offset', '100%')
-    .attr('stop-color', props.color || '#7C3AED')
+    .attr('stop-color', props.color || '#E84545')
     .attr('stop-opacity', 0)
 
   svg.append('path')
@@ -123,7 +123,7 @@ const drawChart = async () => {
     .attr('cy', d => y(d.price))
     .attr('r', 3)
     .attr('fill', '#fff')
-    .attr('stroke', props.color || '#7C3AED')
+    .attr('stroke', props.color || '#E84545')
     .attr('stroke-width', 2)
 }
 
