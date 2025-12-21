@@ -101,8 +101,8 @@ const renderMarkers = (items: Property[] | undefined) => {
     return
   }
 
-  // Helper to generate unique key for a marker
-  const getMarkerKey = (item: Property) => `${item.aptSeq}_${item.aptDong || ''}`
+  // 마커의 고유 키 생성: ID뿐만 아니라 데이터(동, 가격, 평형)가 바뀌면 키도 바뀌게 하여 리렌더링 유도
+  const getMarkerKey = (item: Property) => `${item.aptSeq}_${item.aptDong || ''}_${item.dealAmount}_${item.excluUseAr}`
 
   // 1. 현재 표시 중인 마커 ID 셋 생성
   const currentIds = new Set(items.map(item => getMarkerKey(item)))

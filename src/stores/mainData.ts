@@ -27,53 +27,24 @@ export const useMainDataStore = defineStore('mainData', () => {
   const comparisonList = ref<Property[]>([])
 
   const filters = ref({
-    priceRange: { min: 0, max: 20 },
-    area: [] as string[]
+    priceRange: { min: 0, max: 100 },
+    areaRange: { min: 0, max: 100 }
   })
 
   // 2. [Getters] 데이터를 가공해서 보여주는 함수들 (Computed)
   // 예: 검색어나 필터 조건에 맞는 매물만 걸러서 보여주기
   const filteredProperties = computed(() => {
+    // 이제 서버에서 이미 필터링된 데이터를 가져오므로, 
+    // 프론트엔드에서는 검색어 필터링만 수행하거나 필요 시 추가 처리만 합니다.
     let result = marketProperties.value
 
-    // 1. Search Query
+    // Search Query (서버에서 지원하지 않는 경우 프론트에서 수행)
     if (searchQuery.value) {
       const query = searchQuery.value.toLowerCase()
       result = result.filter(p => 
         p.aptNm.toLowerCase().includes(query) || 
-        p.roadNm.toLowerCase().includes(query)
+        (p.roadNm && p.roadNm.toLowerCase().includes(query))
       )
-    }
-
-    // 2. Price Filter
-    const parsePriceToEok = (priceStr: string): number => {
-      let total = 0
-      const ukMatch = priceStr.match(/(\d+)억/)
-      const manMatch = priceStr.match(/(\d+)만원/)
-      
-      if (ukMatch) total += parseInt(ukMatch[1])
-      if (manMatch) total += parseInt(manMatch[1]) / 10000
-      
-      return total
-    }
-
-    if (filters.value.priceRange.min > 0 || filters.value.priceRange.max < 20) {
-      result = result.filter(p => {
-        const price = parsePriceToEok(p.dealAmount)
-        return price >= filters.value.priceRange.min && price <= filters.value.priceRange.max
-      })
-    }
-
-    // 3. Area Filter
-    if (filters.value.area.length > 0) {
-      result = result.filter(p => {
-        const areaVal = parseInt(p.excluUseAr.replace('평', ''))
-        return filters.value.area.some(range => {
-          if (range === '40+') return areaVal >= 40
-          const min = parseInt(range)
-          return areaVal >= min && areaVal < min + 10
-        })
-      })
     }
 
     return result

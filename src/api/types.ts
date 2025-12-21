@@ -139,6 +139,8 @@ export interface MarketFilters {
   type?: string
   minPrice?: number
   maxPrice?: number
+  priceRange?: { min: number, max: number }
+  areaRange?: { min: number, max: number }
 }
 
 export interface PriceTrend {

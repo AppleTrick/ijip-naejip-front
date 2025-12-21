@@ -58,15 +58,20 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
     scope = 'SIDO' // 시도 뷰
   }
 
+  const isAptScope = scope === 'APT' || scope === 'APT_DONG'
+
   const areas = await searchAreaAddress({
     minLat: bounds.minLat,
     maxLat: bounds.maxLat,
     minLng: bounds.minLng,
     maxLng: bounds.maxLng,
     scope,
-    minPrice: filters?.minPrice,
-    maxPrice: filters?.maxPrice,
-    // 필터가 지원되면 minPyung, maxPyung 추가 가능
+    // 가격: 100억 이상일 경우 상한선 없이 검색 (undefined)
+    minPrice: (filters?.priceRange?.min && filters.priceRange.min !== 0) ? filters.priceRange.min * 10000 : undefined,
+    maxPrice: (filters?.priceRange?.max && filters.priceRange.max < 100) ? filters.priceRange.max * 10000 : undefined,
+    // 평형: APT/APT_DONG 스코프에서만 전송, 100평 이상일 경우 상한선 없이 검색
+    minPyung: (isAptScope && filters?.areaRange?.min && filters.areaRange.min !== 0) ? filters.areaRange.min : undefined,
+    maxPyung: (isAptScope && filters?.areaRange?.max && filters.areaRange.max < 100) ? filters.areaRange.max : undefined
   })
 
   const propertyType = (scope === 'APT_DONG' || scope === 'APT') ? 'APT' : scope

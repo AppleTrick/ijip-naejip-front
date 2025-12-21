@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, computed } from 'vue'
+import { onMounted, computed, watch, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -12,8 +12,8 @@ import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
 
 const store = useMainDataStore()
-const { filteredProperties } = storeToRefs(store)
-const { selectProperty, setSearchQuery } = store
+const { filteredProperties, filters } = storeToRefs(store)
+const { selectProperty, setSearchQuery, setFilters } = store
 const { fetchProperties } = useMarket()
 const statsStore = useMarketStatsStore()
 const { currentRegion } = storeToRefs(statsStore)
@@ -58,9 +58,19 @@ const handleSearch = (query: string) => {
   setSearchQuery(query)
 }
 
-const handleFilter = (filters: any) => {
-  store.setFilters(filters)
+// 지도의 마지막 영역 정보를 저장 (필터 변경 시 재사용)
+const lastBounds = ref<any>(null)
+
+const handleFilter = (newFilters: any) => {
+  setFilters(newFilters)
 }
+
+// 필터 변경 감지: 필터가 변경되면 지도의 마지막 영역 정보를 기반으로 데이터를 다시 가져옵니다.
+watch(filters, async (newFilters) => {
+  if (lastBounds.value) {
+    await fetchProperties(newFilters, lastBounds.value)
+  }
+}, { deep: true })
 
 const handleMarkerSelect = (property: Property) => {
   // 이미 선택된 매물과 같은 매물을 클릭한 경우, 상세 정보를 덮어쓰지 않도록 함
@@ -101,7 +111,8 @@ const handleMarkerSelect = (property: Property) => {
 
 // 지도 영역 변경 시 호출: 변경된 영역(bounds)에 해당하는 매물 데이터를 다시 가져옴
 const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
-  await fetchProperties(undefined, bounds)
+  lastBounds.value = bounds // 마지막 영역 정보 업데이트
+  await fetchProperties(filters.value, bounds)
 }
 </script>
 
