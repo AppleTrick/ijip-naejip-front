@@ -239,12 +239,23 @@ const drawChart = async () => {
     })
 }
 
+// 디바운스 유틸리티 (컴포넌트 내에서 간단히 구현)
+const debounce = (fn: Function, delay: number) => {
+  let timeoutId: ReturnType<typeof setTimeout>
+  return (...args: any[]) => {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => fn(...args), delay)
+  }
+}
+
+const debouncedDrawChart = debounce(drawChart, 150)
+
 onMounted(() => {
   setTimeout(drawChart, 50)
   
   if (chartRef.value) {
     resizeObserver.value = new ResizeObserver(() => {
-      requestAnimationFrame(drawChart)
+      debouncedDrawChart()
     })
     resizeObserver.value.observe(chartRef.value)
   }
@@ -257,7 +268,7 @@ onUnmounted(() => {
 })
 
 watch(() => props.data, () => {
-  drawChart()
+  debouncedDrawChart()
 }, { deep: true })
 </script>
 
