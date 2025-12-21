@@ -248,6 +248,10 @@ const setAreaRange = (min: number, max: number) => {
 @media (min-width: 768px) {
   .filter-container {
     flex-direction: row;
+    align-items: flex-start;
+  }
+  .search-wrapper {
+    flex: 0 0 32rem; /* 고정 너비 부여하여 버튼 추가 시 크기 유지 */
   }
 }
 
