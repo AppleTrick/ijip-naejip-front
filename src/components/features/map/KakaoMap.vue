@@ -23,19 +23,20 @@ const emit = defineEmits<{
 
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<any>(null)
-let mapMarkers: any[] = []
+// 마커 저장을 위한 Map (Key: aptSeq, Value: CustomOverlay 객체)
+const mapMarkers = new Map<string, any>()
 
 // --- 지도 로직 ---
 
-// 마커 초기화: 지도에 표시된 모든 마커를 제거하고 배열을 비움
+// 마커 초기화: 지도에 표시된 모든 마커를 제거하고 Map을 비움
 const clearMarkers = () => {
-  mapMarkers.forEach(m => {
+  mapMarkers.forEach((m) => {
     if (m.vueContainer) {
       render(null, m.vueContainer)
     }
     m.setMap(null)
   })
-  mapMarkers = []
+  mapMarkers.clear()
 }
 
 // 개별 마커 생성: 커스텀 오버레이를 사용하여 마커를 생성하고 클릭 이벤트를 연결
@@ -90,18 +91,42 @@ const createMarker = (item: Property) => {
   return markRaw(customOverlay)
 }
 
-// 마커 목록 렌더링: 기존 마커를 지우고 새로운 마커 목록을 지도에 표시
+// 마커 목록 렌더링: 기존 마커를 지우는 대신, diffing을 통해 변경된 마커만 업데이트
 const renderMarkers = (items: Property[] | undefined) => {
-  clearMarkers()
-  if (!map.value || !items) return
-
+  if (!map.value) return
   const rawMap = toRaw(map.value)
 
+  if (!items || items.length === 0) {
+    clearMarkers()
+    return
+  }
+
+  // Helper to generate unique key for a marker
+  const getMarkerKey = (item: Property) => `${item.aptSeq}_${item.aptDong || ''}`
+
+  // 1. 현재 표시 중인 마커 ID 셋 생성
+  const currentIds = new Set(items.map(item => getMarkerKey(item)))
+
+  // 2. 제거해야 할 마커 삭제
+  mapMarkers.forEach((marker, key) => {
+    if (!currentIds.has(key)) {
+      if (marker.vueContainer) {
+        render(null, marker.vueContainer)
+      }
+      marker.setMap(null)
+      mapMarkers.delete(key)
+    }
+  })
+
+  // 3. 새로 추가해야 할 마커 생성 및 표시
   items.forEach(item => {
-    const marker = createMarker(item)
-    if (marker) {
-      marker.setMap(rawMap)
-      mapMarkers.push(marker)
+    const key = getMarkerKey(item)
+    if (!mapMarkers.has(key)) {
+      const marker = createMarker(item)
+      if (marker) {
+        marker.setMap(rawMap)
+        mapMarkers.set(key, marker)
+      }
     }
   })
 }
@@ -204,21 +229,6 @@ const loadKakaoMap = (apiKey: string, onLoad: () => void) => {
     document.head.appendChild(script)
   } else {
     load()
-  }
-}
-
-// 지도 중심 이동 (즉시): 지정된 좌표로 지도의 중심을 즉시 이동
-const setCenter = (lat: number, lng: number) => {
-  if (!map.value || !Number.isFinite(lat) || !Number.isFinite(lng)) {
-    console.warn('Invalid coordinates for setCenter:', lat, lng)
-    return
-  }
-  try {
-    const rawMap = toRaw(map.value)
-    const coords = new window.kakao.maps.LatLng(lat, lng)
-    rawMap.setCenter(coords)
-  } catch (e) {
-    console.error('Error in setCenter:', e)
   }
 }
 
