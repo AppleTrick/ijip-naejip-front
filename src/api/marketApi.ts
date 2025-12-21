@@ -114,7 +114,8 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
       })),
       priceTrend: data.priceTrend ? data.priceTrend.dataPoints.map(point => ({
         date: point.month,
-        price: point.avgPrice
+        price: point.avgPrice,
+        volume: point.transactionCount
       })) : [],
       type: 'APT'
     }
