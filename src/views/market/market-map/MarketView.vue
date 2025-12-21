@@ -19,44 +19,105 @@ const { fetchProperties } = useMarket()
 const statsStore = useMarketStatsStore()
 const { currentRegion } = storeToRefs(statsStore)
 
-const mapCenter = computed(() => {
-  // 1. 아파트가 선택된 경우, 해당 아파트 위치로 중심 이동
-  if (store.selectedProperty) {
-    const lat = Number(store.selectedProperty.latitude)
-    const lng = Number(store.selectedProperty.longitude)
-    return { lat, lng }
-    
+// 지도의 현재 상태 관리 (ref를 사용하여 스냅백 현상 방지)
+const mapCenter = ref<{ lat: number, lng: number }>(DEFAULT_MAP_CENTER)
+const mapLevel = ref<number>(9)
+
+// 1. 선택된 아파트나 지역이 변경될 때 지도를 이동시킴
+watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, oldRegion]) => {
+  // 검색 중이거나 초기화 중인 경우를 위해 이전 값과 비교하여 유의미한 변화가 있을 때만 이동
+  const isAptChanged = prop && prop.aptSeq !== oldProp?.aptSeq
+  const isRegionChanged = region && region.id !== oldRegion?.id
+
+  // 아파트가 선택된 경우 우선순위 (새로 선택된 경우에만 이동)
+  if (isAptChanged) {
+    const lat = Number(prop.latitude)
+    const lng = Number(prop.longitude)
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      mapCenter.value = { lat, lng }
+    }
+    return
   }
 
-  // 2. 선택된 아파트가 없으면 현재 지역(시/군/구)의 중심으로 이동
-  if (currentRegion.value && currentRegion.value.lat && currentRegion.value.lng) {
-    const lat = Number(currentRegion.value.lat)
-    const lng = Number(currentRegion.value.lng)
+  // 선택된 지역(시/군/구)이 새로 변경된 경우에만 이동
+  if (isRegionChanged && region.lat && region.lng) {
+    const lat = Number(region.lat)
+    const lng = Number(region.lng)
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      return { lat, lng }
+      mapCenter.value = { lat, lng }
+      
+      // 지역 레벨에 따른 줌 레벨 설정
+      switch (statsStore.currentLevel) {
+        case 'city': mapLevel.value = 9; break
+        case 'district': mapLevel.value = 9; break
+        case 'neighborhood': mapLevel.value = 5; break
+        case 'dong': mapLevel.value = 5; break
+        default: mapLevel.value = 9
+      }
     }
   }
-  
-  // 3. 기본값: 서울시청 (초기 로딩 시 또는 데이터가 없을 때)
-  return DEFAULT_MAP_CENTER
-})
+}, { immediate: false }) // 초기값에 의한 스냅백 방지를 위해 immediate: false로 설정
 
-const mapLevel = computed(() => {
-  switch (statsStore.currentLevel) {
-    case 'city': return 9        // SIDO (> 9)
-    case 'district': return 9    // GUGUN (<= 9)
-    case 'neighborhood': return 5 // DONG (<= 5)
-    case 'apartment': return 3   // APT (<= 4)
-    default: return 9
-  }
-})
+// 검색 시에는 mapCenter와 mapLevel을 직접 업데이트합니다.
 
 onMounted(async () => {
   // 초기 데이터 로딩은 지도의 'idle' 이벤트(영역 변경 감지)에 의해 트리거됩니다.
 })
 
 const handleSearch = (query: string) => {
+  if (!query || !query.trim()) return
+  
   setSearchQuery(query)
+
+  // 카카오맵 장소 검색 서비스 객체 생성
+  if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) {
+    console.error('카카오맵 서비스 로드되지 않음')
+    return
+  }
+
+  const ps = new window.kakao.maps.services.Places()
+
+  // 키워드로 장소를 검색합니다
+  ps.keywordSearch(query, (data: any, status: any) => {
+    if (status === window.kakao.maps.services.Status.OK) {
+      // 검색 결과 중 가장 첫 번째 장소의 정보를 기반으로 이동
+      const firstResult = data[0]
+      const newPos = {
+        lat: Number(firstResult.y),
+        lng: Number(firstResult.x)
+      }
+      
+      // 장소 성격(카테고리)에 따른 스마트 줌 레벨 결정 (marketApi Scope 기준)
+      let targetLevel = 5 
+      const category = firstResult.category_name || ''
+      const name = firstResult.place_name || ''
+      
+      if (category.includes('아파트') || name.includes('아파트')) {
+        targetLevel = 2 // APT 레벨
+      } else if (category.includes('지하철')) {
+        targetLevel = 3 // DONG/역세권 레벨
+      } else if (category.includes('동') || category.includes('읍') || category.includes('면')) {
+        targetLevel = 5 // DONG 레벨
+      } else if (category.includes('구') || category.includes('군')) {
+        targetLevel = 7 // GUGUN 레벨
+      } else if (category.includes('시') || category.includes('도')) {
+        targetLevel = 10 // SIDO 레벨 (제주도, 서울시 등)
+      } else {
+        targetLevel = 5 // 기본값
+      }
+      
+      // mapCenter와 mapLevel을 업데이트하여 지도를 이동시킵니다.
+      mapCenter.value = newPos
+      mapLevel.value = targetLevel
+      
+      // 검색 시 선택된 특정 매물 정보는 해제합니다.
+      selectProperty(null)
+    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+      alert('검색 결과가 없습니다.')
+    } else {
+      alert('검색 중 오류가 발생했습니다.')
+    }
+  })
 }
 
 // 지도의 마지막 영역 정보를 저장 (필터 변경 시 재사용)
@@ -121,8 +182,20 @@ const handleMarkerSelect = (property: Property) => {
 }
 
 // 지도 영역 변경 시 호출: 변경된 영역(bounds)에 해당하는 매물 데이터를 다시 가져옴
-const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number }) => {
+const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minLng: number, maxLng: number, level: number, centerLat: number, centerLng: number }) => {
   lastBounds.value = bounds // 마지막 영역 정보 업데이트
+  
+  // 지도의 현재 상태(줌, 좌표)를 부모 상태와 동기화하여 스냅백 현상 방지
+  if (mapLevel.value !== bounds.level) {
+    mapLevel.value = bounds.level
+  }
+  
+  const latDiff = Math.abs(mapCenter.value.lat - bounds.centerLat)
+  const lngDiff = Math.abs(mapCenter.value.lng - bounds.centerLng)
+  if (latDiff > 0.00001 || lngDiff > 0.00001) {
+    mapCenter.value = { lat: bounds.centerLat, lng: bounds.centerLng }
+  }
+  
   await fetchProperties(filters.value, bounds)
 }
 </script>

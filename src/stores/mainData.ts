@@ -35,19 +35,9 @@ export const useMainDataStore = defineStore('mainData', () => {
   // 예: 검색어나 필터 조건에 맞는 매물만 걸러서 보여주기
   const filteredProperties = computed(() => {
     // 이제 서버에서 이미 필터링된 데이터를 가져오므로, 
-    // 프론트엔드에서는 검색어 필터링만 수행하거나 필요 시 추가 처리만 합니다.
-    let result = marketProperties.value
-
-    // Search Query (서버에서 지원하지 않는 경우 프론트에서 수행)
-    if (searchQuery.value) {
-      const query = searchQuery.value.toLowerCase()
-      result = result.filter(p => 
-        p.aptNm.toLowerCase().includes(query) || 
-        (p.roadNm && p.roadNm.toLowerCase().includes(query))
-      )
-    }
-
-    return result
+    // 프론트엔드에서는 추가적인 텍스트 필터링을 수행하지 않습니다.
+    // (위치 검색은 지도를 이동시키는 용도로만 사용됨)
+    return marketProperties.value
   })
 
   const isInComparison = computed(() => {
