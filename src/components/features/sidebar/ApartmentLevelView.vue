@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -9,6 +9,9 @@ import BaseButton from '@/components/common/BaseButton.vue'
 import { ShieldCheck, Check, Plus, ArrowLeft } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
 import TrendGraph from './common/TrendGraph.vue'
+import { searchApartmentImage } from '@/api/imageApi'
+import { getNearestPanoId } from '@/api/imageApi2'
+import { Map as MapIcon, Image as ImageIcon } from 'lucide-vue-next'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -25,6 +28,92 @@ const currentPyung = computed(() => selectedPyung.value || 'all')
 // 기간 선택 (3y, 6m)
 const selectedPeriod = ref<'3y' | '6m'>('3y')
 
+// 아파트 이미지 및 로드뷰 상태
+const propertyImage = ref<string | null>(null)
+const isImageLoading = ref(false)
+const showRoadview = ref(true) // 기본으로 로드뷰를 보여줌
+const roadviewRef = ref<HTMLElement | null>(null)
+const roadviewInstance = ref<any>(null) // 로드뷰 인스턴스 저장
+const hasRoadview = ref(false)
+const currentPanoId = ref<number | null>(null)
+
+// 기본 대체 이미지 URL (검색 실패 시 사용)
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+
+// 이미지 및 로드뷰 데이터 가져오기 함수
+const fetchMedia = async (aptName: string, address: string = '', lat?: number, lng?: number) => {
+  if (!aptName) return
+  
+  // 상태 초기화
+  isImageLoading.value = true
+  hasRoadview.value = false
+  currentPanoId.value = null
+  propertyImage.value = null
+  showRoadview.value = true // 새 마커 클릭 시 항상 로드뷰 시도부터 시작
+  
+  try {
+    console.log(`[Media] Fetching for: ${aptName}, Lat: ${lat}, Lng: ${lng}`)
+    // 1. 로드뷰 가용성 먼저 확인
+    if (lat && lng) {
+      const panoId = await getNearestPanoId(lat, lng)
+      console.log(`[Media] Roadview PanoID result: ${panoId}`)
+      hasRoadview.value = !!panoId
+      currentPanoId.value = panoId
+      
+      // 로드뷰가 가능하면 로드뷰 모드로, 아니면 사진 모드로 강제 전환
+      showRoadview.value = !!panoId
+    }
+
+    // 2. 이미지 검색
+    const url = await searchApartmentImage(aptName, address)
+    console.log(`[Media] Image result URL: ${url ? 'Success' : 'Failed (Fallback)'}`)
+    propertyImage.value = url || FALLBACK_IMAGE
+  } catch (error) {
+    console.error('Error fetching media:', error)
+    propertyImage.value = FALLBACK_IMAGE
+    hasRoadview.value = false
+  } finally {
+    isImageLoading.value = false
+  }
+}
+
+// 로드뷰 초기화 및 갱신 함수
+const updateRoadview = () => {
+  if (!roadviewRef.value || !currentPanoId.value || !window.kakao) {
+    console.warn('[Media] Cannot update roadview (missing Ref or PanoID)')
+    return
+  }
+  
+  console.log(`[Media] Updating roadview with PanoID: ${currentPanoId.value}`)
+  
+  // v-if로 컨테이너가 새로 생겼을 수 있으므로 매번 새로 생성하거나 새 컨테이너에 맞춰줌
+  try {
+    const rv = new window.kakao.maps.Roadview(roadviewRef.value)
+    roadviewInstance.value = rv
+    
+    rv.setPanoId(currentPanoId.value, new window.kakao.maps.LatLng(
+      selectedProperty.value?.latitude, 
+      selectedProperty.value?.longitude
+    ))
+  } catch (e) {
+    console.error('[Media] Roadview initialization error:', e)
+  }
+}
+
+// 로드뷰 모드 혹은 panoId 변경 감시
+watch([showRoadview, currentPanoId], ([newShow, newPano]) => {
+  if (newShow && newPano) {
+    nextTick(() => {
+      updateRoadview()
+    })
+  }
+}, { immediate: true })
+
+// 이미지 로드 에러 핸들러
+const handleImageError = () => {
+  propertyImage.value = FALLBACK_IMAGE
+}
+
 // 필터링된 가격 추이 데이터
 const filteredPriceTrend = computed(() => {
   if (!selectedProperty.value?.priceTrend) return []
@@ -37,16 +126,27 @@ const filteredPriceTrend = computed(() => {
   }
 })
 
-// 선택된 아파트가 변경되면 상세 정보 가져오기
 // 선택된 아파트나 평형이 변경되면 상세 정보 가져오기
 watch([() => selectedProperty.value?.aptSeq, selectedPyung], async ([newId, newPyung], [oldId, oldPyung]) => {
   // ID가 없으면 리턴
   if (!newId) return
 
-  // ID가 바뀌었거나, 같은 ID인데 평형이 바뀌었을 때만 재요청
-  // (이전 ID와 같고 평형도 같으면 요청 안 함 -> 초기 진입 등 방어)
+  // 1. ID가 바뀌었거나 평형이 바뀌었으면 상세 정보(가격, 그래프 등) 재요청
   if (newId !== oldId || newPyung !== oldPyung) {
     await fetchPropertyDetail(newId)
+  }
+
+  // 2. 아파트 자체가 바뀐 경우에만 미디어(이미지, 로드뷰) 재요청
+  // 평형만 바뀌었을 때는 이미지를 다시 가져올 필요가 없음
+  if (newId !== oldId) {
+    if (selectedProperty.value?.aptNm) {
+      fetchMedia(
+        selectedProperty.value.aptNm, 
+        selectedProperty.value.roadNm || '',
+        Number(selectedProperty.value.latitude),
+        Number(selectedProperty.value.longitude)
+      )
+    }
   }
 }, { immediate: true })
 
@@ -84,9 +184,34 @@ const formatDate = (dateNum: number) => {
 <template>
   <div v-if="selectedProperty" class="apartment-view">
     <div class="sidebar-header">
-      <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-           alt="Property" class="header-image">
+      <div v-if="isImageLoading" class="image-loader">
+        <div class="spinner"></div>
+      </div>
+      
+      <!-- 로드뷰 영역: 로드뷰 모드이고 실제로 로드뷰 데이터가 있을 때만 표시 -->
+      <div v-if="showRoadview && hasRoadview" ref="roadviewRef" class="roadview-container"></div>
+      
+      <!-- 일반 이미지 영역: 사진 모드이거나 로드뷰 데이터가 없을 때 표시 -->
+      <img v-else :src="propertyImage || FALLBACK_IMAGE" 
+           alt="Property" class="header-image"
+           referrerpolicy="no-referrer"
+           @error="handleImageError"
+           :class="{ 'is-loading': isImageLoading }">
+      
       <div class="header-overlay"></div>
+      
+      <!-- 미디어 전환 버튼 (사진/로드뷰) -->
+      <div v-if="hasRoadview" class="media-toggle">
+        <button 
+          @click="showRoadview = !showRoadview" 
+          class="toggle-btn"
+          :title="showRoadview ? '사진 보기' : '로드뷰 보기'"
+        >
+          <component :is="showRoadview ? ImageIcon : MapIcon" class="icon-xs" />
+          <span>{{ showRoadview ? '사진' : '로드뷰' }}</span>
+        </button>
+      </div>
+
       <button @click="goBack" class="back-btn">
         <ArrowLeft class="icon-sm" />
       </button>
@@ -620,5 +745,79 @@ const formatDate = (dateNum: number) => {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
   opacity: 0.9;
+}
+
+/* Image Loader Styles */
+.image-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-gray-100);
+  z-index: 1;
+}
+
+.spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-gray-200);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.header-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: opacity 0.3s ease;
+}
+
+.header-image.is-loading {
+  opacity: 0;
+}
+
+/* Roadview & Media Toggle Styles */
+.roadview-container {
+  width: 100%;
+  height: 100%;
+}
+
+.media-toggle {
+  position: absolute;
+  bottom: 0.75rem;
+  right: 0.75rem;
+  z-index: 10;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  background-color: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 9999px;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  transform: translateY(-2px);
+}
+
+.icon-xs {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 </style>
