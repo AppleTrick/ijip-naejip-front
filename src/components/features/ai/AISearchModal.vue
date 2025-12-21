@@ -20,7 +20,8 @@ const handleSearch = async () => {
   isSearching.value = true
   // Simulate API call
   try {
-    const response = await fetch('/api/v1/ai/search', {
+    const endpoint = props.mode === 'semantic' ? '/api/v1/ai/search' : '/api/v1/ai/parse-filter'
+    const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: query.value })

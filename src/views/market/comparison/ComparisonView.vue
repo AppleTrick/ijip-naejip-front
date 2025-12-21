@@ -5,7 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
-import { ArrowLeft, Trash2, Home, AlertCircle, Filter } from 'lucide-vue-next'
+import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -80,6 +80,31 @@ const sortedComparisonList = computed(() => {
   
   return list
 })
+
+const aiSummary = ref<string | null>(null)
+const isGeneratingSummary = ref(false)
+
+const getAISummary = async () => {
+  if (comparisonList.value.length === 0 && !myHouse.value) return
+  
+  isGeneratingSummary.value = true
+  try {
+    const response = await fetch('/api/v1/ai/comparison-summary', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        myHouse: myHouse.value,
+        comparisonList: comparisonList.value
+      })
+    })
+    const data = await response.json()
+    aiSummary.value = data.data
+  } catch (error) {
+    console.error('AI Summary Error:', error)
+  } finally {
+    isGeneratingSummary.value = false
+  }
+}
 </script>
 
 <template>
@@ -161,6 +186,38 @@ const sortedComparisonList = computed(() => {
 
         <!-- Main Content -->
         <div class="comparison-content">
+          <!-- AI Summary Section -->
+          <div class="ai-summary-card mb-6">
+            <div class="summary-header">
+              <div class="summary-title">
+                <Sparkles class="sparkle-icon" />
+                <h3>AI 매물 비교 요약</h3>
+              </div>
+              <BaseButton 
+                variant="primary" 
+                size="sm" 
+                :disabled="isGeneratingSummary || (comparisonList.length === 0 && !myHouse)"
+                @click="getAISummary"
+              >
+                <Loader2 v-if="isGeneratingSummary" class="spin-icon mr-1" />
+                {{ aiSummary ? '다시 분석하기' : 'AI 분석 시작' }}
+              </BaseButton>
+            </div>
+            
+            <div v-if="aiSummary" class="summary-content">
+              <p class="summary-text">{{ aiSummary }}</p>
+            </div>
+            <div v-else-if="!isGeneratingSummary" class="summary-placeholder">
+              <p>선택하신 매물들의 특징을 AI가 분석하여 최적의 선택을 도와드립니다.</p>
+            </div>
+            <div v-else class="summary-loading">
+              <div class="loading-dots">
+                <span>.</span><span>.</span><span>.</span>
+              </div>
+              <p>매물 정보를 분석하고 있습니다...</p>
+            </div>
+          </div>
+
           <!-- Sort Header -->
           <div class="sort-header">
             <span class="count-text">총 <span class="count-number">{{ comparisonList.length + (myHouse ? 1 : 0) }}</span>개의 매물 비교</span>
@@ -783,5 +840,94 @@ const sortedComparisonList = computed(() => {
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
+
+/* AI Summary Styles */
+.ai-summary-card {
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  border: 1px solid var(--color-primary-transparent-20);
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-title h3 {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 1.125rem;
+}
+
+.sparkle-icon {
+  color: var(--color-primary);
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.summary-content {
+  background-color: var(--color-primary-soft);
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-primary-transparent-10);
+}
+
+.summary-text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-gray-800);
+}
+
+.summary-placeholder {
+  padding: 1rem;
+  text-align: center;
+  color: var(--color-gray-400);
+  font-size: 0.875rem;
+  background-color: var(--color-gray-50);
+  border-radius: 0.75rem;
+}
+
+.summary-loading {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+.loading-dots span {
+  font-size: 2rem;
+  animation: dots 1.5s infinite;
+  display: inline-block;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dots {
+  0%, 100% { transform: translateY(0); opacity: 0.2; }
+  50% { transform: translateY(-5px); opacity: 1; }
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.mb-6 { margin-bottom: 1.5rem; }
+.mr-1 { margin-right: 0.25rem; }
 </style>
 
