@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, computed } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -21,6 +21,21 @@ const { goBack } = statsStore
 
 // 현재 선택된 평형 (statsStore의 selectedPyung과 동기화)
 const currentPyung = computed(() => selectedPyung.value || 'all')
+
+// 기간 선택 (3y, 6m)
+const selectedPeriod = ref<'3y' | '6m'>('3y')
+
+// 필터링된 가격 추이 데이터
+const filteredPriceTrend = computed(() => {
+  if (!selectedProperty.value?.priceTrend) return []
+  
+  if (selectedPeriod.value === '3y') {
+    return selectedProperty.value.priceTrend
+  } else {
+    // 최근 6개월 데이터만 추출
+    return selectedProperty.value.priceTrend.slice(-6)
+  }
+})
 
 // 선택된 아파트가 변경되면 상세 정보 가져오기
 // 선택된 아파트나 평형이 변경되면 상세 정보 가져오기
@@ -132,9 +147,27 @@ const formatDate = (dateNum: number) => {
 
       <!-- Price Trend Graph -->
       <div v-if="selectedProperty.priceTrend && selectedProperty.priceTrend.length > 0" class="chart-section">
-        <h3 class="section-title">가격 추이</h3>
+        <div class="chart-header">
+          <h3 class="section-title">주요 시세</h3>
+          <div class="period-tabs">
+            <button 
+              class="period-tab" 
+              :class="{ active: selectedPeriod === '3y' }"
+              @click="selectedPeriod = '3y'"
+            >
+              최근 3년
+            </button>
+            <button 
+              class="period-tab" 
+              :class="{ active: selectedPeriod === '6m' }"
+              @click="selectedPeriod = '6m'"
+            >
+              6개월
+            </button>
+          </div>
+        </div>
         <div class="chart-wrapper">
-          <TrendGraph :data="selectedProperty.priceTrend" :height="150" color="var(--color-primary)" />
+          <TrendGraph :data="filteredPriceTrend" :height="220" color="var(--color-primary)" />
         </div>
       </div>
 
@@ -477,12 +510,44 @@ const formatDate = (dateNum: number) => {
   margin-bottom: 2rem;
 }
 
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.period-tabs {
+  display: flex;
+  background-color: var(--color-gray-100);
+  padding: 0.2rem;
+  border-radius: 0.5rem;
+}
+
+.period-tab {
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  border: none;
+  background: none;
+  color: var(--color-gray-500);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.period-tab.active {
+  background-color: var(--color-white);
+  color: var(--color-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
 .chart-wrapper {
   background-color: var(--color-white);
   border: 1px solid var(--color-gray-200);
   border-radius: 0.75rem;
   padding: 1rem;
-  height: 180px;
+  height: 250px;
 }
 
 .pyung-list {

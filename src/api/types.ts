@@ -144,6 +144,7 @@ export interface MarketFilters {
 export interface PriceTrend {
   date: string
   price: number // 만원 단위
+  volume?: number // 거래량
 }
 
 export interface RegionStats {
