@@ -40,9 +40,12 @@ const currentPanoId = ref<number | null>(null)
 // 기본 대체 이미지 URL (검색 실패 시 사용)
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
 
-// 이미지 및 로드뷰 데이터 가져오기 함수
+// 이미지 및 로드뷰 데이터 가져오기 함수 (중복 호출 및 레이스 컨디션 방지)
+let latestMediaRequestId = 0
 const fetchMedia = async (aptName: string, address: string = '', lat?: number, lng?: number) => {
   if (!aptName) return
+  
+  const requestId = ++latestMediaRequestId
   
   // 상태 초기화
   isImageLoading.value = true
@@ -52,28 +55,36 @@ const fetchMedia = async (aptName: string, address: string = '', lat?: number, l
   showRoadview.value = true // 새 마커 클릭 시 항상 로드뷰 시도부터 시작
   
   try {
-    console.log(`[Media] Fetching for: ${aptName}, Lat: ${lat}, Lng: ${lng}`)
-    // 1. 로드뷰 가용성 먼저 확인
-    if (lat && lng) {
-      const panoId = await getNearestPanoId(lat, lng)
-      console.log(`[Media] Roadview PanoID result: ${panoId}`)
-      hasRoadview.value = !!panoId
-      currentPanoId.value = panoId
-      
-      // 로드뷰가 가능하면 로드뷰 모드로, 아니면 사진 모드로 강제 전환
-      showRoadview.value = !!panoId
+    console.log(`[Media] Fetching for: ${aptName} (Request #${requestId})`)
+    
+    // 1. 로드뷰 가용성 및 이미지 검색 병렬 처리로 속도 향상
+    const [panoId, url] = await Promise.all([
+      lat && lng ? getNearestPanoId(lat, lng) : Promise.resolve(null),
+      searchApartmentImage(aptName, address)
+    ])
+
+    // 가장 최근의 요청만 반영
+    if (requestId !== latestMediaRequestId) {
+      console.log(`[Media] Request #${requestId} discarded (newer request exists)`)
+      return
     }
 
-    // 2. 이미지 검색
-    const url = await searchApartmentImage(aptName, address)
-    console.log(`[Media] Image result URL: ${url ? 'Success' : 'Failed (Fallback)'}`)
+    console.log(`[Media] Results - PanoID: ${panoId}, Image: ${url ? 'Success' : 'Fallback'}`)
+    
+    hasRoadview.value = !!panoId
+    currentPanoId.value = panoId
+    showRoadview.value = !!panoId
     propertyImage.value = url || FALLBACK_IMAGE
   } catch (error) {
-    console.error('Error fetching media:', error)
-    propertyImage.value = FALLBACK_IMAGE
-    hasRoadview.value = false
+    if (requestId === latestMediaRequestId) {
+      console.error('Error fetching media:', error)
+      propertyImage.value = FALLBACK_IMAGE
+      hasRoadview.value = false
+    }
   } finally {
-    isImageLoading.value = false
+    if (requestId === latestMediaRequestId) {
+      isImageLoading.value = false
+    }
   }
 }
 

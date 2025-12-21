@@ -5,6 +5,9 @@
 const KAKAO_REST_API_KEY = import.meta.env.VITE_KAKAO_REST_API_KEY;
 const KAKAO_IMAGE_SEARCH_URL = 'https://dapi.kakao.com/v2/search/image';
 
+// 간단한 인메모리 캐시 (Key: query, Value: imageUrl)
+const imageCache = new Map<string, string | null>();
+
 /**
  * 아파트 이름과 주소를 검색어로 하여 이미지를 검색하고 첫 번째 결과의 URL을 반환합니다.
  * @param aptName 아파트 이름
@@ -17,11 +20,15 @@ export const searchApartmentImage = async (aptName: string, address: string = ''
     return null;
   }
 
-  try {
-    // 검색어 최적화: 주소 + 아파트 이름 + "전경" 키워드를 붙여 해당 단지의 실제 사진을 유도함
-    // const query = `${address} ${aptName} 아파트 전경`;
-    const query = `${address} 이미지`;
+  const query = `${address} ${aptName} 이미지`;
 
+  // 캐시 확인
+  if (imageCache.has(query)) {
+    console.log(`[ImageSearch] Cache Hit: "${query}"`);
+    return imageCache.get(query) || null;
+  }
+
+  try {
     console.log(`[ImageSearch] Query: "${query}"`);
     
     const response = await fetch(`${KAKAO_IMAGE_SEARCH_URL}?query=${encodeURIComponent(query)}&size=1`, {
@@ -40,11 +47,13 @@ export const searchApartmentImage = async (aptName: string, address: string = ''
     if (data.documents && data.documents.length > 0) {
       const resultUrl = data.documents[0].image_url;
       console.log(`[ImageSearch] Found Image: ${resultUrl}`);
-      // 첫 번째 이미지 결과 반환
+      // 캐시에 저장
+      imageCache.set(query, resultUrl);
       return resultUrl;
     }
 
     console.warn(`[ImageSearch] No results found for: "${query}"`);
+    imageCache.set(query, null);
     return null;
   } catch (error) {
     console.error('Error searching apartment image:', error);
