@@ -29,7 +29,7 @@ const drawChart = async () => {
 
   d3.select(container).selectAll('*').remove()
 
-  const margin = { top: 30, right: 10, bottom: 25, left: 40 }
+  const margin = { top: 30, right: 25, bottom: 25, left: 40 }
   const innerWidth = width - margin.left - margin.right
   const innerHeight = height - margin.top - margin.bottom
   
