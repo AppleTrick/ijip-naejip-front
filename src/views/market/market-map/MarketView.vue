@@ -10,7 +10,8 @@ import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
-import { RotateCcw } from 'lucide-vue-next'
+import { RotateCcw, Sparkles, Wand2 } from 'lucide-vue-next'
+import AISearchModal from '@/components/features/ai/AISearchModal.vue'
 
 const store = useMainDataStore()
 const { filteredProperties, filters } = storeToRefs(store)
@@ -18,6 +19,27 @@ const { selectProperty, setSearchQuery, setFilters } = store
 const { fetchProperties } = useMarket()
 const statsStore = useMarketStatsStore()
 const { currentRegion } = storeToRefs(statsStore)
+
+const isAIModalOpen = ref(false)
+const aiMode = ref<'semantic' | 'filter'>('semantic')
+
+const openSemanticSearch = () => {
+  aiMode.value = 'semantic'
+  isAIModalOpen.value = true
+}
+
+const openNaturalFilter = () => {
+  aiMode.value = 'filter'
+  isAIModalOpen.value = true
+}
+
+const handleAISearchResult = (result: any) => {
+  console.log('AI Search Result:', result)
+  // For filters, we could update the store here
+  if (aiMode.value === 'filter' && result.filters) {
+    setFilters(result.filters)
+  }
+}
 
 // 지도의 현재 상태 관리 (ref를 사용하여 스냅백 현상 방지)
 const mapCenter = ref<{ lat: number, lng: number }>(DEFAULT_MAP_CENTER)
@@ -228,6 +250,24 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
           </button>
         </div>
       </div>
+      <div class="ai-fab-container">
+        <button class="ai-fab-btn semantic-search" @click="openSemanticSearch" title="AI 시맨틱 검색">
+          <Sparkles class="ai-icon" />
+          <span class="fab-label">의도 검색</span>
+        </button>
+        <button class="ai-fab-btn natural-filter" @click="openNaturalFilter" title="자연어 필터">
+          <Wand2 class="ai-icon" />
+          <span class="fab-label">자연어 필터</span>
+        </button>
+      </div>
+
+      <!-- AI 검색 모달 -->
+      <AISearchModal 
+        :is-open="isAIModalOpen" 
+        :mode="aiMode" 
+        @close="isAIModalOpen = false"
+        @search="handleAISearchResult"
+      />
     </div>
   </div>
 </template>
@@ -300,5 +340,73 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
 .reset-icon {
   width: 1.125rem;
   height: 1.125rem;
+}
+
+/* AI FAB Styles */
+.ai-fab-container {
+  position: absolute;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  z-index: 25;
+}
+
+.ai-fab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border: none;
+  border-radius: 9999px;
+  background-color: var(--color-white);
+  color: var(--color-gray-700);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  max-width: 3.5rem;
+  white-space: nowrap;
+}
+
+.ai-fab-btn:hover {
+  max-width: 12rem;
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  transform: translateY(-2px);
+}
+
+.ai-fab-btn.semantic-search {
+  border: 1px solid var(--color-primary-transparent-20);
+}
+
+.ai-fab-btn.natural-filter {
+  border: 1px solid var(--color-secondary-transparent-20);
+}
+
+.ai-icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+.fab-label {
+  font-weight: 700;
+  font-size: 0.875rem;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.ai-fab-btn:hover .fab-label {
+  opacity: 1;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+  .ai-fab-container {
+    bottom: 1.5rem;
+    right: 1.5rem;
+  }
 }
 </style>
