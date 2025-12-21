@@ -6,6 +6,7 @@ import { useMainDataStore } from '@/stores/mainData'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
+import http from '@/api/http'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -89,16 +90,11 @@ const getAISummary = async () => {
   
   isGeneratingSummary.value = true
   try {
-    const response = await fetch('/api/v1/ai/comparison-summary', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        myHouse: myHouse.value,
-        comparisonList: comparisonList.value
-      })
+    const response = await http.post('/api/v1/ai/comparison-summary', {
+      myHouse: myHouse.value,
+      comparisonList: comparisonList.value
     })
-    const data = await response.json()
-    aiSummary.value = data.data
+    aiSummary.value = response.data.data
   } catch (error) {
     console.error('AI Summary Error:', error)
   } finally {

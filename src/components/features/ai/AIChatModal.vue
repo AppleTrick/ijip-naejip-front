@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, nextTick } from 'vue'
 import { X, Send, Bot, Loader2 } from 'lucide-vue-next'
+import http from '@/api/http'
 
 const props = defineProps<{
   isOpen: boolean
@@ -46,13 +47,17 @@ const handleSend = async () => {
   await scrollToBottom()
 
   try {
-    const response = await fetch(`/api/v1/ai/analysis?areaCode=${props.areaCode}&aptName=${props.apartmentName}`)
-    const data = await response.json()
+    const response = await http.get('/api/v1/ai/analysis', {
+      params: {
+        areaCode: props.areaCode,
+        aptName: props.apartmentName
+      }
+    })
     
     messages.value.push({
       id: Date.now() + 1,
       role: 'assistant',
-      content: data.data || '죄송합니다. 정보를 가져오는 중 오류가 발생했습니다.'
+      content: response.data.data || '죄송합니다. 정보를 가져오는 중 오류가 발생했습니다.'
     })
   } catch (error) {
     messages.value.push({

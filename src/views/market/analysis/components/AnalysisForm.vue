@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import http from '@/api/http'
 import AddressSearch from '@/components/features/address/AddressSearch.vue'
 import FileUpload from './FileUpload.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -57,13 +58,8 @@ const onFileAnalyzed = (data: any) => {
 const analyze = async () => {
   loading.value = true
   try {
-    const response = await fetch('/api/v1/ai/fraud-check', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(form.value)
-    })
-    const data = await response.json()
-    result.value = data.data
+    const response = await http.post('/api/v1/ai/fraud-check', form.value)
+    result.value = response.data.data
   } catch (e) {
     alert('분석 중 오류가 발생했습니다.')
     console.error(e)
