@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, reactive, watch, computed } from 'vue'
-import { Search, RotateCcw } from 'lucide-vue-next'
+import { ref, reactive, watch } from 'vue'
+import { Search } from 'lucide-vue-next'
 import BaseFilterDropdown from '@/components/common/BaseFilterDropdown.vue'
 
 const emit = defineEmits<{
@@ -32,12 +32,6 @@ watch(filters, () => {
   applyFilters()
 }, { deep: true })
 
-
-
-const isFilterActive = computed(() => {
-  return filters.priceRange.min > 0 || filters.priceRange.max < 100 || 
-         filters.areaRange.min > 0 || filters.areaRange.max < 100
-})
 
 const resetFilters = () => {
   filters.priceRange.min = 0
@@ -85,6 +79,11 @@ const setAreaRange = (min: number, max: number) => {
   filters.areaRange.min = min
   filters.areaRange.max = max
 }
+
+// 부모 컴포넌트에서 호출할 수 있도록 노출
+defineExpose({
+  resetFilters
+})
 </script>
 
 <template>
@@ -217,41 +216,32 @@ const setAreaRange = (min: number, max: number) => {
           </div>
         </div>
       </BaseFilterDropdown>
-
-      <!-- 초기화 버튼 -->
-      <button 
-        @click="resetFilters" 
-        class="reset-btn"
-        v-if="isFilterActive"
-      >
-        <RotateCcw class="reset-icon" />
-        초기화
-      </button>
     </div>
   </div>
 </template>
 
 <style scoped>
 .filter-container {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
-  right: 1rem;
-  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  max-width: 56rem;
-  margin: 0 auto;
 }
 
 @media (min-width: 768px) {
   .filter-container {
     flex-direction: row;
-    align-items: flex-start;
+    align-items: center;
+    padding: 0.5rem;
+    gap: 0.5rem;
   }
   .search-wrapper {
-    flex: 0 0 32rem; /* 고정 너비 부여하여 버튼 추가 시 크기 유지 */
+    flex: 0 0 400px;
+    width: 400px;
+  }
+  .filter-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0; /* 줄어들지 않도록 설정 */
   }
 }
 
@@ -516,32 +506,5 @@ const setAreaRange = (min: number, max: number) => {
   color: var(--color-white);
   border-color: var(--color-primary);
   box-shadow: 0 4px 12px var(--color-primary-transparent-20);
-}
-
-.reset-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.5rem 1rem;
-  background-color: var(--color-white);
-  border: 1px solid var(--color-gray-200);
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--color-gray-600);
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-}
-
-.reset-btn:hover {
-  background-color: var(--color-gray-50);
-  color: var(--color-primary);
-  border-color: var(--color-primary-transparent-20);
-}
-
-.reset-icon {
-  width: 1rem;
-  height: 1rem;
 }
 </style>

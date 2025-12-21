@@ -10,6 +10,7 @@ import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
+import { RotateCcw } from 'lucide-vue-next'
 
 const store = useMainDataStore()
 const { filteredProperties, filters } = storeToRefs(store)
@@ -60,9 +61,19 @@ const handleSearch = (query: string) => {
 
 // 지도의 마지막 영역 정보를 저장 (필터 변경 시 재사용)
 const lastBounds = ref<any>(null)
+const filterRef = ref<any>(null)
+
+const isFilterActive = computed(() => {
+  return filters.value.priceRange.min > 0 || filters.value.priceRange.max < 100 || 
+         filters.value.areaRange.min > 0 || filters.value.areaRange.max < 100
+})
 
 const handleFilter = (newFilters: any) => {
   setFilters(newFilters)
+}
+
+const resetAll = () => {
+  filterRef.value?.resetFilters()
 }
 
 // 필터 변경 감지: 필터가 변경되면 지도의 마지막 영역 정보를 기반으로 데이터를 다시 가져옵니다.
@@ -131,10 +142,17 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
         @update-bounds="handleBoundsUpdate"
       />
       
-      <!-- 플로팅 검색바 -->
-      <div class="floating-search">
+      <!-- 플로팅 검색바 패키지: 중앙 정렬 유지용 -->
+      <div class="floating-search-package">
+        <!-- 검색바 본체 -->
         <div class="search-container">
-          <MarketFilter @search="handleSearch" @filter="handleFilter" />
+          <MarketFilter ref="filterRef" @search="handleSearch" @filter="handleFilter" />
+          
+          <!-- 초기화 버튼: 컨테이너 우측 외부에 절대 위치로 배치 -->
+          <button v-if="isFilterActive" @click.stop="resetAll" class="floating-reset-btn">
+            <RotateCcw class="reset-icon" />
+            <span>초기화</span>
+          </button>
         </div>
       </div>
     </div>
@@ -155,17 +173,59 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
   position: relative;
 }
 
-.floating-search {
+.floating-search-package {
   position: absolute;
   top: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 20;
-  width: 90%;
-  max-width: 600px;
+  pointer-events: none;
+}
+
+.floating-search-package > * {
+  pointer-events: auto; /* 자식 요소들은 클릭 가능 */
 }
 
 .search-container {
-  padding: 0.75rem;
+  position: relative; /* 버튼의 기준점 */
+  padding: 0;
+  display: flex;
+  align-items: center;
+  border-radius: 1rem;
+  pointer-events: auto;
+}
+
+.floating-reset-btn {
+  position: absolute;
+  left: calc(100% + 0.75rem); /* 검색창 우측 끝에서 0.75rem 띄움 */
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0 1.25rem;
+  height: 3.25rem;
+  background-color: var(--color-white);
+  border: none;
+  border-radius: 1rem;
+  font-weight: 700;
+  color: var(--color-gray-700);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+.floating-reset-btn:hover {
+  background-color: var(--color-gray-50);
+  color: var(--color-primary);
+  transform: translateY(calc(-50% - 2px)); /* 수직 중앙 유지하며 살짝 위로 */
+  box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+}
+
+.reset-icon {
+  width: 1.125rem;
+  height: 1.125rem;
 }
 </style>
