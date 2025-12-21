@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { X, Search, Sparkles, Wand2, Loader2, MapPin } from 'lucide-vue-next'
 import BaseButton from '@/components/common/BaseButton.vue'
+import http from '@/api/http'
 
 const props = defineProps<{
   isOpen: boolean
@@ -12,23 +13,17 @@ const emit = defineEmits(['close', 'search'])
 
 const query = ref('')
 const isSearching = ref(false)
-const searchResult = ref<any>(null)
+const searchResult = ref(null as any)
 
 const handleSearch = async () => {
   if (!query.value.trim()) return
   
   isSearching.value = true
-  // Simulate API call
   try {
     const endpoint = props.mode === 'semantic' ? '/api/v1/ai/search' : '/api/v1/ai/parse-filter'
-    const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: query.value })
-    })
-    const data = await response.json()
-    searchResult.value = data.data
-    emit('search', data.data)
+    const response = await http.post(endpoint, { query: query.value })
+    searchResult.value = response.data.data
+    emit('search', response.data.data)
   } catch (error) {
     console.error('AI Search Error:', error)
   } finally {
