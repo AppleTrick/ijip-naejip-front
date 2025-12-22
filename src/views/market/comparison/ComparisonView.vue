@@ -228,7 +228,20 @@ const getAISummary = async () => {
 
 <template>
   <div class="comparison-page">
-    <div class="content-container">
+    <!-- 비로그인 시 로그인 안내 -->
+    <div v-if="!isAuthenticated" class="login-required">
+      <div class="login-required-card">
+        <AlertCircle class="login-icon" />
+        <h2>로그인이 필요합니다</h2>
+        <p>관심 아파트 기능은 로그인 이후 이용 가능합니다.</p>
+        <BaseButton variant="primary" @click="router.push('/login')">
+          로그인하기
+        </BaseButton>
+      </div>
+    </div>
+
+    <!-- 로그인 시 메인 컨텐츠 -->
+    <div v-else class="content-container">
       <!-- Header -->
       <div class="page-header">
         <div class="header-left">
@@ -513,6 +526,42 @@ const getAISummary = async () => {
 .content-container {
   max-width: 80rem; /* max-w-7xl */
   margin: 0 auto;
+}
+
+.login-required {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.login-required-card {
+  text-align: center;
+  padding: 3rem;
+  background: var(--color-white);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+}
+
+.login-required-card .login-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+}
+
+.login-required-card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.login-required-card p {
+  color: var(--color-gray-500);
+  margin-bottom: 1.5rem;
 }
 
 .page-header {
