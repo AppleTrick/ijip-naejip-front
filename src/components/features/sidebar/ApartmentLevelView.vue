@@ -231,9 +231,9 @@ const formatDate = (dateNum: number) => {
         </button>
       </div>
 
-      <button @click="goBack" class="back-btn">
+      <!-- <button @click="goBack" class="back-btn">
         <ArrowLeft class="icon-sm" />
-      </button>
+      </button> -->
     </div>
 
     <div class="sidebar-content">
