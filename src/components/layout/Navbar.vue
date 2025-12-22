@@ -58,13 +58,13 @@ const handleLogout = () => {
             >
               매물 지도
             </router-link>
-            <router-link 
+            <!-- <router-link 
               to="/analysis" 
               class="nav-link" 
               active-class="nav-link--active"
             >
               안전도 분석
-            </router-link>
+            </router-link> -->
             <router-link 
               to="/comparison" 
               class="nav-link" 
@@ -152,14 +152,14 @@ const handleLogout = () => {
         >
           매물 지도
         </router-link>
-        <router-link 
+        <!-- <router-link 
           to="/analysis" 
           class="mobile-nav-link"
           active-class="mobile-nav-link--active"
           @click="closeMenu"
         >
           안전도 분석
-        </router-link>
+        </router-link> -->
         <router-link 
           to="/comparison" 
           class="mobile-nav-link"
