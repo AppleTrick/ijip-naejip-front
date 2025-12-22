@@ -17,18 +17,24 @@ const searchResult = ref(null as any)
 
 const handleMove = (item: any) => {
   console.log('handleMove Item:', item)
-  if (item.latitude && item.longitude) {
+  
+  // 좌표 유효성 검사 개선 (0도 유효한 값일 수 있음)
+  const lat = Number(item.latitude)
+  const lng = Number(item.longitude)
+  
+  if (Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)) {
     emit('move-location', {
-      lat: item.latitude,
-      lng: item.longitude,
+      lat: lat,
+      lng: lng,
       aptSeq: item.aptSeq
     })
     closeModal()
   } else {
-    console.warn('Coordinates missing for item:', item)
-    alert('위치 정보가 없습니다.')
+    console.warn('Invalid coordinates for item:', item)
+    alert('위치 정보가 올바르지 않습니다. 다른 매물을 선택해 주세요.')
   }
 }
+
 
 const handleSearch = async () => {
   if (!query.value.trim()) return
