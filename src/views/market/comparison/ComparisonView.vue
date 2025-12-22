@@ -9,6 +9,7 @@ import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
 import http from '@/api/http'
 import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
+import { getNearestPanoId } from '@/api/imageApi2'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -22,8 +23,8 @@ const favoritesFromDB = ref<any[]>([])
 const favoriteImages = ref<Record<string, string>>({})
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
 
-// 로드뷰 이미지 URL 생성
-const getRoadviewImageUrl = (panoId: string) => {
+// 로드뷰 스냅샷 이미지 URL 생성 (PriceDetailView와 동일)
+const getRoadviewImageUrl = (panoId: number) => {
   return `https://map.kakaocdn.net/roadview/snapshot?panoId=${panoId}&heading=0&pitch=0&width=400&height=300`
 }
 
@@ -31,14 +32,12 @@ const getRoadviewImageUrl = (panoId: string) => {
 const loadFavorites = async () => {
   try {
     favoritesFromDB.value = await getFavorites()
-    // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용)
+    // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용) - PriceDetailView와 동일한 로직
     for (const fav of favoritesFromDB.value) {
       if (fav.latitude && fav.longitude) {
         try {
-          const panoId = await fetch(
-            `https://dapi.kakao.com/v2/local/geo/roadview.json?x=${fav.longitude}&y=${fav.latitude}&radius=50`,
-            { headers: { Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}` } }
-          ).then(r => r.json()).then(d => d.documents?.[0]?.pan_id)
+          // getNearestPanoId 사용 (PriceDetailView와 동일)
+          const panoId = await getNearestPanoId(Number(fav.latitude), Number(fav.longitude))
           
           if (panoId) {
             favoriteImages.value[fav.aptSeq] = getRoadviewImageUrl(panoId)
