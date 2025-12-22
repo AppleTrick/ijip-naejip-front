@@ -7,11 +7,10 @@ import LandingFeatures from './components/LandingFeatures.vue'
 import LandingStats from './components/LandingStats.vue'
 import LandingCTA from './components/LandingCTA.vue'
 
-// Animated statistics
 const stats = ref([
-  { value: 0, target: 15000, label: '분석된 매물', suffix: '+', icon: Home },
-  { value: 0, target: 98, label: '사기 예방률', suffix: '%', icon: Shield },
-  { value: 0, target: 25000, label: '안심 회원', suffix: '+', icon: Users },
+  { value: 0, target: 15000, label: '분석된 지역 데이터', suffix: '+', icon: Home },
+  { value: 0, target: 99, label: '추천 만족도', suffix: '%', icon: Shield },
+  { value: 0, target: 25000, label: '활성 사용자', suffix: '+', icon: Users },
   { value: 0, target: 4.9, label: '평점', suffix: '/5.0', icon: Award, decimal: true }
 ])
 

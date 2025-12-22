@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Map, Shield, Scale } from 'lucide-vue-next'
+import { Map, Sparkles, Scale } from 'lucide-vue-next'
 
 const handleMouseEnter = (e: MouseEvent) => {
   if (e.currentTarget instanceof HTMLElement) {
@@ -46,17 +46,17 @@ const handleMouseLeave = (e: MouseEvent) => {
         <div class="featured-badge">BEST</div>
         <div class="feature-bg"></div>
         <div class="icon-wrapper shield-gradient">
-          <Shield class="feature-icon" />
+          <Sparkles class="feature-icon" />
         </div>
-        <h3 class="feature-title">AI 전세사기 예방 시스템</h3>
+        <h3 class="feature-title">AI 맞춤 동네 추천</h3>
         <p class="feature-description">
-          빅데이터 분석과 AI 알고리즘으로 전세사기 위험도를 정확하게 진단합니다.
-          안전한 거래를 위한 필수 체크리스트를 제공합니다.
+          "직장 강남역, 주말엔 한강 러닝, 예산 3억"
+          당신의 조건과 취향을 말하면 AI가 살기 좋은 동네를 찾아드립니다.
         </p>
         <div class="feature-tags">
-          <span class="tag">AI 분석</span>
-          <span class="tag">위험도 진단</span>
-          <span class="tag">실시간 모니터링</span>
+          <span class="tag">라이프스타일 분석</span>
+          <span class="tag">최적 지역 제안</span>
+          <span class="tag">동네 분위기 파악</span>
         </div>
       </div>
 
