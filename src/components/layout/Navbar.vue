@@ -44,6 +44,7 @@ const handleLogout = () => {
         <div class="desktop-menu">
           <!-- Main Navigation -->
           <div class="nav-links">
+            <!-- 홈 링크 비활성화
             <router-link 
               to="/home" 
               class="nav-link" 
@@ -51,6 +52,7 @@ const handleLogout = () => {
             >
               홈
             </router-link>
+            -->
             <router-link 
               to="/map" 
               class="nav-link" 
@@ -136,6 +138,7 @@ const handleLogout = () => {
     <!-- Mobile Menu Dropdown -->
     <div v-if="isMenuOpen" class="mobile-menu">
       <div class="mobile-menu-content">
+        <!-- 홈 링크 비활성화
         <router-link 
           to="/home" 
           class="mobile-nav-link"
@@ -144,6 +147,7 @@ const handleLogout = () => {
         >
           홈
         </router-link>
+        -->
         <router-link 
           to="/map" 
           class="mobile-nav-link"

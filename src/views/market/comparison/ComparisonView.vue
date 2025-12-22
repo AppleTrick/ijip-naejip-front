@@ -113,8 +113,8 @@ const getAISummary = async () => {
             <ArrowLeft class="icon-md" />
           </button>
           <div>
-            <h1 class="page-title">집 비교하기</h1>
-            <p class="page-subtitle">내 집과 관심 매물을 한눈에 비교해보세요.</p>
+            <h1 class="page-title">관심 아파트</h1>
+            <p class="page-subtitle">내 집과 관심 아파트를 한눈에 비교해보세요.</p>
           </div>
         </div>
       </div>
@@ -125,7 +125,7 @@ const getAISummary = async () => {
           <div class="filter-card">
             <div class="filter-header">
               <Filter class="filter-icon" />
-              <h3 class="filter-title">필터링 기준</h3>
+              <h3 class="filter-title">정렬 조건</h3>
             </div>
             
             <!-- Mock Filters -->
@@ -187,7 +187,7 @@ const getAISummary = async () => {
             <div class="summary-header">
               <div class="summary-title">
                 <Sparkles class="sparkle-icon" />
-                <h3>AI 매물 비교 요약</h3>
+                <h3>AI 아파트 비교 요약</h3>
               </div>
               <BaseButton 
                 variant="primary" 
@@ -204,19 +204,19 @@ const getAISummary = async () => {
               <p class="summary-text">{{ aiSummary }}</p>
             </div>
             <div v-else-if="!isGeneratingSummary" class="summary-placeholder">
-              <p>선택하신 매물들의 특징을 AI가 분석하여 최적의 선택을 도와드립니다.</p>
+              <p>선택하신 아파트들의 특징을 AI가 분석하여 최적의 선택을 도와드립니다.</p>
             </div>
             <div v-else class="summary-loading">
               <div class="loading-dots">
                 <span>.</span><span>.</span><span>.</span>
               </div>
-              <p>매물 정보를 분석하고 있습니다...</p>
+              <p>아파트 정보를 분석하고 있습니다...</p>
             </div>
           </div>
 
           <!-- Sort Header -->
           <div class="sort-header">
-            <span class="count-text">총 <span class="count-number">{{ comparisonList.length + (myHouse ? 1 : 0) }}</span>개의 매물 비교</span>
+            <span class="count-text">총 <span class="count-number">{{ comparisonList.length + (myHouse ? 1 : 0) }}</span>개의 아파트 비교</span>
             <div class="sort-select-wrapper">
               <BaseSelect v-model="sortOption" :options="sortOptions" placeholder="정렬 기준" />
             </div>
