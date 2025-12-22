@@ -197,13 +197,25 @@ const aiSummary = ref<string | null>(null)
 const isGeneratingSummary = ref(false)
 
 const getAISummary = async () => {
-  if (comparisonList.value.length === 0 && !myHouse.value) return
+  // 로그인 시 DB 데이터 사용, 비로그인 시 로컬 데이터 사용
+  const dataToCompare = isAuthenticated.value && favoritesFromDB.value.length > 0
+    ? favoritesFromDB.value.map(f => ({
+        aptNm: f.aptName,
+        roadNm: f.address,
+        dealAmount: f.dealAmount || '',
+        excluUseAr: f.pyung ? `${f.pyung}` : '',
+        buildYear: null,
+        floor: ''
+      }))
+    : comparisonList.value
+  
+  if (dataToCompare.length === 0 && !myHouse.value) return
   
   isGeneratingSummary.value = true
   try {
     const response = await http.post('/api/v1/ai/comparison-summary', {
       myHouse: myHouse.value,
-      comparisonList: comparisonList.value
+      comparisonList: dataToCompare
     })
     aiSummary.value = response.data.data
   } catch (error) {
