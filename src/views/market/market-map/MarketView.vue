@@ -38,6 +38,18 @@ const handleAISearchResult = (result: any) => {
   // For filters, we could update the store here
   if (aiMode.value === 'filter' && result.filters) {
     setFilters(result.filters)
+    isAIModalOpen.value = false // 필터 적용 후 모달 닫기
+  }
+}
+
+const handleMoveLocation = (location: { lat: number, lng: number, aptSeq?: string }) => {
+  if (location.lat && location.lng) {
+    // 지도 중심 이동 및 줌 레벨 조정
+    mapCenter.value = { lat: location.lat, lng: location.lng }
+    mapLevel.value = 3 
+    
+    // 모달은 AISearchModal 내부에서 이미 닫힘(closeModal 호출) 
+    // 하지만 상태 동기화를 위해 여기서 명시적으로 false 처리해도 좋음 (이벤트 흐름상 자동 처리됨)
   }
 }
 
@@ -267,6 +279,7 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
         :mode="aiMode" 
         @close="isAIModalOpen = false"
         @search="handleAISearchResult"
+        @move-location="handleMoveLocation"
       />
     </div>
   </div>

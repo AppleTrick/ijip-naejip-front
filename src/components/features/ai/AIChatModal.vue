@@ -233,6 +233,7 @@ const closeModal = () => {
   border-radius: 1rem;
   font-size: 0.9375rem;
   line-height: 1.5;
+  white-space: pre-wrap; /* 줄바꿈 및 공백 유지 */
 }
 
 .user .message-bubble {

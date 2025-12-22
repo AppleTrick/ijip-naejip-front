@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { X, Search, Sparkles, Wand2, Loader2, MapPin } from 'lucide-vue-next'
+import { X, Search, Sparkles, Wand2, Loader2, MapPin, ArrowRight } from 'lucide-vue-next'
 import BaseButton from '@/components/common/BaseButton.vue'
 import http from '@/api/http'
 
@@ -9,16 +9,32 @@ const props = defineProps<{
   mode: 'semantic' | 'filter'
 }>()
 
-const emit = defineEmits(['close', 'search'])
+const emit = defineEmits(['close', 'search', 'move-location'])
 
 const query = ref('')
 const isSearching = ref(false)
 const searchResult = ref(null as any)
 
+const handleMove = (item: any) => {
+  console.log('handleMove Item:', item)
+  if (item.latitude && item.longitude) {
+    emit('move-location', {
+      lat: item.latitude,
+      lng: item.longitude,
+      aptSeq: item.aptSeq
+    })
+    closeModal()
+  } else {
+    console.warn('Coordinates missing for item:', item)
+    alert('위치 정보가 없습니다.')
+  }
+}
+
 const handleSearch = async () => {
   if (!query.value.trim()) return
   
   isSearching.value = true
+  searchResult.value = null // 이전 결과 초기화 (깜빡임 방지)
   try {
     const endpoint = props.mode === 'semantic' ? '/api/v1/ai/search' : '/api/v1/ai/parse-filter'
     const response = await http.post(endpoint, { query: query.value })
@@ -39,7 +55,7 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="closeModal">
+  <div v-if="isOpen" class="modal-overlay"> <!-- 오버레이 클릭 닫기 제거 -->
     <div class="modal-content">
       <div class="modal-header">
         <div class="header-title">
@@ -83,7 +99,15 @@ const closeModal = () => {
           </div>
         </div>
 
-        <div v-if="searchResult" class="result-container">
+        <div v-if="isSearching" class="loading-state">
+          <div class="loader-content">
+            <Loader2 class="spin-icon-lg" />
+            <p>AI가 고객님의 요청을 분석하고 있어요... 🧐</p>
+            <span class="sub-text">잠시만 기다려주세요!</span>
+          </div>
+        </div>
+
+        <div v-if="searchResult && !isSearching" class="result-container">
           <div class="analysis-box">
             <Sparkles class="sparkle-icon" />
             <p class="analysis-text">{{ searchResult.analysis }}</p>
@@ -93,11 +117,17 @@ const closeModal = () => {
             <h3>추천 매물</h3>
             <div class="results-list">
               <div v-for="item in searchResult.results" :key="item.aptSeq" class="result-item">
-                <MapPin class="pin-icon" />
-                <div class="item-info">
-                  <span class="apt-name">{{ item.aptNm }}</span>
-                  <span class="apt-addr">{{ item.roadNm }}</span>
+                <div class="result-content">
+                  <MapPin class="pin-icon" />
+                  <div class="item-info">
+                    <span class="apt-name">{{ item.aptName }}</span>
+                    <span class="apt-addr">{{ item.dongName }}</span>
+                  </div>
                 </div>
+                <button class="move-btn" @click="handleMove(item)">
+                  이동
+                  <ArrowRight class="btn-icon-xxs" />
+                </button>
               </div>
             </div>
           </div>
@@ -123,9 +153,12 @@ const closeModal = () => {
   background-color: var(--color-white);
   width: 90%;
   max-width: 600px;
+  max-height: 80vh; /* 높이 제한 */
   border-radius: 1.5rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   overflow: hidden;
+  display: flex; /* Flexbox 적용 */
+  flex-direction: column; /* 세로 정렬 */
   animation: modal-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -175,6 +208,8 @@ const closeModal = () => {
 
 .modal-body {
   padding: 1.5rem;
+  overflow-y: auto; /* 내용이 길면 스크롤 */
+  flex: 1; /* 남은 공간 차지 */
 }
 
 .description {
@@ -183,10 +218,14 @@ const closeModal = () => {
   margin-bottom: 1.5rem;
 }
 
+/* Restored and fixed CSS */
 .search-input-wrapper {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  width: 100%;
+  flex-shrink: 0;
+  box-sizing: border-box;
 }
 
 .search-textarea {
@@ -198,6 +237,7 @@ const closeModal = () => {
   font-size: 1rem;
   resize: none;
   transition: border-color 0.2s;
+  box-sizing: border-box;
 }
 
 .search-textarea:focus {
@@ -209,6 +249,8 @@ const closeModal = () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .tip {
@@ -246,6 +288,7 @@ const closeModal = () => {
   line-height: 1.6;
   color: var(--color-gray-800);
   margin: 0;
+  white-space: pre-wrap; /* 줄바꿈 지원 */
 }
 
 .recommendations h3 {
@@ -309,5 +352,73 @@ const closeModal = () => {
   width: 1rem;
   height: 1rem;
   margin-right: 0.5rem;
+}
+
+.result-item {
+  justify-content: space-between; /* 양끝 정렬 */
+}
+
+.result-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.move-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background-color: var(--color-primary-transparent-10);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.move-btn:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+}
+
+.btn-icon-xxs {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  animation: fade-in 0.3s ease-out;
+}
+
+.loader-content {
+  text-align: center;
+  color: var(--color-gray-600);
+}
+
+.loader-content p {
+  font-weight: 600;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  color: var(--color-gray-900);
+}
+
+.sub-text {
+  font-size: 0.8125rem;
+  color: var(--color-gray-500);
+}
+
+.spin-icon-lg {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-primary);
+  animation: spin 1s linear infinite;
 }
 </style>

@@ -1,12 +1,17 @@
 <script setup lang="ts">
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, nextTick } from 'vue'
 import { Search } from 'lucide-vue-next'
+import { storeToRefs } from 'pinia'
+import { useMainDataStore } from '@/stores/mainData'
 import BaseFilterDropdown from '@/components/common/BaseFilterDropdown.vue'
 
 const emit = defineEmits<{
   (e: 'search', query: string): void
   (e: 'filter', filters: any): void
 }>()
+
+const store = useMainDataStore()
+const { filters: storeFilters } = storeToRefs(store)
 
 const searchQuery = ref<string>('')
 
@@ -16,7 +21,13 @@ const filters = reactive({
   areaRange: { min: 0, max: 100 }  // 단위: 평
 })
 
-// 평형 옵션 정의 제거 (범위 방식으로 변경됨)
+// Store(AI/Global) -> Local UI Sync
+watch(storeFilters, (newVal) => {
+  if (JSON.stringify(newVal) !== JSON.stringify(filters)) {
+    filters.priceRange = { ...newVal.priceRange }
+    filters.areaRange = { ...newVal.areaRange }
+  }
+}, { deep: true, immediate: true })
 
 const handleSearch = () => {
   emit('search', searchQuery.value)
@@ -26,14 +37,16 @@ const applyFilters = () => {
   emit('filter', { ...filters })
 }
 
-// 필터 변경 감지: 변경 시 즉시 필터 적용 (UX 향상)
-// 체크박스나 슬라이더 변경 시 실시간으로 반영
-watch(filters, () => {
-  applyFilters()
+// 필터 변경 감지 & Store 업데이트 Loop 방지
+watch(filters, (newVal) => {
+  // Store와 다를 때만 Emit (UI 조작 시)
+  if (JSON.stringify(newVal) !== JSON.stringify(storeFilters.value)) {
+    applyFilters()
+  }
 }, { deep: true })
 
-
 const resetFilters = () => {
+  // 로컬 상태 초기화 -> Watcher가 감지하여 applyFilters 호출 -> Store 업데이트
   filters.priceRange.min = 0
   filters.priceRange.max = 100
   filters.areaRange.min = 0
