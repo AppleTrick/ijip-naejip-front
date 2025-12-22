@@ -12,6 +12,7 @@ import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
 import { RotateCcw, Sparkles, Wand2 } from 'lucide-vue-next'
 import AISearchModal from '@/components/features/ai/AISearchModal.vue'
+import AIFloatingButton from '@/components/common/AIFloatingButton.vue'
 
 const store = useMainDataStore()
 const { filteredProperties, filters } = storeToRefs(store)
@@ -263,14 +264,23 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
         </div>
       </div>
       <div class="ai-fab-container">
-        <button class="ai-fab-btn semantic-search" @click="openSemanticSearch" title="AI 시맨틱 검색">
-          <Sparkles class="ai-icon" />
-          <span class="fab-label">의도 검색</span>
-        </button>
-        <button class="ai-fab-btn natural-filter" @click="openNaturalFilter" title="자연어 필터">
-          <Wand2 class="ai-icon" />
-          <span class="fab-label">자연어 필터</span>
-        </button>
+        <AIFloatingButton 
+          label="의도 검색" 
+          title="AI 시맨틱 검색" 
+          variant="semantic" 
+          @click="openSemanticSearch"
+        >
+          <template #icon><Sparkles /></template>
+        </AIFloatingButton>
+        
+        <AIFloatingButton 
+          label="자연어 필터" 
+          title="자연어 필터" 
+          variant="filter" 
+          @click="openNaturalFilter"
+        >
+          <template #icon><Wand2 /></template>
+        </AIFloatingButton>
       </div>
 
       <!-- AI 검색 모달 -->
@@ -364,55 +374,7 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
   flex-direction: column;
   gap: 1rem;
   z-index: 25;
-}
-
-.ai-fab-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
-  border: none;
-  border-radius: 9999px;
-  background-color: var(--color-white);
-  color: var(--color-gray-700);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  overflow: hidden;
-  max-width: 3.5rem;
-  white-space: nowrap;
-}
-
-.ai-fab-btn:hover {
-  max-width: 12rem;
-  background-color: var(--color-primary);
-  color: var(--color-white);
-  transform: translateY(-2px);
-}
-
-.ai-fab-btn.semantic-search {
-  border: 1px solid var(--color-primary-transparent-20);
-}
-
-.ai-fab-btn.natural-filter {
-  border: 1px solid var(--color-secondary-transparent-20);
-}
-
-.ai-icon {
-  width: 1.5rem;
-  height: 1.5rem;
-  flex-shrink: 0;
-}
-
-.fab-label {
-  font-weight: 700;
-  font-size: 0.875rem;
-  opacity: 0;
-  transition: opacity 0.2s ease-in-out;
-}
-
-.ai-fab-btn:hover .fab-label {
-  opacity: 1;
+  align-items: flex-end; /* 오른쪽 정렬로 변경하여 개별 확장 시 영향 없도록 함 */
 }
 
 /* Mobile adjustments */
