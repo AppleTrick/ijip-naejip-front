@@ -3,6 +3,7 @@ import { ref, watch, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
+import { useAuthStore } from '@/stores/auth'
 import { useMarket } from '@/composables/useMarket'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
@@ -11,17 +12,55 @@ import { formatPrice } from '@/utils/formatters'
 import TrendGraph from './common/TrendGraph.vue'
 import { searchApartmentImage } from '@/api/imageApi'
 import { getNearestPanoId } from '@/api/imageApi2'
+import { addFavorite, removeFavorite } from '@/api/favoriteApi'
 import { Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon } from 'lucide-vue-next'
 import AIChatModal from '@/components/features/ai/AIChatModal.vue'
 
 const router = useRouter()
 const store = useMainDataStore()
 const statsStore = useMarketStatsStore()
+const authStore = useAuthStore()
 const { fetchPropertyDetail } = useMarket()
 const { selectedProperty } = storeToRefs(store)
 const { selectedPyung } = storeToRefs(statsStore)
+const { isAuthenticated } = storeToRefs(authStore)
 const { addToComparison, removeFromComparison, isInComparison } = store
 const { goBack } = statsStore
+
+// 관심 아파트 클릭 핸들러 (로그인 확인 + API 호출)
+const handleFavoriteClick = async () => {
+  if (!selectedProperty.value) return
+  
+  // 로그인 확인
+  if (!isAuthenticated.value) {
+    if (confirm('로그인이 필요합니다. 로그인 페이지로 이동할까요?')) {
+      router.push('/login')
+    }
+    return
+  }
+  
+  const apt = selectedProperty.value
+  
+  try {
+    if (isInComparison(apt.aptSeq)) {
+      // 삭제 (추후 ID 기반 삭제로 개선 필요)
+      removeFromComparison(apt.aptSeq)
+      // await removeFavorite(id) // TODO: 실제 ID 필요
+    } else {
+      // 추가
+      await addFavorite({
+        aptSeq: apt.aptSeq,
+        aptName: apt.aptNm,
+        address: apt.roadNm || '',
+        pyung: Number(apt.excluUseAr) || 0,
+        dealAmount: apt.dealAmount || ''
+      })
+      addToComparison(apt)
+    }
+  } catch (error: any) {
+    alert(error.message || '관심 등록 중 오류가 발생했습니다.')
+  }
+}
 
 // 현재 선택된 평형 (statsStore의 selectedPyung과 동기화)
 const currentPyung = computed(() => selectedPyung.value || 'all')
@@ -241,10 +280,10 @@ const formatDate = (dateNum: number) => {
         <div class="title-row">
           <h2 class="property-title">{{ selectedProperty.aptNm }}</h2>
           <button 
-            @click="isInComparison(selectedProperty.aptSeq) ? removeFromComparison(selectedProperty.aptSeq) : addToComparison(selectedProperty)"
+            @click="handleFavoriteClick"
             class="compare-btn"
             :class="isInComparison(selectedProperty.aptSeq) ? 'compare-btn--active' : 'compare-btn--inactive'"
-            :title="isInComparison(selectedProperty.aptSeq) ? '비교함에서 제거' : '비교함에 추가'"
+            :title="isInComparison(selectedProperty.aptSeq) ? '관심 목록에서 제거' : '관심 목록에 추가'"
           >
             <component :is="isInComparison(selectedProperty.aptSeq) ? Check : Plus" class="icon-md" />
           </button>

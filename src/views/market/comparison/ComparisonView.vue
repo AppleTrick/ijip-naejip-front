@@ -883,6 +883,7 @@ const getAISummary = async () => {
   font-size: 0.9375rem;
   line-height: 1.6;
   color: var(--color-gray-800);
+  white-space: pre-wrap;
 }
 
 .summary-placeholder {
