@@ -9,6 +9,7 @@ import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
 import http from '@/api/http'
 import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
+import { searchApartmentImage } from '@/api/imageApi'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -17,14 +18,25 @@ const { myHouse, comparisonList } = storeToRefs(store)
 const { isAuthenticated } = storeToRefs(authStore)
 const { removeFromComparison } = store
 
-// DB 기반 관심 아파트 목록
+// DB 기반 관심 아파트 목록 + 이미지
 const favoritesFromDB = ref<any[]>([])
+const favoriteImages = ref<Record<string, string>>({})
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
 
-// 로그인된 경우 DB에서 관심 목록 로드
+// 로그인된 경우 DB에서 관심 목록 로드 + 이미지
 onMounted(async () => {
   if (isAuthenticated.value) {
     try {
       favoritesFromDB.value = await getFavorites()
+      // 각 아파트 이미지 로드
+      for (const fav of favoritesFromDB.value) {
+        try {
+          const img = await searchApartmentImage(fav.aptName || '', fav.address || '')
+          favoriteImages.value[fav.aptSeq] = img || FALLBACK_IMAGE
+        } catch {
+          favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+        }
+      }
     } catch (error) {
       console.error('관심 목록 로드 실패:', error)
     }
@@ -57,6 +69,12 @@ const goBack = () => {
 
 const parsePrice = (priceStr: string | undefined): number => {
   if (!priceStr) return 0
+  // 숫자만 있는 경우 (예: "34300" = 만원 단위)
+  const numOnly = priceStr.replace(/[^\d]/g, '')
+  if (numOnly && !priceStr.includes('억')) {
+    return parseInt(numOnly)
+  }
+  // 억/만원 형식인 경우
   let total = 0
   const ukMatch = priceStr.match(/(\d+)억/)
   const manMatch = priceStr.match(/(\d+)만원/)
@@ -64,6 +82,29 @@ const parsePrice = (priceStr: string | undefined): number => {
   if (ukMatch) total += parseInt(ukMatch[1]) * 10000
   if (manMatch) total += parseInt(manMatch[1])
   return total
+}
+
+// 가격을 X.X억 형식으로 포맷
+const formatPriceDisplay = (priceStr: string | undefined): string => {
+  if (!priceStr) return '-'
+  
+  // 이미 억 형식이면 그대로 반환
+  if (priceStr.includes('억')) return priceStr
+  
+  // 숫자만 있는 경우 (만원 단위)
+  const price = parseInt(priceStr.replace(/[^\d]/g, ''))
+  if (isNaN(price) || price === 0) return '-'
+  
+  const uk = Math.floor(price / 10000)
+  const man = price % 10000
+  
+  if (uk > 0 && man > 0) {
+    return `${uk}억 ${man}만원`
+  } else if (uk > 0) {
+    return `${uk}억`
+  } else {
+    return `${man}만원`
+  }
 }
 
 const formatPriceDiff = (targetPrice: string, basePrice: string): string => {
@@ -328,7 +369,7 @@ const getAISummary = async () => {
                   </button>
                   
                   <div class="card-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                    <img :src="favoriteImages[property.aptSeq] || FALLBACK_IMAGE" 
                          alt="Property" class="card-image" />
                   </div>
 
@@ -344,7 +385,7 @@ const getAISummary = async () => {
                       <!-- Price Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">매매가</p>
-                        <p class="stat-value">{{ property.dealAmount }}</p>
+                        <p class="stat-value">{{ formatPriceDisplay(property.dealAmount) }}</p>
                         <div v-if="myHouse" class="diff-text" 
                              :class="parsePrice(property.dealAmount) > parsePrice(myHouse.dealAmount) ? 'text-red' : parsePrice(property.dealAmount) < parsePrice(myHouse.dealAmount) ? 'text-blue' : 'text-gray'">
                           {{ formatPriceDiff(property.dealAmount, myHouse.dealAmount) }}
@@ -354,7 +395,7 @@ const getAISummary = async () => {
                       <!-- Area Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">면적</p>
-                        <p class="stat-value">{{ property.excluUseAr }}평</p>
+                        <p class="stat-value">{{ property.excluUseAr || '-' }}</p>
                         <div v-if="myHouse" class="diff-text"
                              :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'text-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'text-red' : 'text-gray'">
                           {{ formatAreaDiff(property.excluUseAr, myHouse.excluUseAr) }}

@@ -4,24 +4,66 @@ import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
+import { useAuthStore } from '@/stores/auth'
 import { useMarket } from '@/composables/useMarket'
 import BaseButton from '@/components/common/BaseButton.vue'
-import { ArrowLeft, Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon, Check, Plus } from 'lucide-vue-next'
+import { ArrowLeft, Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon, Check, Plus, Heart } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
 import TrendGraph from '@/components/features/sidebar/common/TrendGraph.vue'
 import { searchApartmentImage } from '@/api/imageApi'
 import { getNearestPanoId } from '@/api/imageApi2'
 import { loadKakaoSDK } from '@/utils/kakaoLoader'
+import { addFavorite, removeFavoriteByAptSeq, checkFavorite } from '@/api/favoriteApi'
 import AIChatModal from '@/components/features/ai/AIChatModal.vue'
 
 const route = useRoute()
 const router = useRouter()
 const store = useMainDataStore()
 const statsStore = useMarketStatsStore()
+const authStore = useAuthStore()
 const { fetchPropertyDetail } = useMarket()
 const { selectedProperty } = storeToRefs(store)
 const { selectedPyung } = storeToRefs(statsStore)
+const { isAuthenticated } = storeToRefs(authStore)
 const { addToComparison, removeFromComparison, isInComparison } = store
+
+// 관심 아파트 여부 (DB 기준)
+const isFavorite = ref(false)
+
+// 관심 아파트 클릭 핸들러
+const handleFavoriteClick = async () => {
+  if (!selectedProperty.value) return
+  
+  if (!isAuthenticated.value) {
+    if (confirm('로그인이 필요합니다. 로그인 페이지로 이동할까요?')) {
+      router.push('/login')
+    }
+    return
+  }
+  
+  const apt = selectedProperty.value
+  const pyung = Number(selectedPyung.value) || 0
+  
+  try {
+    if (isFavorite.value) {
+      await removeFavoriteByAptSeq(apt.aptSeq)
+      removeFromComparison(apt.aptSeq)
+      isFavorite.value = false
+    } else {
+      await addFavorite({
+        aptSeq: apt.aptSeq,
+        aptName: apt.aptNm,
+        address: apt.roadNm || '',
+        pyung: pyung,
+        dealAmount: apt.dealAmount || ''
+      })
+      addToComparison(apt)
+      isFavorite.value = true
+    }
+  } catch (error: any) {
+    alert(error.message || '관심 등록 중 오류가 발생했습니다.')
+  }
+}
 
 // Route ID handling
 const propertyId = route.params.id as string
@@ -40,6 +82,12 @@ onMounted(async () => {
       const p = selectedProperty.value
       fetchMedia(p.aptNm, p.roadNm || '', Number(p.latitude), Number(p.longitude))
       analyzeAutomatedLocation(p.aptNm, p.roadNm || '')
+      
+      // 4. 관심 아파트 여부 확인 (로그인 시)
+      if (isAuthenticated.value) {
+        const pyung = Number(selectedPyung.value) || 0
+        isFavorite.value = await checkFavorite(p.aptSeq, pyung)
+      }
     }
   }
 })
@@ -290,12 +338,12 @@ onMounted(() => {
         </div>
         <div class="header-actions">
            <button 
-            @click="isInComparison(selectedProperty.aptSeq) ? removeFromComparison(selectedProperty.aptSeq) : addToComparison(selectedProperty)"
+            @click="handleFavoriteClick"
             class="action-btn compare-btn"
-            :class="{ active: isInComparison(selectedProperty.aptSeq) }"
+            :class="{ active: isFavorite }"
           >
-            <component :is="isInComparison(selectedProperty.aptSeq) ? Check : Plus" class="icon-sm" />
-            {{ isInComparison(selectedProperty.aptSeq) ? '비교함 제거' : '비교함 추가' }}
+            <Heart class="icon-sm" :class="{ 'fill-red': isFavorite }" />
+            {{ isFavorite ? '관심 등록됨' : '관심 등록' }}
           </button>
           <BaseButton variant="primary" class="action-btn" @click="openChatModal">
             <ChatIcon class="icon-sm mr-1" /> AI 에이전트 질문
