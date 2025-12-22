@@ -40,6 +40,8 @@ const handleFavoriteClick = async () => {
   }
   
   const apt = selectedProperty.value
+  // 선택된 평수 사용 (statsStore의 selectedPyung)
+  const pyung = selectedPyung.value ? Number(selectedPyung.value) : null
   
   try {
     if (isInComparison(apt.aptSeq)) {
@@ -52,7 +54,7 @@ const handleFavoriteClick = async () => {
         aptSeq: apt.aptSeq,
         aptName: apt.aptNm,
         address: apt.roadNm || '',
-        pyung: Number(apt.excluUseAr) || 0,
+        pyung: pyung || 0,
         dealAmount: apt.dealAmount || ''
       })
       addToComparison(apt)

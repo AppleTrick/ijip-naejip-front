@@ -9,7 +9,6 @@ import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
 import http from '@/api/http'
 import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
-import { searchApartmentImage } from '@/api/imageApi'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -28,35 +27,47 @@ const getRoadviewImageUrl = (panoId: string) => {
   return `https://map.kakaocdn.net/roadview/snapshot?panoId=${panoId}&heading=0&pitch=0&width=400&height=300`
 }
 
-// 로그인된 경우 DB에서 관심 목록 로드 + 로드뷰 이미지
-onMounted(async () => {
-  if (isAuthenticated.value) {
-    try {
-      favoritesFromDB.value = await getFavorites()
-      // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용)
-      for (const fav of favoritesFromDB.value) {
-        if (fav.latitude && fav.longitude) {
-          try {
-            const panoId = await fetch(
-              `https://dapi.kakao.com/v2/local/geo/roadview.json?x=${fav.longitude}&y=${fav.latitude}&radius=50`,
-              { headers: { Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}` } }
-            ).then(r => r.json()).then(d => d.documents?.[0]?.pan_id)
-            
-            if (panoId) {
-              favoriteImages.value[fav.aptSeq] = getRoadviewImageUrl(panoId)
-            } else {
-              favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
-            }
-          } catch {
+// 관심 목록 로드 함수
+const loadFavorites = async () => {
+  try {
+    favoritesFromDB.value = await getFavorites()
+    // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용)
+    for (const fav of favoritesFromDB.value) {
+      if (fav.latitude && fav.longitude) {
+        try {
+          const panoId = await fetch(
+            `https://dapi.kakao.com/v2/local/geo/roadview.json?x=${fav.longitude}&y=${fav.latitude}&radius=50`,
+            { headers: { Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}` } }
+          ).then(r => r.json()).then(d => d.documents?.[0]?.pan_id)
+          
+          if (panoId) {
+            favoriteImages.value[fav.aptSeq] = getRoadviewImageUrl(panoId)
+          } else {
             favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
           }
-        } else {
+        } catch {
           favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
         }
+      } else {
+        favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
       }
-    } catch (error) {
-      console.error('관심 목록 로드 실패:', error)
     }
+  } catch (error) {
+    console.error('관심 목록 로드 실패:', error)
+  }
+}
+
+// 페이지 로드 시 관심 목록 로드 (새로고침 대응)
+onMounted(async () => {
+  // 1. 인증 초기화 대기 (새로고침 시 토큰에서 사용자 정보 복원)
+  const { checkAuth, isAuthInitialized } = authStore
+  if (!isAuthInitialized) {
+    await checkAuth()
+  }
+  
+  // 2. 로그인 상태면 DB에서 관심 목록 로드
+  if (isAuthenticated.value) {
+    await loadFavorites()
   }
 })
 
