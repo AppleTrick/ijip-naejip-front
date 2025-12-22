@@ -1,17 +1,47 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
+import { useAuthStore } from '@/stores/auth'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
 import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
 import http from '@/api/http'
+import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
 
 const router = useRouter()
 const store = useMainDataStore()
+const authStore = useAuthStore()
 const { myHouse, comparisonList } = storeToRefs(store)
+const { isAuthenticated } = storeToRefs(authStore)
 const { removeFromComparison } = store
+
+// DB 기반 관심 아파트 목록
+const favoritesFromDB = ref<any[]>([])
+
+// 로그인된 경우 DB에서 관심 목록 로드
+onMounted(async () => {
+  if (isAuthenticated.value) {
+    try {
+      favoritesFromDB.value = await getFavorites()
+    } catch (error) {
+      console.error('관심 목록 로드 실패:', error)
+    }
+  }
+})
+
+// DB에서 삭제
+const handleRemoveFavorite = async (aptSeq: string) => {
+  try {
+    await removeFavoriteByAptSeq(aptSeq)
+    favoritesFromDB.value = favoritesFromDB.value.filter(f => f.aptSeq !== aptSeq)
+    removeFromComparison(aptSeq)
+  } catch (error) {
+    console.error('삭제 실패:', error)
+  }
+}
+
 
 const sortOption = ref<string>('default')
 const sortOptions = [
@@ -62,9 +92,22 @@ const formatAreaDiff = (targetArea: string, baseArea: string): string => {
 }
 
 const sortedComparisonList = computed(() => {
-  let list = [...comparisonList.value]
+  // 로그인 시 DB 데이터 사용, 비로그인 시 로컬 데이터 사용
+  const source = isAuthenticated.value && favoritesFromDB.value.length > 0 
+    ? favoritesFromDB.value.map(f => ({
+        aptSeq: f.aptSeq,
+        aptNm: f.aptName,
+        roadNm: f.address,
+        dealAmount: f.dealAmount || '',
+        excluUseAr: f.pyung ? `${f.pyung}평` : '',
+        latitude: 0,
+        longitude: 0,
+        buildYear: 0,
+        floor: ''
+      }))
+    : [...comparisonList.value]
   
-  // Filter logic would go here
+  let list = [...source]
   
   // Sort logic
   switch (sortOption.value) {
@@ -279,7 +322,7 @@ const getAISummary = async () => {
             <div v-if="sortedComparisonList.length > 0" class="comparison-items">
               <div v-for="property in sortedComparisonList" :key="property.aptSeq" class="property-card-wrapper">
                 <div class="property-card">
-                  <button @click="removeFromComparison(property.aptSeq)" 
+                  <button @click="handleRemoveFavorite(property.aptSeq)" 
                           class="remove-btn">
                     <Trash2 class="icon-sm" />
                   </button>

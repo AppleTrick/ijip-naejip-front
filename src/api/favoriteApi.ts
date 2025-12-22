@@ -46,7 +46,7 @@ export const addFavorite = async (data: FavoriteAddRequest): Promise<FavoriteApa
 }
 
 /**
- * 관심 아파트 삭제
+ * 관심 아파트 삭제 (ID)
  */
 export const removeFavorite = async (id: number): Promise<void> => {
   try {
@@ -56,6 +56,19 @@ export const removeFavorite = async (id: number): Promise<void> => {
     throw error
   }
 }
+
+/**
+ * 관심 아파트 삭제 (aptSeq)
+ */
+export const removeFavoriteByAptSeq = async (aptSeq: string): Promise<void> => {
+  try {
+    await http.delete(`/api/v1/favorites/apt/${aptSeq}`)
+  } catch (error) {
+    console.error('관심 아파트 삭제 실패:', error)
+    throw error
+  }
+}
+
 
 /**
  * 관심 등록 여부 확인

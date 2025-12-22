@@ -12,7 +12,7 @@ import { formatPrice } from '@/utils/formatters'
 import TrendGraph from './common/TrendGraph.vue'
 import { searchApartmentImage } from '@/api/imageApi'
 import { getNearestPanoId } from '@/api/imageApi2'
-import { addFavorite, removeFavorite } from '@/api/favoriteApi'
+import { addFavorite, removeFavoriteByAptSeq } from '@/api/favoriteApi'
 import { Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon } from 'lucide-vue-next'
 import AIChatModal from '@/components/features/ai/AIChatModal.vue'
 
@@ -43,9 +43,9 @@ const handleFavoriteClick = async () => {
   
   try {
     if (isInComparison(apt.aptSeq)) {
-      // 삭제 (추후 ID 기반 삭제로 개선 필요)
+      // 삭제
+      await removeFavoriteByAptSeq(apt.aptSeq)
       removeFromComparison(apt.aptSeq)
-      // await removeFavorite(id) // TODO: 실제 ID 필요
     } else {
       // 추가
       await addFavorite({
