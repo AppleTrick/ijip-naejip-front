@@ -23,17 +23,34 @@ const favoritesFromDB = ref<any[]>([])
 const favoriteImages = ref<Record<string, string>>({})
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
 
-// 로그인된 경우 DB에서 관심 목록 로드 + 이미지
+// 로드뷰 이미지 URL 생성
+const getRoadviewImageUrl = (panoId: string) => {
+  return `https://map.kakaocdn.net/roadview/snapshot?panoId=${panoId}&heading=0&pitch=0&width=400&height=300`
+}
+
+// 로그인된 경우 DB에서 관심 목록 로드 + 로드뷰 이미지
 onMounted(async () => {
   if (isAuthenticated.value) {
     try {
       favoritesFromDB.value = await getFavorites()
-      // 각 아파트 이미지 로드
+      // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용)
       for (const fav of favoritesFromDB.value) {
-        try {
-          const img = await searchApartmentImage(fav.aptName || '', fav.address || '')
-          favoriteImages.value[fav.aptSeq] = img || FALLBACK_IMAGE
-        } catch {
+        if (fav.latitude && fav.longitude) {
+          try {
+            const panoId = await fetch(
+              `https://dapi.kakao.com/v2/local/geo/roadview.json?x=${fav.longitude}&y=${fav.latitude}&radius=50`,
+              { headers: { Authorization: `KakaoAK ${import.meta.env.VITE_KAKAO_REST_API_KEY}` } }
+            ).then(r => r.json()).then(d => d.documents?.[0]?.pan_id)
+            
+            if (panoId) {
+              favoriteImages.value[fav.aptSeq] = getRoadviewImageUrl(panoId)
+            } else {
+              favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+            }
+          } catch {
+            favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+          }
+        } else {
           favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
         }
       }
