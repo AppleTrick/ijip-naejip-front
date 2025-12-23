@@ -18,9 +18,9 @@ const searchResult = ref(null as any)
 const handleMove = (item: any) => {
   console.log('handleMove Item:', item)
   
-  // 좌표 유효성 검사 개선 (0도 유효한 값일 수 있음)
-  const lat = Number(item.latitude)
-  const lng = Number(item.longitude)
+  // 백엔드 응답 형식에 따라 lat/lng 또는 latitude/longitude 모두 지원
+  const lat = Number(item.lat ?? item.latitude)
+  const lng = Number(item.lng ?? item.longitude)
   
   if (Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)) {
     emit('move-location', {
