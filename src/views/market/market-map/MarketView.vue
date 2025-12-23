@@ -23,6 +23,7 @@ const { currentRegion } = storeToRefs(statsStore)
 
 const isAIModalOpen = ref(false)
 const aiMode = ref<'semantic' | 'filter'>('semantic')
+const isShowingAIResults = ref(false) // AI 추천 결과가 지도에 표시 중인지 여부
 
 const openSemanticSearch = () => {
   aiMode.value = 'semantic'
@@ -102,6 +103,7 @@ onMounted(async () => {
 const handleSearch = (query: string) => {
   if (!query || !query.trim()) return
   
+  handleResetAIResults() // 일반 검색 시 AI 결과 모드 해제
   setSearchQuery(query)
 
   // 카카오맵 장소 검색 서비스 객체 생성
@@ -169,6 +171,7 @@ const handleFilter = (newFilters: any) => {
 }
 
 const resetAll = () => {
+  handleResetAIResults() // 초기화 시 AI 결과 모드 해제
   filterRef.value?.resetFilters()
 }
 
@@ -231,7 +234,21 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
     mapCenter.value = { lat: bounds.centerLat, lng: bounds.centerLng }
   }
   
+  // AI 추천 결과가 표시 중인 경우, 지도가 움직여도 자동으로 매물을 새로고침하지 않음
+  // (사용자가 추천 결과를 확인하는 동안 일반 데이터로 덮어씌워지는 것을 방지)
+  if (isShowingAIResults.value) {
+    console.log('AI 추천 결과 유지 중 - 자동 새로고침 스킵')
+    return
+  }
+
   await fetchProperties(filters.value, bounds)
+}
+
+const handleResetAIResults = () => {
+  isShowingAIResults.value = false
+  if (lastBounds.value) {
+    fetchProperties(filters.value, lastBounds.value)
+  }
 }
 </script>
 
