@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
+import http from '@/api/http'
 import AddressSearch from '@/components/features/address/AddressSearch.vue'
 import FileUpload from './FileUpload.vue'
 import BaseInput from '@/components/common/BaseInput.vue'
@@ -57,49 +58,8 @@ const onFileAnalyzed = (data: any) => {
 const analyze = async () => {
   loading.value = true
   try {
-    // 1. Basic Safety Check (Client-side for Building Ledger)
-    let localResult: AnalysisResult = {
-      safetyGrade: 'SAFE',
-      message: '안전한 매물로 보입니다.',
-      debtRatio: 0
-    }
-
-    // Calculate Debt Ratio (Mock logic if backend is not reachable or for immediate feedback)
-    if (form.value.marketValue > 0) {
-      const totalDebt = Number(form.value.deposit) + Number(form.value.priorDebt)
-      localResult.debtRatio = Math.round((totalDebt / Number(form.value.marketValue)) * 100)
-    }
-
-    // Check 1: Violation Building
-    if (form.value.isViolation) {
-      localResult.safetyGrade = 'DANGER'
-      localResult.message = '위반건축물로 등록된 매물입니다. 전세자금대출 및 보증보험 가입이 불가능할 수 있으며, 이행강제금이 부과될 수 있습니다. 계약을 권장하지 않습니다.'
-    } 
-    // Check 2: Usage (Neighborhood Living Facility)
-    else if (form.value.usage === 'neighborhood') {
-      localResult.safetyGrade = 'DANGER'
-      localResult.message = '근린생활시설(상가) 용도입니다. 주거용으로 사용하더라도 전세자금대출과 보증보험 가입이 거절될 수 있습니다. 불법 개조 여부를 반드시 확인하세요.'
-    }
-    // Check 3: Debt Ratio
-    else if (localResult.debtRatio >= 80) {
-      localResult.safetyGrade = 'DANGER'
-      localResult.message = `깡통전세 위험이 높습니다. 부채비율이 ${localResult.debtRatio}%로, 집값보다 빚(보증금+대출)이 너무 많습니다.`
-    } else if (localResult.debtRatio >= 70) {
-      localResult.safetyGrade = 'WARNING'
-      localResult.message = `부채비율이 ${localResult.debtRatio}%로 다소 높습니다. 보증보험 가입 가능 여부를 꼭 확인하세요.`
-    }
-
-    // Simulate API call or use local result
-    // In a real scenario, we would send all data to the backend.
-    // For now, we combine local checks with the flow.
-    
-    // const response = await axios.post('http://localhost:8080/api/v1/analysis/safety-check', form.value)
-    // result.value = response.data
-    
-    // Using Local Result for Demo/Self-Check
-    await new Promise(resolve => setTimeout(resolve, 1000)) // Fake delay
-    result.value = localResult
-
+    const response = await http.post('/api/v1/ai/fraud-check', form.value)
+    result.value = response.data.data
   } catch (e) {
     alert('분석 중 오류가 발생했습니다.')
     console.error(e)

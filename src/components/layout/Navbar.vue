@@ -44,6 +44,7 @@ const handleLogout = () => {
         <div class="desktop-menu">
           <!-- Main Navigation -->
           <div class="nav-links">
+            <!-- 홈 링크 비활성화
             <router-link 
               to="/home" 
               class="nav-link" 
@@ -51,6 +52,7 @@ const handleLogout = () => {
             >
               홈
             </router-link>
+            -->
             <router-link 
               to="/map" 
               class="nav-link" 
@@ -58,13 +60,13 @@ const handleLogout = () => {
             >
               매물 지도
             </router-link>
-            <router-link 
+            <!-- <router-link 
               to="/analysis" 
               class="nav-link" 
               active-class="nav-link--active"
             >
               안전도 분석
-            </router-link>
+            </router-link> -->
             <router-link 
               to="/comparison" 
               class="nav-link" 
@@ -136,6 +138,7 @@ const handleLogout = () => {
     <!-- Mobile Menu Dropdown -->
     <div v-if="isMenuOpen" class="mobile-menu">
       <div class="mobile-menu-content">
+        <!-- 홈 링크 비활성화
         <router-link 
           to="/home" 
           class="mobile-nav-link"
@@ -144,6 +147,7 @@ const handleLogout = () => {
         >
           홈
         </router-link>
+        -->
         <router-link 
           to="/map" 
           class="mobile-nav-link"
@@ -152,14 +156,14 @@ const handleLogout = () => {
         >
           매물 지도
         </router-link>
-        <router-link 
+        <!-- <router-link 
           to="/analysis" 
           class="mobile-nav-link"
           active-class="mobile-nav-link--active"
           @click="closeMenu"
         >
           안전도 분석
-        </router-link>
+        </router-link> -->
         <router-link 
           to="/comparison" 
           class="mobile-nav-link"

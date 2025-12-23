@@ -12,11 +12,6 @@ const routes: Array<RouteRecordRaw> = [
       component: () => import('../views/home/home/HomeView.vue')
     },
     {
-      path: '/landing-v2',
-      name: 'landing-v2',
-      component: () => import('../views/home/landing/LandingViewV2.vue')
-    },
-    {
       path: '/map',
       name: 'market',
       component: () => import('../views/market/market-map/MarketView.vue')
@@ -32,11 +27,11 @@ const routes: Array<RouteRecordRaw> = [
       component: () => import('../views/market/comparison/ComparisonView.vue')
     },
 
-    {
-      path: '/analysis',
-      name: 'analysis',
-      component: () => import('../views/market/analysis/AnalysisView.vue')
-    },
+    // {
+    //   path: '/analysis',
+    //   name: 'analysis',
+    //   component: () => import('../views/market/analysis/AnalysisView.vue')
+    // },
     {
       path: '/survey',
       name: 'preference-survey',

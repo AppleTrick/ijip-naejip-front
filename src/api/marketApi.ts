@@ -93,6 +93,7 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
       params: { pyung }
     })
     const data = response.data.data
+    console.log('API Raw Response for ' + id, data)
     
     if (!data) return undefined
 
@@ -100,14 +101,14 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
       aptSeq: String(data.apartmentInfo.aptSeq),
       aptNm: data.apartmentInfo.aptName,
       dealAmount: data.apartmentInfo.avgPrice ? formatPrice(data.apartmentInfo.avgPrice) : '0억',
-      latitude: 0, 
-      longitude: 0,
+      latitude: Number(data.apartmentInfo.latitude) || 0, 
+      longitude: Number(data.apartmentInfo.longitude) || 0,
       roadNm: data.apartmentInfo.address,
       excluUseAr: (data.apartmentInfo.pyungTypes || []).join(', ') + '평',
       floor: '-', // 상세 정보에 층수 요약은 없음
       description: `건축년도: ${data.apartmentInfo.buildYear}년, 평형: ${(data.apartmentInfo.pyungTypes || []).join(', ')}`,
       buildYear: data.apartmentInfo.buildYear,
-      pyungList: data.apartmentInfo.pyungTypes || [],
+      pyungList: (data.apartmentInfo.pyungTypes || []).map(String),
       deals: data.recentTransactions.map((deal, index) => ({
         no: index,
         aptSeq: String(data.apartmentInfo.aptSeq),

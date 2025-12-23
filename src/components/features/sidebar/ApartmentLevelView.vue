@@ -3,6 +3,7 @@ import { ref, watch, computed, nextTick } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
+import { useAuthStore } from '@/stores/auth'
 import { useMarket } from '@/composables/useMarket'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
@@ -11,19 +12,67 @@ import { formatPrice } from '@/utils/formatters'
 import TrendGraph from './common/TrendGraph.vue'
 import { searchApartmentImage } from '@/api/imageApi'
 import { getNearestPanoId } from '@/api/imageApi2'
-import { Map as MapIcon, Image as ImageIcon } from 'lucide-vue-next'
+import { addFavorite, removeFavoriteByAptSeq } from '@/api/favoriteApi'
+import { Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon } from 'lucide-vue-next'
+import AIChatModal from '@/components/features/ai/AIChatModal.vue'
 
 const router = useRouter()
 const store = useMainDataStore()
 const statsStore = useMarketStatsStore()
+const authStore = useAuthStore()
 const { fetchPropertyDetail } = useMarket()
 const { selectedProperty } = storeToRefs(store)
 const { selectedPyung } = storeToRefs(statsStore)
+const { isAuthenticated } = storeToRefs(authStore)
 const { addToComparison, removeFromComparison, isInComparison } = store
 const { goBack } = statsStore
 
+// 관심 아파트 클릭 핸들러 (로그인 확인 + API 호출)
+const handleFavoriteClick = async () => {
+  if (!selectedProperty.value) return
+  
+  // 로그인 확인
+  if (!isAuthenticated.value) {
+    if (confirm('로그인이 필요합니다. 로그인 페이지로 이동할까요?')) {
+      router.push('/login')
+    }
+    return
+  }
+  
+  const apt = selectedProperty.value
+  // 선택된 평수 사용 (statsStore의 selectedPyung)
+  const pyung = selectedPyung.value ? Number(selectedPyung.value) : null
+  
+  try {
+    if (isInComparison(apt.aptSeq)) {
+      // 삭제
+      await removeFavoriteByAptSeq(apt.aptSeq)
+      removeFromComparison(apt.aptSeq)
+    } else {
+      // 추가
+      await addFavorite({
+        aptSeq: apt.aptSeq,
+        aptName: apt.aptNm,
+        address: apt.roadNm || '',
+        pyung: pyung || 0,
+        dealAmount: apt.dealAmount || ''
+      })
+      addToComparison(apt)
+    }
+  } catch (error: any) {
+    alert(error.message || '관심 등록 중 오류가 발생했습니다.')
+  }
+}
+
 // 현재 선택된 평형 (statsStore의 selectedPyung과 동기화)
 const currentPyung = computed(() => selectedPyung.value || 'all')
+
+// AI 채팅 모달 상태
+const isChatModalOpen = ref(false)
+
+const openChatModal = () => {
+  isChatModalOpen.value = true
+}
 
 // 기간 선택 (3y, 6m)
 const selectedPeriod = ref<'3y' | '6m'>('3y')
@@ -223,9 +272,9 @@ const formatDate = (dateNum: number) => {
         </button>
       </div>
 
-      <button @click="goBack" class="back-btn">
+      <!-- <button @click="goBack" class="back-btn">
         <ArrowLeft class="icon-sm" />
-      </button>
+      </button> -->
     </div>
 
     <div class="sidebar-content">
@@ -233,10 +282,10 @@ const formatDate = (dateNum: number) => {
         <div class="title-row">
           <h2 class="property-title">{{ selectedProperty.aptNm }}</h2>
           <button 
-            @click="isInComparison(selectedProperty.aptSeq) ? removeFromComparison(selectedProperty.aptSeq) : addToComparison(selectedProperty)"
+            @click="handleFavoriteClick"
             class="compare-btn"
             :class="isInComparison(selectedProperty.aptSeq) ? 'compare-btn--active' : 'compare-btn--inactive'"
-            :title="isInComparison(selectedProperty.aptSeq) ? '비교함에서 제거' : '비교함에 추가'"
+            :title="isInComparison(selectedProperty.aptSeq) ? '관심 목록에서 제거' : '관심 목록에 추가'"
           >
             <component :is="isInComparison(selectedProperty.aptSeq) ? Check : Plus" class="icon-md" />
           </button>
@@ -245,9 +294,13 @@ const formatDate = (dateNum: number) => {
         <p class="property-address">
           <span class="mr-2">📍</span> {{ selectedProperty.roadNm }}
         </p>
-        <div class="action-row">
-          <BaseButton full-width variant="primary" @click="goToDetail">
-            아파트 실거래 상세 정보 보기
+        <div class="action-row gap-2 flex">
+          <BaseButton variant="primary" @click="goToDetail" class="flex-1">
+            실거래 상세 정보
+          </BaseButton>
+          <BaseButton variant="outline" @click="openChatModal" class="flex-1 ai-agent-btn">
+            <ChatIcon class="icon-xs mr-1" />
+            AI 에이전트
           </BaseButton>
         </div>
       </div>
@@ -354,6 +407,14 @@ const formatDate = (dateNum: number) => {
         </BaseButton>
       </div>
     </div>
+
+    <!-- AI 채팅 모달 -->
+    <AIChatModal 
+      :is-open="isChatModalOpen" 
+      :apartment-name="selectedProperty.aptNm"
+      :area-code="selectedProperty.aptSeq"
+      @close="isChatModalOpen = false"
+    />
   </div>
 </template>
 
@@ -482,6 +543,25 @@ const formatDate = (dateNum: number) => {
 
 .action-row {
   margin-top: 1rem;
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ai-agent-btn {
+  border-color: var(--color-primary-transparent-30);
+  color: var(--color-primary);
+}
+
+.ai-agent-btn:hover {
+  background-color: var(--color-primary-soft);
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.mr-1 {
+  margin-right: 0.25rem;
 }
 
 .mr-2 {

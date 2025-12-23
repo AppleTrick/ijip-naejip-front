@@ -1,16 +1,86 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
+import { useAuthStore } from '@/stores/auth'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
-import { ArrowLeft, Trash2, Home, AlertCircle, Filter } from 'lucide-vue-next'
+import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
+import http from '@/api/http'
+import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
+import { getNearestPanoId } from '@/api/imageApi2'
 
 const router = useRouter()
 const store = useMainDataStore()
+const authStore = useAuthStore()
 const { myHouse, comparisonList } = storeToRefs(store)
+const { isAuthenticated } = storeToRefs(authStore)
 const { removeFromComparison } = store
+
+// DB 기반 관심 아파트 목록 + 이미지
+const favoritesFromDB = ref<any[]>([])
+const favoriteImages = ref<Record<string, string>>({})
+const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
+
+// 로드뷰 스냅샷 이미지 URL 생성 (PriceDetailView와 동일)
+const getRoadviewImageUrl = (panoId: number) => {
+  return `https://map.kakaocdn.net/roadview/snapshot?panoId=${panoId}&heading=0&pitch=0&width=400&height=300`
+}
+
+// 관심 목록 로드 함수
+const loadFavorites = async () => {
+  try {
+    favoritesFromDB.value = await getFavorites()
+    // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용) - PriceDetailView와 동일한 로직
+    for (const fav of favoritesFromDB.value) {
+      if (fav.latitude && fav.longitude) {
+        try {
+          // getNearestPanoId 사용 (PriceDetailView와 동일)
+          const panoId = await getNearestPanoId(Number(fav.latitude), Number(fav.longitude))
+          
+          if (panoId) {
+            favoriteImages.value[fav.aptSeq] = getRoadviewImageUrl(panoId)
+          } else {
+            favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+          }
+        } catch {
+          favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+        }
+      } else {
+        favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+      }
+    }
+  } catch (error) {
+    console.error('관심 목록 로드 실패:', error)
+  }
+}
+
+// 페이지 로드 시 관심 목록 로드 (새로고침 대응)
+onMounted(async () => {
+  // 1. 인증 초기화 대기 (새로고침 시 토큰에서 사용자 정보 복원)
+  const { checkAuth, isAuthInitialized } = authStore
+  if (!isAuthInitialized) {
+    await checkAuth()
+  }
+  
+  // 2. 로그인 상태면 DB에서 관심 목록 로드
+  if (isAuthenticated.value) {
+    await loadFavorites()
+  }
+})
+
+// DB에서 삭제
+const handleRemoveFavorite = async (aptSeq: string) => {
+  try {
+    await removeFavoriteByAptSeq(aptSeq)
+    favoritesFromDB.value = favoritesFromDB.value.filter(f => f.aptSeq !== aptSeq)
+    removeFromComparison(aptSeq)
+  } catch (error) {
+    console.error('삭제 실패:', error)
+  }
+}
+
 
 const sortOption = ref<string>('default')
 const sortOptions = [
@@ -26,6 +96,12 @@ const goBack = () => {
 
 const parsePrice = (priceStr: string | undefined): number => {
   if (!priceStr) return 0
+  // 숫자만 있는 경우 (예: "34300" = 만원 단위)
+  const numOnly = priceStr.replace(/[^\d]/g, '')
+  if (numOnly && !priceStr.includes('억')) {
+    return parseInt(numOnly)
+  }
+  // 억/만원 형식인 경우
   let total = 0
   const ukMatch = priceStr.match(/(\d+)억/)
   const manMatch = priceStr.match(/(\d+)만원/)
@@ -33,6 +109,29 @@ const parsePrice = (priceStr: string | undefined): number => {
   if (ukMatch) total += parseInt(ukMatch[1]) * 10000
   if (manMatch) total += parseInt(manMatch[1])
   return total
+}
+
+// 가격을 X.X억 형식으로 포맷
+const formatPriceDisplay = (priceStr: string | undefined): string => {
+  if (!priceStr) return '-'
+  
+  // 이미 억 형식이면 그대로 반환
+  if (priceStr.includes('억')) return priceStr
+  
+  // 숫자만 있는 경우 (만원 단위)
+  const price = parseInt(priceStr.replace(/[^\d]/g, ''))
+  if (isNaN(price) || price === 0) return '-'
+  
+  const uk = Math.floor(price / 10000)
+  const man = price % 10000
+  
+  if (uk > 0 && man > 0) {
+    return `${uk}억 ${man}만원`
+  } else if (uk > 0) {
+    return `${uk}억`
+  } else {
+    return `${man}만원`
+  }
 }
 
 const formatPriceDiff = (targetPrice: string, basePrice: string): string => {
@@ -61,9 +160,22 @@ const formatAreaDiff = (targetArea: string, baseArea: string): string => {
 }
 
 const sortedComparisonList = computed(() => {
-  let list = [...comparisonList.value]
+  // 로그인 시 DB 데이터 사용, 비로그인 시 로컬 데이터 사용
+  const source = isAuthenticated.value && favoritesFromDB.value.length > 0 
+    ? favoritesFromDB.value.map(f => ({
+        aptSeq: f.aptSeq,
+        aptNm: f.aptName,
+        roadNm: f.address,
+        dealAmount: f.dealAmount || '',
+        excluUseAr: f.pyung ? `${f.pyung}평` : '',
+        latitude: 0,
+        longitude: 0,
+        buildYear: 0,
+        floor: ''
+      }))
+    : [...comparisonList.value]
   
-  // Filter logic would go here
+  let list = [...source]
   
   // Sort logic
   switch (sortOption.value) {
@@ -80,11 +192,56 @@ const sortedComparisonList = computed(() => {
   
   return list
 })
+
+const aiSummary = ref<string | null>(null)
+const isGeneratingSummary = ref(false)
+
+const getAISummary = async () => {
+  // 로그인 시 DB 데이터 사용, 비로그인 시 로컬 데이터 사용
+  const dataToCompare = isAuthenticated.value && favoritesFromDB.value.length > 0
+    ? favoritesFromDB.value.map(f => ({
+        aptNm: f.aptName,
+        roadNm: f.address,
+        dealAmount: f.dealAmount || '',
+        excluUseAr: f.pyung ? `${f.pyung}` : '',
+        buildYear: null,
+        floor: ''
+      }))
+    : comparisonList.value
+  
+  if (dataToCompare.length === 0 && !myHouse.value) return
+  
+  isGeneratingSummary.value = true
+  try {
+    const response = await http.post('/api/v1/ai/comparison-summary', {
+      myHouse: myHouse.value,
+      comparisonList: dataToCompare
+    })
+    aiSummary.value = response.data.data
+  } catch (error) {
+    console.error('AI Summary Error:', error)
+  } finally {
+    isGeneratingSummary.value = false
+  }
+}
 </script>
 
 <template>
   <div class="comparison-page">
-    <div class="content-container">
+    <!-- 비로그인 시 로그인 안내 -->
+    <div v-if="!isAuthenticated" class="login-required">
+      <div class="login-required-card">
+        <AlertCircle class="login-icon" />
+        <h2>로그인이 필요합니다</h2>
+        <p>관심 아파트 기능은 로그인 이후 이용 가능합니다.</p>
+        <BaseButton variant="primary" @click="router.push('/login')">
+          로그인하기
+        </BaseButton>
+      </div>
+    </div>
+
+    <!-- 로그인 시 메인 컨텐츠 -->
+    <div v-else class="content-container">
       <!-- Header -->
       <div class="page-header">
         <div class="header-left">
@@ -92,8 +249,8 @@ const sortedComparisonList = computed(() => {
             <ArrowLeft class="icon-md" />
           </button>
           <div>
-            <h1 class="page-title">집 비교하기</h1>
-            <p class="page-subtitle">내 집과 관심 매물을 한눈에 비교해보세요.</p>
+            <h1 class="page-title">관심 아파트</h1>
+            <p class="page-subtitle">내 집과 관심 아파트를 한눈에 비교해보세요.</p>
           </div>
         </div>
       </div>
@@ -104,7 +261,7 @@ const sortedComparisonList = computed(() => {
           <div class="filter-card">
             <div class="filter-header">
               <Filter class="filter-icon" />
-              <h3 class="filter-title">필터링 기준</h3>
+              <h3 class="filter-title">정렬 조건</h3>
             </div>
             
             <!-- Mock Filters -->
@@ -161,9 +318,41 @@ const sortedComparisonList = computed(() => {
 
         <!-- Main Content -->
         <div class="comparison-content">
+          <!-- AI Summary Section -->
+          <div class="ai-summary-card mb-6">
+            <div class="summary-header">
+              <div class="summary-title">
+                <Sparkles class="sparkle-icon" />
+                <h3>AI 아파트 비교 요약</h3>
+              </div>
+              <BaseButton 
+                variant="primary" 
+                size="sm" 
+                :disabled="isGeneratingSummary || (comparisonList.length === 0 && !myHouse)"
+                @click="getAISummary"
+              >
+                <Loader2 v-if="isGeneratingSummary" class="spin-icon mr-1" />
+                {{ aiSummary ? '다시 분석하기' : 'AI 분석 시작' }}
+              </BaseButton>
+            </div>
+            
+            <div v-if="aiSummary" class="summary-content">
+              <p class="summary-text">{{ aiSummary }}</p>
+            </div>
+            <div v-else-if="!isGeneratingSummary" class="summary-placeholder">
+              <p>선택하신 아파트들의 특징을 AI가 분석하여 최적의 선택을 도와드립니다.</p>
+            </div>
+            <div v-else class="summary-loading">
+              <div class="loading-dots">
+                <span>.</span><span>.</span><span>.</span>
+              </div>
+              <p>아파트 정보를 분석하고 있습니다...</p>
+            </div>
+          </div>
+
           <!-- Sort Header -->
           <div class="sort-header">
-            <span class="count-text">총 <span class="count-number">{{ comparisonList.length + (myHouse ? 1 : 0) }}</span>개의 매물 비교</span>
+            <span class="count-text">총 <span class="count-number">{{ comparisonList.length + (myHouse ? 1 : 0) }}</span>개의 아파트 비교</span>
             <div class="sort-select-wrapper">
               <BaseSelect v-model="sortOption" :options="sortOptions" placeholder="정렬 기준" />
             </div>
@@ -226,13 +415,13 @@ const sortedComparisonList = computed(() => {
             <div v-if="sortedComparisonList.length > 0" class="comparison-items">
               <div v-for="property in sortedComparisonList" :key="property.aptSeq" class="property-card-wrapper">
                 <div class="property-card">
-                  <button @click="removeFromComparison(property.aptSeq)" 
+                  <button @click="handleRemoveFavorite(property.aptSeq)" 
                           class="remove-btn">
                     <Trash2 class="icon-sm" />
                   </button>
                   
                   <div class="card-image-wrapper">
-                    <img src="https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
+                    <img :src="favoriteImages[property.aptSeq] || FALLBACK_IMAGE" 
                          alt="Property" class="card-image" />
                   </div>
 
@@ -248,7 +437,7 @@ const sortedComparisonList = computed(() => {
                       <!-- Price Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">매매가</p>
-                        <p class="stat-value">{{ property.dealAmount }}</p>
+                        <p class="stat-value">{{ formatPriceDisplay(property.dealAmount) }}</p>
                         <div v-if="myHouse" class="diff-text" 
                              :class="parsePrice(property.dealAmount) > parsePrice(myHouse.dealAmount) ? 'text-red' : parsePrice(property.dealAmount) < parsePrice(myHouse.dealAmount) ? 'text-blue' : 'text-gray'">
                           {{ formatPriceDiff(property.dealAmount, myHouse.dealAmount) }}
@@ -258,7 +447,7 @@ const sortedComparisonList = computed(() => {
                       <!-- Area Comparison -->
                       <div class="stat-item highlight-bg">
                         <p class="stat-label">면적</p>
-                        <p class="stat-value">{{ property.excluUseAr }}평</p>
+                        <p class="stat-value">{{ property.excluUseAr || '-' }}</p>
                         <div v-if="myHouse" class="diff-text"
                              :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'text-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'text-red' : 'text-gray'">
                           {{ formatAreaDiff(property.excluUseAr, myHouse.excluUseAr) }}
@@ -337,6 +526,42 @@ const sortedComparisonList = computed(() => {
 .content-container {
   max-width: 80rem; /* max-w-7xl */
   margin: 0 auto;
+}
+
+.login-required {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  padding: 2rem;
+}
+
+.login-required-card {
+  text-align: center;
+  padding: 3rem;
+  background: var(--color-white);
+  border-radius: 1rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  max-width: 400px;
+}
+
+.login-required-card .login-icon {
+  width: 4rem;
+  height: 4rem;
+  color: var(--color-primary);
+  margin-bottom: 1.5rem;
+}
+
+.login-required-card h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-gray-900);
+  margin-bottom: 0.75rem;
+}
+
+.login-required-card p {
+  color: var(--color-gray-500);
+  margin-bottom: 1.5rem;
 }
 
 .page-header {
@@ -783,5 +1008,95 @@ const sortedComparisonList = computed(() => {
   font-size: 0.875rem;
   margin-bottom: 1rem;
 }
+
+/* AI Summary Styles */
+.ai-summary-card {
+  background-color: var(--color-white);
+  border-radius: 1rem;
+  border: 1px solid var(--color-primary-transparent-20);
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-bottom: 1.5rem;
+}
+
+.summary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.summary-title h3 {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 1.125rem;
+}
+
+.sparkle-icon {
+  color: var(--color-primary);
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.summary-content {
+  background-color: var(--color-primary-soft);
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--color-primary-transparent-10);
+}
+
+.summary-text {
+  font-size: 0.9375rem;
+  line-height: 1.6;
+  color: var(--color-gray-800);
+  white-space: pre-wrap;
+}
+
+.summary-placeholder {
+  padding: 1rem;
+  text-align: center;
+  color: var(--color-gray-400);
+  font-size: 0.875rem;
+  background-color: var(--color-gray-50);
+  border-radius: 0.75rem;
+}
+
+.summary-loading {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--color-primary);
+}
+
+.loading-dots span {
+  font-size: 2rem;
+  animation: dots 1.5s infinite;
+  display: inline-block;
+}
+
+.loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+.loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dots {
+  0%, 100% { transform: translateY(0); opacity: 0.2; }
+  50% { transform: translateY(-5px); opacity: 1; }
+}
+
+.spin-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.mb-6 { margin-bottom: 1.5rem; }
+.mr-1 { margin-right: 0.25rem; }
 </style>
 

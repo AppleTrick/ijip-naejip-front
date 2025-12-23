@@ -180,7 +180,9 @@ export interface ApartmentInfoDto {
   address: string
   avgPrice: number
   buildYear: number
-  pyungTypes: string[]
+  latitude: number
+  longitude: number
+  pyungTypes: number[]
 }
 
 export interface RecentTransactionDto {

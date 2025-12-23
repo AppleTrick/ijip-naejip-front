@@ -26,11 +26,12 @@ const navigateToMap = () => {
         <span>전세사기 ZERO 프로젝트</span>
       </div>
       <h1 class="hero-title">
-        당신의 안전한 보금자리 <span class="highlight">이집내집</span><span class="gradient-text">에서 찾으세요</span>
+        나에게 딱 맞는 동네를 <br>
+        <span class="highlight">AI 위치 추천</span><span class="gradient-text">으로 찾으세요</span>
       </h1>
       <p class="hero-subtitle">
-        빅데이터 기반 전세사기 예방 분석과 실거래가 정보를 한눈에.<br>
-        <span class="emphasize">AI가 분석</span>한 안전도로 안심하고 살 수 있는 집을 찾으세요.
+        "출퇴근 30분, 공원 근처, 조용한 동네 어디 없을까?"<br>
+        <span class="emphasize">AI가 당신의 라이프스타일</span>을 분석하여 최적의 거주지를 제안합니다.
       </p>
       <div class="hero-actions">
         <BaseButton 
@@ -40,16 +41,7 @@ const navigateToMap = () => {
           @click="navigateToMap"
         >
           <Map :size="20" />
-          지도에서 매물 찾기
-        </BaseButton>
-        <BaseButton 
-          variant="outline" 
-          size="lg" 
-          class="cta-button glass-button"
-          @click="router.push('/analysis')"
-        >
-          <Shield :size="20" />
-          전세사기 위험도 확인
+          AI 동네 추천 받기
         </BaseButton>
       </div>
       
@@ -72,10 +64,10 @@ const navigateToMap = () => {
         <div class="card-glow"></div>
         <Shield class="card-icon" :size="28" />
         <div class="card-content">
-          <div class="card-title">안전 등급 A</div>
-          <div class="card-subtitle">위험도 분석 완료</div>
+          <div class="card-title">AI 동네 추천</div>
+          <div class="card-subtitle">라이프스타일 매칭</div>
         </div>
-        <div class="card-badge success">✓</div>
+        <div class="card-badge success">Smart</div>
       </div>
       
       <div class="floating-card card-2">

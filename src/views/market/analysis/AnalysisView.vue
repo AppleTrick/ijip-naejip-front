@@ -3,6 +3,7 @@ import { ref, watch } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import AnalysisMapOverlay from './components/AnalysisMapOverlay.vue'
+import AnalysisForm from './components/AnalysisForm.vue'
 import KakaoMap from '@/components/features/map/KakaoMap.vue'
 
 const store = useMainDataStore()
