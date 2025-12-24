@@ -11,6 +11,7 @@ import http from '@/api/http'
 import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
 import AptRoadview from '@/components/features/apt/AptRoadview.vue'
 import { useMapNavigation } from '@/composables/useMapNavigation'
+import { marked } from 'marked'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -207,6 +208,12 @@ const totalComparisonCount = computed(() => {
 const aiSummary = ref<string | null>(null)
 const isGeneratingSummary = ref(false)
 
+// 마크다운 렌더링을 위한 computed
+const renderedAiSummary = computed(() => {
+  if (!aiSummary.value) return ''
+  return marked(aiSummary.value)
+})
+
 const getAISummary = async () => {
   const dataToCompare = comparisonList.value
   
@@ -279,7 +286,7 @@ const getAISummary = async () => {
             </div>
             
             <div v-if="aiSummary" class="summary-content">
-              <p class="summary-text">{{ aiSummary }}</p>
+              <div class="summary-text markdown-body" v-html="renderedAiSummary"></div>
             </div>
             <div v-else-if="!isGeneratingSummary" class="summary-placeholder">
               <p>선택하신 아파트들의 특징을 AI가 분석하여 최적의 선택을 도와드립니다.</p>
@@ -1082,7 +1089,51 @@ const getAISummary = async () => {
   font-size: 0.9375rem;
   line-height: 1.6;
   color: var(--color-gray-800);
-  white-space: pre-wrap;
+}
+
+/* Markdown Body Styles */
+.markdown-body :deep(h1), 
+.markdown-body :deep(h2), 
+.markdown-body :deep(h3) {
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.markdown-body :deep(h3) {
+  font-size: 1.1rem;
+}
+
+.markdown-body :deep(ul), 
+.markdown-body :deep(ol) {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.markdown-body :deep(li) {
+  margin-bottom: 0.25rem;
+}
+
+.markdown-body :deep(p) {
+  margin-bottom: 1rem;
+}
+
+.markdown-body :deep(p:last-child) {
+  margin-bottom: 0;
+}
+
+.markdown-body :deep(strong) {
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.markdown-body :deep(blockquote) {
+  border-left: 4px solid var(--color-primary-transparent-20);
+  padding-left: 1rem;
+  margin-left: 0;
+  color: var(--color-gray-600);
+  font-style: italic;
 }
 
 .summary-placeholder {
