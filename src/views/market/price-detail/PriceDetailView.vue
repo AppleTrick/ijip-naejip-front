@@ -686,4 +686,8 @@ onMounted(() => {
 .icon-md { width: 1.5rem; height: 1.5rem; }
 .icon-xs { width: 1rem; height: 1rem; }
 .mr-1 { margin-right: 0.25rem; }
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
 </style>
