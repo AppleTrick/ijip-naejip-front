@@ -4,7 +4,7 @@ import { computed } from 'vue'
 const props = defineProps<{
   label: string
   title: string
-  variant: 'semantic' | 'filter'
+  variant: 'semantic' | 'filter' | 'stats'
 }>()
 
 const emit = defineEmits(['click'])
@@ -12,7 +12,8 @@ const emit = defineEmits(['click'])
 const btnClass = computed(() => {
   return {
     'semantic': props.variant === 'semantic',
-    'filter': props.variant === 'filter'
+    'filter': props.variant === 'filter',
+    'stats': props.variant === 'stats'
   }
 })
 </script>
@@ -93,5 +94,9 @@ const btnClass = computed(() => {
 
 .ai-fab-btn.filter {
   border: 1px solid var(--color-secondary-transparent-20);
+}
+
+.ai-fab-btn.stats {
+  border: 1px solid rgba(139, 92, 246, 0.2); /* Violet secondary */
 }
 </style>

@@ -10,8 +10,9 @@ import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
-import { RotateCcw, Sparkles, Wand2 } from 'lucide-vue-next'
+import { RotateCcw, Sparkles, Wand2, LayoutDashboard } from 'lucide-vue-next'
 import AISearchModal from '@/components/features/ai/AISearchModal.vue'
+import AIStatsModal from '@/components/features/ai/AIStatsModal.vue'
 import AIFloatingButton from '@/components/common/AIFloatingButton.vue'
 
 const store = useMainDataStore()
@@ -22,6 +23,7 @@ const statsStore = useMarketStatsStore()
 const { currentRegion } = storeToRefs(statsStore)
 
 const isAIModalOpen = ref(false)
+const isStatsModalOpen = ref(false)
 const aiMode = ref<'semantic' | 'filter'>('semantic')
 const isShowingAIResults = ref(false) // AI 추천 결과가 지도에 표시 중인지 여부
 
@@ -33,6 +35,10 @@ const openSemanticSearch = () => {
 const openNaturalFilter = () => {
   aiMode.value = 'filter'
   isAIModalOpen.value = true
+}
+
+const openStatsSearch = () => {
+  isStatsModalOpen.value = true
 }
 
 const handleAISearchResult = (result: any) => {
@@ -97,7 +103,9 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
 // 검색 시에는 mapCenter와 mapLevel을 직접 업데이트합니다.
 
 onMounted(async () => {
-  // 초기 데이터 로딩은 지도의 'idle' 이벤트(영역 변경 감지)에 의해 트리거됩니다.
+  // 초기 로딩 시 AI 결과 모드 해제 상태임을 보장
+  isShowingAIResults.value = false
+  console.log('MarketView Mounted - AI Result Mode reset')
 })
 
 const handleSearch = (query: string) => {
@@ -234,13 +242,13 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
     mapCenter.value = { lat: bounds.centerLat, lng: bounds.centerLng }
   }
   
-  // AI 추천 결과가 표시 중인 경우, 지도가 움직여도 자동으로 매물을 새로고침하지 않음
-  // (사용자가 추천 결과를 확인하는 동안 일반 데이터로 덮어씌워지는 것을 방지)
+  console.log('Bounds Update:', bounds.level, bounds.centerLat)
   if (isShowingAIResults.value) {
     console.log('AI 추천 결과 유지 중 - 자동 새로고침 스킵')
     return
   }
 
+  console.log('Fetching properties for scope:', bounds.level)
   await fetchProperties(filters.value, bounds)
 }
 
@@ -298,6 +306,15 @@ const handleResetAIResults = () => {
         >
           <template #icon><Wand2 /></template>
         </AIFloatingButton>
+
+        <AIFloatingButton 
+          label="통계 분석" 
+          title="AI 통계 분석 챗봇" 
+          variant="stats" 
+          @click="openStatsSearch"
+        >
+          <template #icon><LayoutDashboard /></template>
+        </AIFloatingButton>
       </div>
 
       <!-- AI 검색 모달 -->
@@ -306,6 +323,13 @@ const handleResetAIResults = () => {
         :mode="aiMode" 
         @close="isAIModalOpen = false"
         @search="handleAISearchResult"
+        @move-location="handleMoveLocation"
+      />
+
+      <!-- AI 통계 분석 모달 -->
+      <AIStatsModal 
+        :is-open="isStatsModalOpen" 
+        @close="isStatsModalOpen = false"
         @move-location="handleMoveLocation"
       />
     </div>
