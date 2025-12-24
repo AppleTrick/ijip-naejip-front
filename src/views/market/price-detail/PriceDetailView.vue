@@ -111,7 +111,6 @@ let currentAbortController: AbortController | null = null
 const analyzeAutomatedLocation = async (aptName: string, address: string) => {
   if (!aptName || !address) return
   
-  // Cancel previous request if any
   if (currentAbortController) {
     currentAbortController.abort()
   }
@@ -121,61 +120,21 @@ const analyzeAutomatedLocation = async (aptName: string, address: string) => {
   aiAnalysisResult.value = ''
   
   try {
-    const response = await fetch(
-      `/api/v1/ai/location-attraction?aptName=${encodeURIComponent(aptName)}&address=${encodeURIComponent(address)}`,
-      { signal: currentAbortController.signal }
-    )
+    const response = await http.get('/api/v1/ai/location-attraction', {
+      params: { aptName, address },
+      signal: currentAbortController.signal
+    })
     
-    if (!response.body) return
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
-
-    while (true) {
-      const { value, done } = await reader.read()
-      if (done) break
-      
-      const chunk = decoder.decode(value, { stream: true })
-      buffer += chunk
-      
-      // Handle SSE: Split by newlines and process complete 'data:' lines
-      let lines = buffer.split('\n')
-      // Keep the last (potentially incomplete) line in the buffer
-      buffer = lines.pop() || ''
-      
-      for (const line of lines) {
-        const trimmedLine = line.trim()
-        if (trimmedLine.startsWith('data:')) {
-          const content = trimmedLine.replace('data:', '').trim()
-          // Filter out internal Spring AI / SSE artifacts
-          if (content && content !== '[DONE]') {
-            // Append content directly (assuming it's a character or word)
-            aiAnalysisResult.value += content
-          }
-        } else if (trimmedLine && !trimmedLine.startsWith('event:')) {
-          // Fallback for raw text if not structured as SSE
-          // But usually we skip empty lines or metadata
-          if (!trimmedLine.includes('retry:')) {
-             aiAnalysisResult.value += trimmedLine
-          }
-        }
-      }
+    if (response.data && response.data.data) {
+      aiAnalysisResult.value = response.data.data
     }
-    
-    // Process remaining buffer if it doesn't look like a standard SSE prefix
-    if (buffer.trim() && !buffer.startsWith('data:')) {
-       // Only if it's raw text
-    }
-
   } catch (error: any) {
-    if (error.name === 'AbortError') {
+    if (error.name === 'AbortError' || error.message === 'canceled') {
       console.log('AI Analysis request aborted')
       return
     }
-    console.error('Streaming Error:', error)
-    if (!aiAnalysisResult.value) {
-       aiAnalysisResult.value = '일시적인 오류로 분석을 완료할 수 없습니다.'
-    }
+    console.error('AI Analysis Error:', error)
+    aiAnalysisResult.value = '일시적인 오류로 분석을 완료할 수 없습니다.'
   } finally {
     isAiAnalyzing.value = false
     currentAbortController = null

@@ -14,11 +14,11 @@ const { toggleSidebar } = store
   <div class="sidebar-container" :class="{ 'sidebar-closed': !isSidebarOpen }">
     <div class="market-sidebar">
       <transition name="fade" mode="out-in">
-        <RegionStatsView v-if="currentLevel === 'city'" />
+        <!-- <RegionStatsView v-if="currentLevel === 'city'" />
         <RegionStatsView v-else-if="currentLevel === 'district'" has-back-button />
         <RegionStatsView v-else-if="currentLevel === 'neighborhood'" has-back-button />
-        <RegionStatsView v-else-if="currentLevel === 'dong'" has-back-button />
-        <ApartmentLevelView v-else-if="currentLevel === 'apartment'" />
+        <RegionStatsView v-else-if="currentLevel === 'dong'" has-back-button /> -->
+        <ApartmentLevelView v-if="currentLevel === 'apartment'" />
       </transition>
     </div>
 
