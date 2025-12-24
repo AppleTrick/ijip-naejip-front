@@ -58,8 +58,8 @@ const handleAiAnalysisClick = async () => {
 
 const handleAISearchResult = (result: any) => {
   console.log('AI Search Result:', result)
-  // For filters, we could update the store here
-  if (aiMode.value === 'filter' && result.filters) {
+  // 자연어 필터링 결과가 있으면 스토어에 적용
+  if (result.filters) {
     setFilters(result.filters)
     isAIModalOpen.value = false // 필터 적용 후 모달 닫기
   }
