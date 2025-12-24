@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, nextTick } from 'vue'
+import { ref, watch, computed } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
@@ -7,14 +7,12 @@ import { useAuthStore } from '@/stores/auth'
 import { useMarket } from '@/composables/useMarket'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
-import { ShieldCheck, Check, Plus, ArrowLeft } from 'lucide-vue-next'
+import { ShieldCheck, Check, Plus, ArrowLeft, MessageSquare as ChatIcon } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
-import TrendGraph from './common/TrendGraph.vue'
-import { searchApartmentImage } from '@/api/imageApi'
-import { getNearestPanoId } from '@/api/imageApi2'
 import { addFavorite, removeFavoriteByAptSeq } from '@/api/favoriteApi'
-import { Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon } from 'lucide-vue-next'
+import TrendGraph from './common/TrendGraph.vue'
 import AIChatModal from '@/components/features/ai/AIChatModal.vue'
+import AptRoadview from '@/components/features/apt/AptRoadview.vue'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -54,7 +52,9 @@ const handleFavoriteClick = async () => {
         aptName: apt.aptNm,
         address: apt.roadNm || '',
         pyung: pyung || 0,
-        dealAmount: apt.dealAmount || ''
+        dealAmount: apt.dealAmount || '',
+        latitude: Number(apt.latitude),
+        longitude: Number(apt.longitude)
       })
       addToComparison(apt)
     }
@@ -75,103 +75,6 @@ const openChatModal = () => {
 
 // 기간 선택 (3y, 6m)
 const selectedPeriod = ref<'3y' | '6m'>('3y')
-
-// 아파트 이미지 및 로드뷰 상태
-const propertyImage = ref<string | null>(null)
-const isImageLoading = ref(false)
-const showRoadview = ref(true) // 기본으로 로드뷰를 보여줌
-const roadviewRef = ref<HTMLElement | null>(null)
-const roadviewInstance = ref<any>(null) // 로드뷰 인스턴스 저장
-const hasRoadview = ref(false)
-const currentPanoId = ref<number | null>(null)
-
-// 기본 대체 이미지 URL (검색 실패 시 사용)
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-
-// 이미지 및 로드뷰 데이터 가져오기 함수 (중복 호출 및 레이스 컨디션 방지)
-let latestMediaRequestId = 0
-const fetchMedia = async (aptName: string, address: string = '', lat?: number, lng?: number) => {
-  if (!aptName) return
-  
-  const requestId = ++latestMediaRequestId
-  
-  // 상태 초기화
-  isImageLoading.value = true
-  hasRoadview.value = false
-  currentPanoId.value = null
-  propertyImage.value = null
-  showRoadview.value = true // 새 마커 클릭 시 항상 로드뷰 시도부터 시작
-  
-  try {
-    console.log(`[Media] Fetching for: ${aptName} (Request #${requestId})`)
-    
-    // 1. 로드뷰 가용성 및 이미지 검색 병렬 처리로 속도 향상
-    const [panoId, url] = await Promise.all([
-      lat && lng ? getNearestPanoId(lat, lng) : Promise.resolve(null),
-      searchApartmentImage(aptName, address)
-    ])
-
-    // 가장 최근의 요청만 반영
-    if (requestId !== latestMediaRequestId) {
-      console.log(`[Media] Request #${requestId} discarded (newer request exists)`)
-      return
-    }
-
-    console.log(`[Media] Results - PanoID: ${panoId}, Image: ${url ? 'Success' : 'Fallback'}`)
-    
-    hasRoadview.value = !!panoId
-    currentPanoId.value = panoId
-    showRoadview.value = !!panoId
-    propertyImage.value = url || FALLBACK_IMAGE
-  } catch (error) {
-    if (requestId === latestMediaRequestId) {
-      console.error('Error fetching media:', error)
-      propertyImage.value = FALLBACK_IMAGE
-      hasRoadview.value = false
-    }
-  } finally {
-    if (requestId === latestMediaRequestId) {
-      isImageLoading.value = false
-    }
-  }
-}
-
-// 로드뷰 초기화 및 갱신 함수
-const updateRoadview = () => {
-  if (!roadviewRef.value || !currentPanoId.value || !window.kakao) {
-    console.warn('[Media] Cannot update roadview (missing Ref or PanoID)')
-    return
-  }
-  
-  console.log(`[Media] Updating roadview with PanoID: ${currentPanoId.value}`)
-  
-  // v-if로 컨테이너가 새로 생겼을 수 있으므로 매번 새로 생성하거나 새 컨테이너에 맞춰줌
-  try {
-    const rv = new window.kakao.maps.Roadview(roadviewRef.value)
-    roadviewInstance.value = rv
-    
-    rv.setPanoId(currentPanoId.value, new window.kakao.maps.LatLng(
-      selectedProperty.value?.latitude, 
-      selectedProperty.value?.longitude
-    ))
-  } catch (e) {
-    console.error('[Media] Roadview initialization error:', e)
-  }
-}
-
-// 로드뷰 모드 혹은 panoId 변경 감시
-watch([showRoadview, currentPanoId], ([newShow, newPano]) => {
-  if (newShow && newPano) {
-    nextTick(() => {
-      updateRoadview()
-    })
-  }
-}, { immediate: true })
-
-// 이미지 로드 에러 핸들러
-const handleImageError = () => {
-  propertyImage.value = FALLBACK_IMAGE
-}
 
 // 필터링된 가격 추이 데이터
 const filteredPriceTrend = computed(() => {
@@ -194,19 +97,6 @@ watch([() => selectedProperty.value?.aptSeq, selectedPyung], async ([newId, newP
   if (newId !== oldId || newPyung !== oldPyung) {
     await fetchPropertyDetail(newId)
   }
-
-  // 2. 아파트 자체가 바뀐 경우에만 미디어(이미지, 로드뷰) 재요청
-  // 평형만 바뀌었을 때는 이미지를 다시 가져올 필요가 없음
-  if (newId !== oldId) {
-    if (selectedProperty.value?.aptNm) {
-      fetchMedia(
-        selectedProperty.value.aptNm, 
-        selectedProperty.value.roadNm || '',
-        Number(selectedProperty.value.latitude),
-        Number(selectedProperty.value.longitude)
-      )
-    }
-  }
 }, { immediate: true })
 
 // 평형 선택 핸들러
@@ -220,10 +110,6 @@ const handlePyungSelect = (pyung: string) => {
 const displayPrice = computed(() => {
   return selectedProperty.value?.dealAmount || '0억'
 })
-
-const goToAnalysis = () => {
-  router.push('/analysis')
-}
 
 const goToDetail = () => {
   if (selectedProperty.value) {
@@ -243,37 +129,15 @@ const formatDate = (dateNum: number) => {
 <template>
   <div v-if="selectedProperty" class="apartment-view">
     <div class="sidebar-header">
-      <div v-if="isImageLoading" class="image-loader">
-        <div class="spinner"></div>
-      </div>
-      
-      <!-- 로드뷰 영역: 로드뷰 모드이고 실제로 로드뷰 데이터가 있을 때만 표시 -->
-      <div v-if="showRoadview && hasRoadview" ref="roadviewRef" class="roadview-container"></div>
-      
-      <!-- 일반 이미지 영역: 사진 모드이거나 로드뷰 데이터가 없을 때 표시 -->
-      <img v-else :src="propertyImage || FALLBACK_IMAGE" 
-           alt="Property" class="header-image"
-           referrerpolicy="no-referrer"
-           @error="handleImageError"
-           :class="{ 'is-loading': isImageLoading }">
-      
-      <div class="header-overlay"></div>
-      
-      <!-- 미디어 전환 버튼 (사진/로드뷰) -->
-      <div v-if="hasRoadview" class="media-toggle">
-        <button 
-          @click="showRoadview = !showRoadview" 
-          class="toggle-btn"
-          :title="showRoadview ? '사진 보기' : '로드뷰 보기'"
-        >
-          <component :is="showRoadview ? ImageIcon : MapIcon" class="icon-xs" />
-          <span>{{ showRoadview ? '사진' : '로드뷰' }}</span>
-        </button>
-      </div>
-
-      <!-- <button @click="goBack" class="back-btn">
-        <ArrowLeft class="icon-sm" />
-      </button> -->
+      <AptRoadview 
+        v-if="selectedProperty"
+        :apt-seq="selectedProperty.aptSeq"
+        :apt-nm="selectedProperty.aptNm"
+        :address="selectedProperty.roadNm"
+        :latitude="selectedProperty.latitude"
+        :longitude="selectedProperty.longitude"
+        height="16rem"
+      />
     </div>
 
     <div class="sidebar-content">

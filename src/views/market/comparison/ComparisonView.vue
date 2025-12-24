@@ -6,10 +6,10 @@ import { useMainDataStore } from '@/stores/mainData'
 import { useAuthStore } from '@/stores/auth'
 import BaseButton from '@/components/common/BaseButton.vue'
 import BaseSelect from '@/components/common/BaseSelect.vue'
-import { ArrowLeft, Trash2, Home, AlertCircle, Filter, Sparkles, Loader2 } from 'lucide-vue-next'
+import { Trash2, AlertCircle, Loader2 } from 'lucide-vue-next'
 import http from '@/api/http'
 import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
-import { getNearestPanoId } from '@/api/imageApi2'
+import AptRoadview from '@/components/features/apt/AptRoadview.vue'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -18,38 +18,35 @@ const { myHouse, comparisonList } = storeToRefs(store)
 const { isAuthenticated } = storeToRefs(authStore)
 const { removeFromComparison } = store
 
-// DB 기반 관심 아파트 목록 + 이미지
+// DB 기반 관심 아파트 목록
 const favoritesFromDB = ref<any[]>([])
-const favoriteImages = ref<Record<string, string>>({})
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-
-// 로드뷰 스냅샷 이미지 URL 생성 (PriceDetailView와 동일)
-const getRoadviewImageUrl = (panoId: number) => {
-  return `https://map.kakaocdn.net/roadview/snapshot?panoId=${panoId}&heading=0&pitch=0&width=400&height=300`
-}
 
 // 관심 목록 로드 함수
 const loadFavorites = async () => {
   try {
-    favoritesFromDB.value = await getFavorites()
-    // 각 아파트 로드뷰 이미지 로드 (lat/lng 사용) - PriceDetailView와 동일한 로직
-    for (const fav of favoritesFromDB.value) {
-      if (fav.latitude && fav.longitude) {
-        try {
-          // getNearestPanoId 사용 (PriceDetailView와 동일)
-          const panoId = await getNearestPanoId(Number(fav.latitude), Number(fav.longitude))
-          
-          if (panoId) {
-            favoriteImages.value[fav.aptSeq] = getRoadviewImageUrl(panoId)
-          } else {
-            favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
-          }
-        } catch {
-          favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
+    const favorites = await getFavorites()
+    favoritesFromDB.value = favorites
+    
+    // 스토어의 comparisonList 동기화 (새로고침 시에도 AI 분석 데이터로 활용하기 위함)
+    if (favorites && favorites.length > 0) {
+      // 이미 스토어에 데이터가 있으면 중복 추가 방지
+      favorites.forEach(fav => {
+        if (!store.isInComparison(fav.aptSeq)) {
+          // 필요한 필드 매핑 (Store의 Property 인터페이스에 맞춤)
+          store.addToComparison({
+            aptSeq: fav.aptSeq,
+            aptNm: fav.aptName,
+            roadNm: fav.address,
+            dealAmount: fav.dealAmount || '',
+            excluUseAr: fav.pyung ? `${fav.pyung}평` : '',
+            latitude: Number(fav.latitude) || 0,
+            longitude: Number(fav.longitude) || 0,
+            description: '',
+            buildYear: 0, // 기본값
+            floor: ''      // 기본값
+          })
         }
-      } else {
-        favoriteImages.value[fav.aptSeq] = FALLBACK_IMAGE
-      }
+      })
     }
   } catch (error) {
     console.error('관심 목록 로드 실패:', error)
@@ -160,22 +157,8 @@ const formatAreaDiff = (targetArea: string, baseArea: string): string => {
 }
 
 const sortedComparisonList = computed(() => {
-  // 로그인 시 DB 데이터 사용, 비로그인 시 로컬 데이터 사용
-  const source = isAuthenticated.value && favoritesFromDB.value.length > 0 
-    ? favoritesFromDB.value.map(f => ({
-        aptSeq: f.aptSeq,
-        aptNm: f.aptName,
-        roadNm: f.address,
-        dealAmount: f.dealAmount || '',
-        excluUseAr: f.pyung ? `${f.pyung}평` : '',
-        latitude: 0,
-        longitude: 0,
-        buildYear: 0,
-        floor: ''
-      }))
-    : [...comparisonList.value]
-  
-  let list = [...source]
+  // 스토어의 comparisonList를 기준으로 정렬 (이미 loadFavorites에서 동기화됨)
+  let list = [...comparisonList.value]
   
   // Sort logic
   switch (sortOption.value) {
@@ -193,21 +176,16 @@ const sortedComparisonList = computed(() => {
   return list
 })
 
+// 총 비교 개수 (backend 기반 favoritesFromDB가 있으면 우선 사용하거나 store와 합산 로직)
+const totalComparisonCount = computed(() => {
+  return comparisonList.value.length + (myHouse.value ? 1 : 0)
+})
+
 const aiSummary = ref<string | null>(null)
 const isGeneratingSummary = ref(false)
 
 const getAISummary = async () => {
-  // 로그인 시 DB 데이터 사용, 비로그인 시 로컬 데이터 사용
-  const dataToCompare = isAuthenticated.value && favoritesFromDB.value.length > 0
-    ? favoritesFromDB.value.map(f => ({
-        aptNm: f.aptName,
-        roadNm: f.address,
-        dealAmount: f.dealAmount || '',
-        excluUseAr: f.pyung ? `${f.pyung}` : '',
-        buildYear: null,
-        floor: ''
-      }))
-    : comparisonList.value
+  const dataToCompare = comparisonList.value
   
   if (dataToCompare.length === 0 && !myHouse.value) return
   
@@ -256,65 +234,6 @@ const getAISummary = async () => {
       </div>
 
       <div class="main-layout">
-        <!-- Left Sidebar (Filters) -->
-        <div class="filters-sidebar">
-          <div class="filter-card">
-            <div class="filter-header">
-              <Filter class="filter-icon" />
-              <h3 class="filter-title">정렬 조건</h3>
-            </div>
-            
-            <!-- Mock Filters -->
-            <div class="filter-content">
-              <div class="filter-group">
-                <label class="filter-label">가격 범위</label>
-                <div class="range-wrapper">
-                  <input type="range" class="range-input" min="0" max="20" step="1">
-                </div>
-                <div class="range-labels">
-                  <span>최소</span>
-                  <span>최대</span>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">면적</label>
-                <div class="checkbox-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox-input">
-                    <span class="checkbox-text">20평대</span>
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox-input">
-                    <span class="checkbox-text">30평대</span>
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox-input">
-                    <span class="checkbox-text">40평대 이상</span>
-                  </label>
-                </div>
-              </div>
-
-              <div class="filter-group">
-                <label class="filter-label">층수</label>
-                <div class="checkbox-group">
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox-input">
-                    <span class="checkbox-text">1층</span>
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox-input">
-                    <span class="checkbox-text">저층 (2~5층)</span>
-                  </label>
-                  <label class="checkbox-label">
-                    <input type="checkbox" class="checkbox-input">
-                    <span class="checkbox-text">고층 (6층 이상)</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <!-- Main Content -->
         <div class="comparison-content">
@@ -322,13 +241,13 @@ const getAISummary = async () => {
           <div class="ai-summary-card mb-6">
             <div class="summary-header">
               <div class="summary-title">
-                <Sparkles class="sparkle-icon" />
+                <span class="sparkle-icon">✨</span>
                 <h3>AI 아파트 비교 요약</h3>
               </div>
               <BaseButton 
                 variant="primary" 
                 size="sm" 
-                :disabled="isGeneratingSummary || (comparisonList.length === 0 && !myHouse)"
+                :disabled="isGeneratingSummary || totalComparisonCount === 0"
                 @click="getAISummary"
               >
                 <Loader2 v-if="isGeneratingSummary" class="spin-icon mr-1" />
@@ -352,7 +271,7 @@ const getAISummary = async () => {
 
           <!-- Sort Header -->
           <div class="sort-header">
-            <span class="count-text">총 <span class="count-number">{{ comparisonList.length + (myHouse ? 1 : 0) }}</span>개의 아파트 비교</span>
+            <span class="count-text">총 <span class="count-number">{{ totalComparisonCount }}</span>개의 아파트 비교</span>
             <div class="sort-select-wrapper">
               <BaseSelect v-model="sortOption" :options="sortOptions" placeholder="정렬 기준" />
             </div>
@@ -367,8 +286,12 @@ const getAISummary = async () => {
                 </div>
                 
                 <div class="card-image-wrapper">
-                  <img src="https://images.unsplash.com/photo-1580587771525-78b9dba3b91d?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" 
-                       alt="My House" class="card-image" />
+                  <AptRoadview 
+                    :apt-seq="'my-house'"
+                    :apt-nm="myHouse.aptNm"
+                    :address="myHouse.roadNm"
+                    height="100%"
+                  />
                 </div>
 
                 <div class="card-details">
@@ -404,13 +327,6 @@ const getAISummary = async () => {
               </div>
             </div>
 
-            <!-- Empty State for My House -->
-            <div v-else class="empty-my-house">
-              <Home class="empty-icon" />
-              <p class="empty-text">내 집을 등록하면 비교가 더 쉬워집니다.</p>
-              <BaseButton @click="router.push('/settings/house')" size="sm">내 집 등록하기</BaseButton>
-            </div>
-
             <!-- Comparison List -->
             <div v-if="sortedComparisonList.length > 0" class="comparison-items">
               <div v-for="property in sortedComparisonList" :key="property.aptSeq" class="property-card-wrapper">
@@ -421,8 +337,14 @@ const getAISummary = async () => {
                   </button>
                   
                   <div class="card-image-wrapper">
-                    <img :src="favoriteImages[property.aptSeq] || FALLBACK_IMAGE" 
-                         alt="Property" class="card-image" />
+                    <AptRoadview 
+                      :apt-seq="property.aptSeq"
+                      :apt-nm="property.aptNm"
+                      :address="property.roadNm"
+                      :latitude="property.latitude"
+                      :longitude="property.longitude"
+                      height="100%"
+                    />
                   </div>
 
                   <div class="card-details">
@@ -468,6 +390,7 @@ const getAISummary = async () => {
                         </div>
                       </div>
                     </div>
+
                     
                     <div class="card-footer">
                       <BaseButton variant="outline" size="sm" @click="router.push('/map')">

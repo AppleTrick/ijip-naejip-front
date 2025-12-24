@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, nextTick, onMounted } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
@@ -7,14 +7,13 @@ import { useMarketStatsStore } from '@/stores/marketStats'
 import { useAuthStore } from '@/stores/auth'
 import { useMarket } from '@/composables/useMarket'
 import BaseButton from '@/components/common/BaseButton.vue'
-import { ArrowLeft, Map as MapIcon, Image as ImageIcon, MessageSquare as ChatIcon, Check, Plus, Heart } from 'lucide-vue-next'
+import { ArrowLeft, MessageSquare as ChatIcon, Heart } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
 import TrendGraph from '@/components/features/sidebar/common/TrendGraph.vue'
-import { searchApartmentImage } from '@/api/imageApi'
-import { getNearestPanoId } from '@/api/imageApi2'
 import { loadKakaoSDK } from '@/utils/kakaoLoader'
 import { addFavorite, removeFavoriteByAptSeq, checkFavorite } from '@/api/favoriteApi'
 import AIChatModal from '@/components/features/ai/AIChatModal.vue'
+import AptRoadview from '@/components/features/apt/AptRoadview.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -55,7 +54,9 @@ const handleFavoriteClick = async () => {
         aptName: apt.aptNm,
         address: apt.roadNm || '',
         pyung: pyung,
-        dealAmount: apt.dealAmount || ''
+        dealAmount: apt.dealAmount || '',
+        latitude: Number(apt.latitude),
+        longitude: Number(apt.longitude)
       })
       addToComparison(apt)
       isFavorite.value = true
@@ -93,93 +94,6 @@ const openChatModal = () => isChatModalOpen.value = true
 
 // Period Selection
 const selectedPeriod = ref<'3y' | '6m'>('3y')
-
-// Media State
-const propertyImage = ref<string | null>(null)
-const isImageLoading = ref(false)
-const showRoadview = ref(true)
-const roadviewRef = ref<HTMLElement | null>(null)
-const roadviewInstance = ref<any>(null)
-const hasRoadview = ref(false)
-const currentPanoId = ref<number | null>(null)
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-
-// Fetch Media Logic (Simplified - Matches ApartmentLevelView)
-let latestMediaRequestId = 0
-const fetchMedia = async (aptName: string, address: string = '', lat?: number, lng?: number) => {
-  if (!aptName) return
-  
-  const requestId = ++latestMediaRequestId
-  
-  // 상태 초기화
-  isImageLoading.value = true
-  hasRoadview.value = false
-  currentPanoId.value = null
-  propertyImage.value = null
-  showRoadview.value = true
-  
-  try {
-    console.log(`[Media] Fetching for: ${aptName}, coords: ${lat}, ${lng}`)
-    
-    // 로드뷰와 이미지 동시 검색
-    const [panoId, url] = await Promise.all([
-      lat && lng ? getNearestPanoId(lat, lng) : Promise.resolve(null),
-      searchApartmentImage(aptName, address)
-    ])
-
-    // 최신 요청만 반영
-    if (requestId !== latestMediaRequestId) {
-      console.log(`[Media] Request #${requestId} discarded`)
-      return
-    }
-
-    console.log(`[Media] Results - PanoID: ${panoId}, Image: ${url ? 'OK' : 'Fallback'}`)
-    
-    hasRoadview.value = !!panoId
-    currentPanoId.value = panoId
-    showRoadview.value = !!panoId
-    propertyImage.value = url || FALLBACK_IMAGE
-  } catch (error) {
-    if (requestId === latestMediaRequestId) {
-      console.error('fetchMedia error:', error)
-      propertyImage.value = FALLBACK_IMAGE
-      hasRoadview.value = false
-    }
-  } finally {
-    if (requestId === latestMediaRequestId) {
-      isImageLoading.value = false
-    }
-  }
-}
-
-// 로드뷰 초기화 및 갱신 함수 (Simplified - Matches ApartmentLevelView)
-const updateRoadview = () => {
-  if (!roadviewRef.value || !currentPanoId.value || !window.kakao) {
-    console.warn('[Media] Cannot update roadview (missing Ref or PanoID)')
-    return
-  }
-  
-  console.log(`[Media] Updating roadview with PanoID: ${currentPanoId.value}`)
-  
-  try {
-    const rv = new window.kakao.maps.Roadview(roadviewRef.value)
-    roadviewInstance.value = rv
-    
-    rv.setPanoId(currentPanoId.value, new window.kakao.maps.LatLng(
-      selectedProperty.value?.latitude, 
-      selectedProperty.value?.longitude
-    ))
-  } catch (e) {
-    console.error('[Media] Roadview initialization error:', e)
-  }
-}
-
-watch([showRoadview, currentPanoId], async ([newShow, newPano]) => {
-  if (newShow && newPano) {
-    await nextTick()
-    await updateRoadview()
-  }
-})
 
 // Filtered Price Trend
 const filteredPriceTrend = computed(() => {
@@ -287,7 +201,6 @@ watch([() => selectedProperty.value?.aptSeq, selectedPyung], async ([newId, newP
   // We ONLY trigger these when the apartment itself changes, NOT when only pyung changes.
   if (newId !== oldId && selectedProperty.value) {
     const p = selectedProperty.value
-    fetchMedia(p.aptNm, p.roadNm || '', Number(p.latitude), Number(p.longitude))
     // Trigger Fast AI Analysis
     analyzeAutomatedLocation(p.aptNm, p.roadNm || '')
   }
@@ -307,7 +220,6 @@ const formatDate = (dateNum: number) => {
 }
 
 const goBack = () => router.back()
-const handleImageError = () => propertyImage.value = FALLBACK_IMAGE
 
 // Scroll restoration
 onMounted(() => {
@@ -348,32 +260,14 @@ onMounted(() => {
         <div class="left-column">
           <!-- Media Section -->
           <div class="media-section">
-             <div class="media-container">
-               <div v-if="isImageLoading" class="image-loader">
-                 <div class="spinner"></div>
-               </div>
-               
-               <div v-if="showRoadview && hasRoadview" ref="roadviewRef" class="roadview-container"></div>
-               
-               <img v-else :src="propertyImage || FALLBACK_IMAGE" 
-                    alt="Property" class="header-image"
-                    referrerpolicy="no-referrer"
-                    @error="handleImageError"
-                    :class="{ 'is-loading': isImageLoading }">
-               
-               <div class="header-overlay"></div>
-               
-               <div v-if="hasRoadview" class="media-toggle">
-                 <button 
-                   @click="showRoadview = !showRoadview" 
-                   class="toggle-btn"
-                   :title="showRoadview ? '사진 보기' : '로드뷰 보기'"
-                 >
-                   <component :is="showRoadview ? ImageIcon : MapIcon" class="icon-xs" />
-                   <span>{{ showRoadview ? '사진' : '로드뷰' }}</span>
-                 </button>
-               </div>
-             </div>
+            <AptRoadview 
+              v-if="selectedProperty"
+              :apt-seq="selectedProperty.aptSeq"
+              :apt-nm="selectedProperty.aptNm"
+              :address="selectedProperty.roadNm"
+              :latitude="selectedProperty.latitude"
+              :longitude="selectedProperty.longitude"
+            />
           </div>
 
           <!-- Basic Info Specs -->
@@ -585,63 +479,11 @@ onMounted(() => {
   overflow: hidden;
   box-shadow: var(--shadow-md);
   background: white;
-}
-
-.media-container {
-  position: relative;
   aspect-ratio: 16/10;
-  background: var(--color-gray-100);
-  overflow: hidden;
-}
-
-.header-image, .roadview-container {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
 }
 
-.header-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.3), transparent);
-  pointer-events: none;
-}
-
-.image-loader {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255,255,255,0.8);
-  z-index: 10;
-}
-
-.media-toggle {
-  position: absolute;
-  bottom: 1rem;
-  right: 1rem;
-  z-index: 5;
-}
-
-.toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: rgba(0,0,0,0.7);
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 2rem;
-  font-size: 0.9rem;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: all 0.2s;
-}
-
-.toggle-btn:hover {
-  background: rgba(0,0,0,0.9);
-}
+/* Unused old media classes removed */
 
 .info-card, .chart-card, .history-card {
   background: white;

@@ -7,6 +7,8 @@ export interface FavoriteApartment {
   address: string
   pyung: number
   dealAmount: string
+  latitude?: number
+  longitude?: number
   createdAt: string
 }
 
@@ -16,6 +18,8 @@ export interface FavoriteAddRequest {
   address: string
   pyung: number
   dealAmount: string
+  latitude: number
+  longitude: number
 }
 
 /**
