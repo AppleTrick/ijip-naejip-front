@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
 import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
 import { useMarket } from '@/composables/useMarket'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { ArrowLeft, MessageSquare as ChatIcon, Heart } from 'lucide-vue-next'
@@ -25,7 +26,9 @@ const { fetchPropertyDetail } = useMarket()
 const { selectedProperty } = storeToRefs(store)
 const { selectedPyung } = storeToRefs(statsStore)
 const { isAuthenticated } = storeToRefs(authStore)
-const { addToComparison, removeFromComparison, isInComparison } = store
+const { addToComparison, removeFromComparison } = store
+
+const uiStore = useUiStore()
 
 // 관심 아파트 여부 (DB 기준)
 const isFavorite = ref(false)
@@ -35,7 +38,11 @@ const handleFavoriteClick = async () => {
   if (!selectedProperty.value) return
   
   if (!isAuthenticated.value) {
-    if (confirm('로그인이 필요합니다. 로그인 페이지로 이동할까요?')) {
+    const confirmed = await uiStore.showConfirm({
+      title: '로그인 필요',
+      message: '로그인이 필요한 서비스입니다. 로그인 페이지로 이동할까요?'
+    })
+    if (confirmed) {
       router.push('/login')
     }
     return
@@ -63,7 +70,7 @@ const handleFavoriteClick = async () => {
       isFavorite.value = true
     }
   } catch (error: any) {
-    alert(error.message || '관심 등록 중 오류가 발생했습니다.')
+    uiStore.showAlert(error.message || '관심 등록 중 오류가 발생했습니다.', '오류', 'error')
   }
 }
 

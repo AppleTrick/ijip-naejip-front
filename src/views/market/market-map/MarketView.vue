@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
+import { useUiStore } from '@/stores/ui'
 import type { Property } from '@/api/types'
 import KakaoMap from '@/components/features/map/KakaoMap.vue'
 import MarketFilter from './components/MarketFilter.vue'
@@ -12,7 +13,7 @@ import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
-import { RotateCcw, Sparkles, Wand2, LayoutDashboard, Bot, SlidersHorizontal } from 'lucide-vue-next'
+import { RotateCcw, Wand2, LayoutDashboard, Bot, SlidersHorizontal } from 'lucide-vue-next'
 import AISearchModal from '@/components/features/ai/AISearchModal.vue'
 import AIStatsModal from '@/components/features/ai/AIStatsModal.vue'
 import AIFloatingButton from '@/components/common/AIFloatingButton.vue'
@@ -46,9 +47,15 @@ const openStatsSearch = () => {
   isStatsModalOpen.value = true
 }
 
-const handleAiAnalysisClick = () => {
+const uiStore = useUiStore()
+
+const handleAiAnalysisClick = async () => {
   if (!authStore.isAuthenticated) {
-    if (confirm('AI 부동산 분석은 로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')) {
+    const confirmed = await uiStore.showConfirm({
+      title: '로그인 필요',
+      message: 'AI 부동산 분석은 로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?'
+    })
+    if (confirmed) {
       router.push('/login')
     }
     return
@@ -180,10 +187,9 @@ const handleSearch = (query: string) => {
       
       // 검색 시 선택된 특정 매물 정보는 해제합니다.
       selectProperty(null)
-    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
-      alert('검색 결과가 없습니다.')
+      uiStore.showAlert('검색 결과가 없습니다.', '검색 알림', 'info')
     } else {
-      alert('검색 중 오류가 발생했습니다.')
+      uiStore.showAlert('검색 중 오류가 발생했습니다.', '검색 오류', 'error')
     }
   })
 }
@@ -312,14 +318,14 @@ const handleResetAIResults = () => {
         </div>
       </div>
       <div class="ai-fab-container">
-        <AIFloatingButton 
+        <!-- <AIFloatingButton 
           label="AI 아파트 추천" 
           title="AI 아파트 추천" 
           variant="semantic" 
           @click="openSemanticSearch"
         >
           <template #icon><Sparkles /></template>
-        </AIFloatingButton>
+        </AIFloatingButton> -->
         
         <AIFloatingButton 
           label="AI 필터링 설정" 

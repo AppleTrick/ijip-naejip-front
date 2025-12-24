@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useMarketStatsStore } from '@/stores/marketStats'
 import { storeToRefs } from 'pinia'
-import RegionStatsView from '@/components/features/sidebar/RegionStatsView.vue'
 import ApartmentLevelView from '@/components/features/sidebar/ApartmentLevelView.vue'
 import { ChevronLeft, ChevronRight } from 'lucide-vue-next'
 
@@ -11,7 +10,11 @@ const { toggleSidebar } = store
 </script>
 
 <template>
-  <div class="sidebar-container" :class="{ 'sidebar-closed': !isSidebarOpen }">
+  <div 
+    v-show="currentLevel === 'apartment'"
+    class="sidebar-container" 
+    :class="{ 'sidebar-closed': !isSidebarOpen }"
+  >
     <div class="market-sidebar">
       <transition name="fade" mode="out-in">
         <ApartmentLevelView v-if="currentLevel === 'apartment'" />

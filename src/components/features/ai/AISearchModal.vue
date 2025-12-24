@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { X, Search, Sparkles, Wand2, Loader2, MapPin, ArrowRight } from 'lucide-vue-next'
 import BaseButton from '@/components/common/BaseButton.vue'
 import http from '@/api/http'
+import { useUiStore } from '@/stores/ui'
 
 const props = defineProps<{
   isOpen: boolean
@@ -14,6 +15,8 @@ const emit = defineEmits(['close', 'search', 'move-location'])
 const query = ref('')
 const isSearching = ref(false)
 const searchResult = ref(null as any)
+
+const uiStore = useUiStore()
 
 const handleMove = (item: any) => {
   console.log('handleMove Item:', item)
@@ -31,7 +34,7 @@ const handleMove = (item: any) => {
     closeModal()
   } else {
     console.warn('Invalid coordinates for item:', item)
-    alert('위치 정보가 올바르지 않습니다. 다른 매물을 선택해 주세요.')
+    uiStore.showAlert('위치 정보가 올바르지 않습니다. 다른 매물을 선택해 주세요.', '알림', 'error')
   }
 }
 

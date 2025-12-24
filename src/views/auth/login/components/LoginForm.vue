@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router'
 import BaseInput from '@/components/common/BaseInput.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
 import { useAuthStore } from '@/stores/auth'
+import { useUiStore } from '@/stores/ui'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const uiStore = useUiStore()
 
 const email = ref<string>('')
 const password = ref<string>('')
@@ -22,7 +24,7 @@ const handleLogin = async () => {
   if (success) {
     router.push('/')
   } else {
-    alert('로그인 실패: ' + authStore.error)
+    uiStore.showAlert('로그인 실패: ' + authStore.error, '로그인 오류', 'error')
   }
 }
 </script>

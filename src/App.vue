@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import Navbar from './components/layout/Navbar.vue'
+import GlobalModal from './components/common/GlobalModal.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const authStore = useAuthStore()
@@ -14,6 +15,9 @@ onMounted(() => {
   <div class="app-container">
     <!-- Navbar -->
     <Navbar />
+
+    <!-- Global Modal -->
+    <GlobalModal />
 
     <!-- Main Content -->
     <main class="main-content">
