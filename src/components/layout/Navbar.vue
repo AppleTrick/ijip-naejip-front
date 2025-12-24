@@ -74,14 +74,14 @@ const handleLogout = () => {
             >
               집 비교하기
             </router-link>
-            <router-link 
+            <!-- <router-link 
               v-if="isAuthenticated"
               to="/survey" 
               class="nav-link" 
               active-class="nav-link--active"
             >
               성향 조사
-            </router-link>
+            </router-link> -->
           </div>
 
           <!-- Divider -->
@@ -172,7 +172,7 @@ const handleLogout = () => {
         >
           집 비교하기
         </router-link>
-        <router-link 
+        <!-- <router-link 
           v-if="isAuthenticated"
           to="/survey" 
           class="mobile-nav-link"
@@ -180,7 +180,7 @@ const handleLogout = () => {
           @click="closeMenu"
         >
           성향 조사
-        </router-link>
+        </router-link> -->
         
         <div class="mobile-divider">
           <template v-if="isAuthInitialized">

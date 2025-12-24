@@ -32,11 +32,11 @@ const routes: Array<RouteRecordRaw> = [
     //   name: 'analysis',
     //   component: () => import('../views/market/analysis/AnalysisView.vue')
     // },
-    {
-      path: '/survey',
-      name: 'preference-survey',
-      component: () => import('../views/survey/PreferenceSurveyView.vue')
-    },
+    // {
+    //   path: '/survey',
+    //   name: 'preference-survey',
+    //   component: () => import('../views/survey/PreferenceSurveyView.vue')
+    // },
     {
       path: '/login',
       name: 'login',
