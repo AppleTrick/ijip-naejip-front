@@ -23,7 +23,7 @@ export interface User {
   myHouseArea?: string
   myHouseFloor?: string
   myHousePrice?: string
-  
+
   socialType?: 'NONE' | 'KAKAO' | 'NAVER' | 'GOOGLE'
 }
 
@@ -116,6 +116,7 @@ export interface Property {
   roadNm: string
   excluUseAr: string
   primaryPyung?: number
+  pricePerPyung?: number
   floor: string
   description: string
   buildYear?: number
@@ -172,6 +173,7 @@ export interface AddressResponse {
   longitude: number
   avgPrice: number
   primaryPyung: number
+  pricePerPyung: number
 }
 
 export interface ApartmentInfoDto {

@@ -12,10 +12,10 @@ import { formatPrice } from '@/utils/formatters'
  */
 const convertToProperty = (item: AddressResponse, type: 'APT' | 'APT_DONG' | 'DONG' | 'GUGUN' | 'SIDO'): Property => {
   // APT_DONG의 경우: "아파트명 (동)" 형식으로 표시
-  const displayName = type === 'APT_DONG' && item.aptDong 
-    ? `${item.aptName} (${item.aptDong}동)` 
+  const displayName = type === 'APT_DONG' && item.aptDong
+    ? `${item.aptName} (${item.aptDong}동)`
     : (item.aptName || item.dongName || item.gugunName || item.sidoName)
-  
+
   return {
     aptSeq: item.aptSeq ? String(item.aptSeq) : item.dongCode, // 지역의 경우 동코드를 대체 ID로 사용
     aptNm: displayName,
@@ -26,6 +26,8 @@ const convertToProperty = (item: AddressResponse, type: 'APT' | 'APT_DONG' | 'DO
     roadNm: item.dongName || '',
     excluUseAr: item.primaryPyung && item.primaryPyung > 0 ? String(item.primaryPyung) : '',
     primaryPyung: item.primaryPyung || undefined,
+    // 아파트/아파트동인 경우 평단가를 표시하지 않음 (백엔드에서 데이터가 오더라도 무시)
+    pricePerPyung: (type !== 'APT' && type !== 'APT_DONG') ? (item.pricePerPyung || undefined) : undefined,
     floor: '-',
     description: `${item.sidoName} ${item.gugunName} ${item.dongName}`,
     buildYear: 0,
@@ -94,14 +96,14 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
     })
     const data = response.data.data
     console.log('API Raw Response for ' + id, data)
-    
+
     if (!data) return undefined
 
     const property: Property = {
       aptSeq: String(data.apartmentInfo.aptSeq),
       aptNm: data.apartmentInfo.aptName,
       dealAmount: data.apartmentInfo.avgPrice ? formatPrice(data.apartmentInfo.avgPrice) : '0억',
-      latitude: Number(data.apartmentInfo.latitude) || 0, 
+      latitude: Number(data.apartmentInfo.latitude) || 0,
       longitude: Number(data.apartmentInfo.longitude) || 0,
       roadNm: data.apartmentInfo.address,
       excluUseAr: (data.apartmentInfo.pyungTypes || []).join(', ') + '평',
@@ -125,7 +127,7 @@ export const getPropertyDetail = async (id: string, pyung: string = 'all'): Prom
       })) : [],
       type: 'APT'
     }
-    
+
     return property
   } catch (error) {
     console.error('아파트 상세 정보 조회 실패:', error)

@@ -56,7 +56,8 @@ const createMarker = (item: Property) => {
     price: item.dealAmount,
     name: item.aptNm,
     pyung: item.excluUseAr,
-    aptDong: item.aptDong
+    aptDong: item.aptDong,
+    pricePerPyung: item.pricePerPyung
   })
   render(vnode, content)
   
