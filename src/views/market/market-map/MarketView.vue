@@ -76,9 +76,14 @@ const handleMoveLocation = (location: { lat: number, lng: number, aptSeq?: strin
   }
 }
 
-// 지도의 현재 상태 관리 (ref를 사용하여 스냅백 현상 방지)
-const mapCenter = ref<{ lat: number, lng: number }>(DEFAULT_MAP_CENTER)
-const mapLevel = ref<number>(9)
+// 지도의 현재 상태 관리 (URL 쿼리 파라미터 우선 적용)
+const currentQuery = router.currentRoute.value.query
+const initialLat = currentQuery.lat ? Number(currentQuery.lat) : DEFAULT_MAP_CENTER.lat
+const initialLng = currentQuery.lng ? Number(currentQuery.lng) : DEFAULT_MAP_CENTER.lng
+const initialLevel = currentQuery.level ? Number(currentQuery.level) : 9
+
+const mapCenter = ref<{ lat: number, lng: number }>({ lat: initialLat, lng: initialLng })
+const mapLevel = ref<number>(initialLevel)
 
 // 1. 선택된 아파트나 지역이 변경될 때 지도를 이동시킴
 watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, oldRegion]) => {
@@ -120,7 +125,10 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
 onMounted(async () => {
   // 초기 로딩 시 AI 결과 모드 해제 상태임을 보장
   isShowingAIResults.value = false
-  console.log('MarketView Mounted - AI Result Mode reset')
+  
+  if (currentQuery.lat && currentQuery.lng) {
+    console.log(`MarketView 마운트: ${currentQuery.lat}, ${currentQuery.lng} 위치로 초기화 시도 (레벨: ${initialLevel})`)
+  }
 })
 
 const handleSearch = (query: string) => {

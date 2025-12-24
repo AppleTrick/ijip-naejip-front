@@ -84,8 +84,21 @@ const updateRoadview = async () => {
     
     const lat = typeof props.latitude === 'string' ? parseFloat(props.latitude) : props.latitude
     const lng = typeof props.longitude === 'string' ? parseFloat(props.longitude) : props.longitude
+    const targetPos = new window.kakao.maps.LatLng(lat, lng)
 
-    rv.setPanoId(currentPanoId.value, new window.kakao.maps.LatLng(lat, lng))
+    // 로드뷰 초기화 완료 시점 잡아주기
+    window.kakao.maps.event.addListener(rv, 'init', () => {
+      // 아파트를 바라보도록 시점(Viewpoint) 계산
+      const projection = rv.getProjection()
+      const viewpoint = projection.viewpointFromCoords(targetPos, rv.getPosition())
+      
+      // 조금 더 위를 바라보도록 Tilt 조정 (장애물 회피)
+      viewpoint.tilt -= 40
+      
+      rv.setViewpoint(viewpoint)
+    })
+
+    rv.setPanoId(currentPanoId.value, targetPos)
   } catch (e) {
     console.error('[AptRoadview] Roadview initialization error:', e)
   }
