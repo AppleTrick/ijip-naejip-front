@@ -77,19 +77,11 @@ onMounted(async () => {
     // 2. 매물 상세 정보 로드
     await fetchPropertyDetail(propertyId)
     
-    // 3. 미디어 로드 (로드뷰 + 이미지)
-    if (selectedProperty.value) {
-      const p = selectedProperty.value
-      fetchMedia(p.aptNm, p.roadNm || '', Number(p.latitude), Number(p.longitude))
-      analyzeAutomatedLocation(p.aptNm, p.roadNm || '')
-      
-      // 4. 관심 아파트 여부 확인 (로그인 시)
-      if (isAuthenticated.value) {
-        const pyung = Number(selectedPyung.value) || 0
-        isFavorite.value = await checkFavorite(p.aptSeq, pyung)
-      }
+        // 3. 미디어 로드 및 AI 분석
+      // Note: fetchMedia and analyzeAutomatedLocation are handled by the watch
+      // on selectedProperty and selectedPyung with { immediate: true }.
+      // No need to call them manually here after fetchPropertyDetail.
     }
-  }
 })
 
 // Current Pyung Computation
@@ -200,100 +192,99 @@ const filteredPriceTrend = computed(() => {
 // AI Analysis State
 const aiAnalysisResult = ref('')
 const isAiAnalyzing = ref(false)
+let currentAbortController: AbortController | null = null
 
 const analyzeAutomatedLocation = async (aptName: string, address: string) => {
   if (!aptName || !address) return
+  
+  // Cancel previous request if any
+  if (currentAbortController) {
+    currentAbortController.abort()
+  }
+  
+  currentAbortController = new AbortController()
   isAiAnalyzing.value = true
   aiAnalysisResult.value = ''
   
   try {
-    const response = await fetch(`/api/v1/ai/location-attraction?aptName=${encodeURIComponent(aptName)}&address=${encodeURIComponent(address)}`)
+    const response = await fetch(
+      `/api/v1/ai/location-attraction?aptName=${encodeURIComponent(aptName)}&address=${encodeURIComponent(address)}`,
+      { signal: currentAbortController.signal }
+    )
     
     if (!response.body) return
     const reader = response.body.getReader()
     const decoder = new TextDecoder()
-    let rawAccumulator = ''
+    let buffer = ''
 
     while (true) {
       const { value, done } = await reader.read()
       if (done) break
       
       const chunk = decoder.decode(value, { stream: true })
-      rawAccumulator += chunk
+      buffer += chunk
       
-      // Heuristic: Check if response is wrapped in JSON (e.g. CommonResponse)
-      if (rawAccumulator.trim().startsWith('{')) {
-        // Try to parse partial or full JSON to extract 'data'
-        // Since we can't parse partial JSON easily, we'll wait or try regex for "data" field
-        // But for better UX if it *is* streaming inside the JSON (unlikely), we might want to peek.
-        // For now, let's rely on cleaning it up. 
-        // If it is a single block JSON, we will just parse it at the end or regex match.
-        try {
-          // Attempt to find "data":"..." pattern even in partial string
-          const match = rawAccumulator.match(/"data"\s*:\s*"(.*)/s) // Capture from data until end
-          if (match && match[1]) {
-             // We have the start of data. formatting might be tricky due to JSON escapes.
-             // Simplest: If it's a short response, just wait for full parsing?
-             // User wants it to look like it's streaming.
-             // Let's just try to parse the whole thing if it looks like a complete JSON.
-             const parsed = JSON.parse(rawAccumulator)
-             if (parsed.data) {
-                aiAnalysisResult.value = parsed.data
-             }
+      // Handle SSE: Split by newlines and process complete 'data:' lines
+      let lines = buffer.split('\n')
+      // Keep the last (potentially incomplete) line in the buffer
+      buffer = lines.pop() || ''
+      
+      for (const line of lines) {
+        const trimmedLine = line.trim()
+        if (trimmedLine.startsWith('data:')) {
+          const content = trimmedLine.replace('data:', '').trim()
+          // Filter out internal Spring AI / SSE artifacts
+          if (content && content !== '[DONE]') {
+            // Append content directly (assuming it's a character or word)
+            aiAnalysisResult.value += content
           }
-        } catch (e) {
-          // Incomplete JSON, ignore
-        }
-      } else {
-        // Standard SSE or Raw Text Stream
-        const lines = chunk.split('\n')
-        for (const line of lines) {
-           if (line.startsWith('data:')) {
-             // Handle standard SSE data: prefix
-             const content = line.replace('data:', '')
-             // If the content itself is the JSON {"code":...}, we handle that too?
-             // Assuming Spring AI defaults: data: "text"
-             aiAnalysisResult.value += content
-           } else {
-             // Raw text
-             aiAnalysisResult.value += line
-           }
+        } else if (trimmedLine && !trimmedLine.startsWith('event:')) {
+          // Fallback for raw text if not structured as SSE
+          // But usually we skip empty lines or metadata
+          if (!trimmedLine.includes('retry:')) {
+             aiAnalysisResult.value += trimmedLine
+          }
         }
       }
     }
     
-    // Final Safe Parse if JSON was fully accumulated but not streamed
-    if (rawAccumulator.trim().startsWith('{')) {
-       try {
-          const parsed = JSON.parse(rawAccumulator)
-          if (parsed && parsed.data) {
-             aiAnalysisResult.value = parsed.data
-          }
-       } catch (e) {
-          // Fallback: If parse fails, maybe it wasn't JSON or was cut off.
-          // Try to clean up artifacts manually
-          // console.warn("JSON Parse failed, showing raw", e)
-       }
+    // Process remaining buffer if it doesn't look like a standard SSE prefix
+    if (buffer.trim() && !buffer.startsWith('data:')) {
+       // Only if it's raw text
     }
 
-  } catch (error) {
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.log('AI Analysis request aborted')
+      return
+    }
     console.error('Streaming Error:', error)
     if (!aiAnalysisResult.value) {
        aiAnalysisResult.value = '일시적인 오류로 분석을 완료할 수 없습니다.'
     }
   } finally {
     isAiAnalyzing.value = false
+    currentAbortController = null
   }
 }
 
 // Watch logic to refetch detail if needed (e.g. pyung change)
 watch([() => selectedProperty.value?.aptSeq, selectedPyung], async ([newId, newPyung], [oldId, oldPyung]) => {
   if (!newId) return
+  
+  const pyung = Number(newPyung) || 0
+
   if (newId !== oldId || newPyung !== oldPyung) {
     await fetchPropertyDetail(newId)
+    
+    // Update Favorite status
+    if (isAuthenticated.value && selectedProperty.value) {
+      isFavorite.value = await checkFavorite(selectedProperty.value.aptSeq, pyung)
+    }
   }
   
-  // New Property Loaded -> Trigger Media & AI Analysis
+  // New Property (Apartment) Loaded -> Trigger Media & AI Analysis
+  // We ONLY trigger these when the apartment itself changes, NOT when only pyung changes.
   if (newId !== oldId && selectedProperty.value) {
     const p = selectedProperty.value
     fetchMedia(p.aptNm, p.roadNm || '', Number(p.latitude), Number(p.longitude))
