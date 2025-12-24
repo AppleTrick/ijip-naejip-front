@@ -7,7 +7,7 @@ import { useAuthStore } from '@/stores/auth'
 import { useMarket } from '@/composables/useMarket'
 import { useRouter } from 'vue-router'
 import BaseButton from '@/components/common/BaseButton.vue'
-import { ShieldCheck, Check, Plus, ArrowLeft, MessageSquare as ChatIcon } from 'lucide-vue-next'
+import { Check, Plus, MessageSquare as ChatIcon } from 'lucide-vue-next'
 import { formatPrice } from '@/utils/formatters'
 import { addFavorite, removeFavoriteByAptSeq } from '@/api/favoriteApi'
 import TrendGraph from './common/TrendGraph.vue'
@@ -94,12 +94,13 @@ const filteredPriceTrend = computed(() => {
 })
 
 // 선택된 아파트나 평형이 변경되면 상세 정보 가져오기
-watch([() => selectedProperty.value?.aptSeq, selectedPyung], async ([newId, newPyung], [oldId, oldPyung]) => {
+watch([() => statsStore.selectedApartmentId, selectedPyung], async ([newId, newPyung], [oldId, oldPyung]) => {
   // ID가 없으면 리턴
   if (!newId) return
 
   // 1. ID가 바뀌었거나 평형이 바뀌었으면 상세 정보(가격, 그래프 등) 재요청
   if (newId !== oldId || newPyung !== oldPyung) {
+    console.log(`ApartmentLevelView: 데이터 요청 (ID: ${newId}, 평형: ${newPyung})`)
     await fetchPropertyDetail(newId)
   }
 }, { immediate: true })

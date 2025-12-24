@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, computed, watch, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAuthStore } from '@/stores/auth'
 import { useMainDataStore } from '@/stores/mainData'
@@ -21,6 +21,7 @@ import AIFloatingButton from '@/components/common/AIFloatingButton.vue'
 
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 const store = useMainDataStore()
 const { filteredProperties, filters } = storeToRefs(store)
@@ -80,7 +81,7 @@ const handleMoveLocation = (location: { lat: number, lng: number, aptSeq?: strin
 }
 
 // 지도의 현재 상태 관리 (URL 쿼리 파라미터 우선 적용)
-const currentQuery = computed(() => router.currentRoute.value.query)
+const currentQuery = computed(() => route.query)
 const initialLat = Number(currentQuery.value.lat) || DEFAULT_MAP_CENTER.lat
 const initialLng = Number(currentQuery.value.lng) || DEFAULT_MAP_CENTER.lng
 const initialLevel = Number(currentQuery.value.level) || 9
@@ -102,16 +103,22 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
     const lat = Number(prop.latitude)
     const lng = Number(prop.longitude)
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
-      isMovingProgrammatically.value = true
-      mapCenter.value = { lat, lng }
-      // 다음 틱에서 혹은 이동 완료 후 플래그 해제 (여기선 간단히 타임아웃 처리 가능하지만 
-      // handleBoundsUpdate에서 차차 해제됨)
+      // 만약 URL 쿼리에 이미 해당 아파트 시퀀스가 있고, 좌표가 일치한다면 중복 이동 방지
+      const urlLat = Number(route.query.lat)
+      const urlLng = Number(route.query.lng)
+      const isAlreadyAtTarget = Math.abs(urlLat - lat) < 0.0001 && Math.abs(urlLng - lng) < 0.0001
+      
+      if (!isAlreadyAtTarget) {
+        isMovingProgrammatically.value = true
+        mapCenter.value = { lat, lng }
+      }
     }
     return
   }
 
   // 선택된 지역(시/군/구)이 새로 변경된 경우에만 이동
-  if (isRegionChanged && region.lat && region.lng) {
+  // 단, URL 쿼리에 특정 좌표가 있는 경우(AI 이동 등) 지역 변경에 의한 자동 이동은 스킵함
+  if (isRegionChanged && region.lat && region.lng && !route.query.lat) {
     const lat = Number(region.lat)
     const lng = Number(region.lng)
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
@@ -131,7 +138,7 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
 }, { immediate: false }) // 초기값에 의한 스냅백 방지를 위해 immediate: false로 설정
 
 // 2. URL 쿼리 파라미터 변경 감지 (검색 결과 등으로 이동 시)
-watch(() => router.currentRoute.value.query, (newQuery) => {
+watch(() => route.query, (newQuery) => {
   if (newQuery.lat && newQuery.lng) {
     const nextLat = Number(newQuery.lat)
     const nextLng = Number(newQuery.lng)
@@ -139,6 +146,7 @@ watch(() => router.currentRoute.value.query, (newQuery) => {
     // 현재 값과 다를 때만 업데이트하여 무한 루프 방지
     if (Math.abs(mapCenter.value.lat - nextLat) > 0.00001 || 
         Math.abs(mapCenter.value.lng - nextLng) > 0.00001) {
+      console.log(`URL Query 기반 지도 중심 이동: ${nextLat}, ${nextLng}`)
       isMovingProgrammatically.value = true
       mapCenter.value = { lat: nextLat, lng: nextLng }
     }
@@ -147,6 +155,15 @@ watch(() => router.currentRoute.value.query, (newQuery) => {
     const nextLevel = Number(newQuery.level)
     if (mapLevel.value !== nextLevel) {
       mapLevel.value = nextLevel
+    }
+  }
+  
+  // 3. URL 쿼리에 aptSeq가 있는 경우 통계 스토어 동기화 (사이드바 오픈 및 데이터 로딩)
+  if (newQuery.aptSeq) {
+    const aptSeq = String(newQuery.aptSeq)
+    if (statsStore.selectedApartmentId !== aptSeq) {
+      console.log(`URL Query 기반 아파트 선택 동기화: ${aptSeq}`)
+      statsStore.selectApartment(aptSeq, 'all')
     }
   }
 }, { deep: true })
@@ -303,6 +320,9 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
     return
   }
 
+  // 쿼리에 좌표 정보가 있는데 아직 비동기적으로 스토어가 업데이트 중이거나 로딩 중인 경우 
+  // 불필요한 fetchProperties 호출을 방지하기 위한 체크가 필요할 수 있음
+  
   console.log('Fetching properties for scope:', bounds.level)
   await fetchProperties(filters.value, bounds)
 }

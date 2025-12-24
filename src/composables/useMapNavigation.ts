@@ -43,21 +43,21 @@ export const useMapNavigation = () => {
    * @param lat 위도
    * @param lng 경도
    * @param zoomLevel 지도의 줌 레벨 (기본값 3)
+   * @param aptSeq 선택된 아파트 시퀀스 (옵션)
    */
-  const moveToLocation = (lat: number, lng: number, zoomLevel: number = 3) => {
-    console.log(`${lat}, ${lng} 좌표로 이동 (레벨: ${zoomLevel})`)
+  const moveToLocation = (lat: number, lng: number, zoomLevel: number = 3, aptSeq?: string) => {
+    console.log(`${lat}, ${lng} 좌표로 이동 (레벨: ${zoomLevel}, aptSeq: ${aptSeq})`)
     
     // 1. 선택된 특정 아파트는 해제 (장소 검색 시에는 특정 매물이 선택된 상태가 아니므로)
     store.selectProperty(null)
 
     // 2. 지도 페이지로 이동 및 쿼리 파라미터 전달
+    const query: any = { lat, lng, level: zoomLevel }
+    if (aptSeq) query.aptSeq = aptSeq
+
     router.push({
       path: '/map',
-      query: {
-        lat,
-        lng,
-        level: zoomLevel
-      }
+      query
     })
   }
 

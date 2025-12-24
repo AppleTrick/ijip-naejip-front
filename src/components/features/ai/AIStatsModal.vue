@@ -6,12 +6,17 @@ import html2pdf from 'html2pdf.js'
 import http from '@/api/http'
 import * as reportApi from '@/api/aiReportApi'
 import type { AIReportResponse } from '@/api/types'
+import { useMapNavigation } from '@/composables/useMapNavigation'
+import { useMarketStatsStore } from '@/stores/marketStats'
 
 const props = defineProps<{
   isOpen: boolean
 }>()
 
 const emit = defineEmits(['close', 'move-location'])
+
+const { moveToLocation } = useMapNavigation()
+const statsStore = useMarketStatsStore()
 
 const query = ref('')
 const isProcessing = ref(false)
@@ -93,11 +98,15 @@ const handleMove = (item: any) => {
   const lng = Number(item.lng ?? item.longitude)
   
   if (Number.isFinite(lat) && Number.isFinite(lng)) {
-    emit('move-location', {
-      lat: lat,
-      lng: lng,
-      aptSeq: item.aptSeq
-    })
+    // 1. 지도 이동 및 줌 레벨 조정
+    moveToLocation(lat, lng, 3, item.aptSeq)
+    
+    // 2. 아파트 상세 정보 조회 및 사이드바 오픈
+    if (item.aptSeq) {
+      statsStore.selectApartment(item.aptSeq, 'all')
+    }
+    
+    // 3. 모달 닫기
     emit('close')
   }
 }
@@ -210,9 +219,9 @@ const downloadPDF = async (content: string, title: string = 'AI_부동산_리포
     const opt = {
       margin: 10,
       filename: `${title.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
+      image: { type: 'jpeg' as const, quality: 0.98 },
       html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
     }
 
     await html2pdf().from(element).set(opt).save()
@@ -385,7 +394,6 @@ onMounted(() => {
   background-color: var(--color-white);
   width: 95%;
   max-width: 1200px; /* 확장 */
-  height: 85vh;
   height: 80vh;
   border-radius: 1.5rem;
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
@@ -541,6 +549,7 @@ onMounted(() => {
   color: var(--color-gray-800);
   margin: 0 0 0.5rem 0;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   line-height: 1.4;
@@ -551,6 +560,7 @@ onMounted(() => {
   color: var(--color-gray-600);
   margin: 0 0 0.75rem 0;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
