@@ -2,6 +2,7 @@
 import { onMounted, computed, watch, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
 import { useMainDataStore } from '@/stores/mainData'
 import { useMarketStatsStore } from '@/stores/marketStats'
 import type { Property } from '@/api/types'
@@ -11,12 +12,14 @@ import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
-import { RotateCcw, Sparkles, Wand2, LayoutDashboard } from 'lucide-vue-next'
+import { RotateCcw, Sparkles, Wand2, LayoutDashboard, Bot, SlidersHorizontal } from 'lucide-vue-next'
 import AISearchModal from '@/components/features/ai/AISearchModal.vue'
 import AIStatsModal from '@/components/features/ai/AIStatsModal.vue'
 import AIFloatingButton from '@/components/common/AIFloatingButton.vue'
 
+
 const router = useRouter()
+const authStore = useAuthStore()
 const store = useMainDataStore()
 const { filteredProperties, filters } = storeToRefs(store)
 const { selectProperty, setSearchQuery, setFilters } = store
@@ -41,6 +44,16 @@ const openNaturalFilter = () => {
 
 const openStatsSearch = () => {
   isStatsModalOpen.value = true
+}
+
+const handleAiAnalysisClick = () => {
+  if (!authStore.isAuthenticated) {
+    if (confirm('AI 부동산 분석은 로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')) {
+      router.push('/login')
+    }
+    return
+  }
+  openStatsSearch()
 }
 
 const handleAISearchResult = (result: any) => {
@@ -300,8 +313,8 @@ const handleResetAIResults = () => {
       </div>
       <div class="ai-fab-container">
         <AIFloatingButton 
-          label="의도 검색" 
-          title="AI 시맨틱 검색" 
+          label="AI 아파트 추천" 
+          title="AI 아파트 추천" 
           variant="semantic" 
           @click="openSemanticSearch"
         >
@@ -309,21 +322,21 @@ const handleResetAIResults = () => {
         </AIFloatingButton>
         
         <AIFloatingButton 
-          label="자연어 필터" 
-          title="자연어 필터" 
+          label="AI 필터링 설정" 
+          title="AI 자연어 필터링" 
           variant="filter" 
           @click="openNaturalFilter"
         >
-          <template #icon><Wand2 /></template>
+          <template #icon><SlidersHorizontal /></template>
         </AIFloatingButton>
 
         <AIFloatingButton 
-          label="통계 분석" 
-          title="AI 통계 분석 챗봇" 
+          label="AI 부동산 분석" 
+          title="AI 부동산 분석" 
           variant="stats" 
-          @click="openStatsSearch"
+          @click="handleAiAnalysisClick"
         >
-          <template #icon><LayoutDashboard /></template>
+          <template #icon><Bot /></template>
         </AIFloatingButton>
       </div>
 
@@ -419,7 +432,7 @@ const handleResetAIResults = () => {
 /* AI FAB Styles */
 .ai-fab-container {
   position: absolute;
-  bottom: 2rem;
+  top: 1.5rem;
   right: 2rem;
   display: flex;
   flex-direction: column;

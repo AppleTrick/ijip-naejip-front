@@ -4,6 +4,7 @@ import { formatPrice } from '@/utils/formatters'
 
 const props = defineProps<{
   price: string | number
+  pricePerPyung?: number
   name?: string
   pyung?: string
   aptDong?: string
@@ -24,6 +25,11 @@ const isVisible = computed(() => {
 const formattedPrice = computed(() => {
   if (!isVisible.value) return ''
   return formatPrice(props.price)
+})
+
+const formattedPricePerPyung = computed(() => {
+  if (!props.pricePerPyung) return ''
+  return `평당 ${formatPrice(props.pricePerPyung)}`
 })
 
 const displayAptDong = computed(() => {
@@ -66,6 +72,7 @@ onMounted(() => {
         <span v-if="displayPyung">{{ displayPyung }}</span>
       </div>
       <span v-if="formattedPrice" class="price-text">{{ formattedPrice }}</span>
+      <span v-if="formattedPricePerPyung" class="sub-price-text">{{ formattedPricePerPyung }}</span>
     </div>
   </div>
 </template>
@@ -140,6 +147,15 @@ onMounted(() => {
   margin-top: 0.125rem;
 }
 
+.sub-price-text {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  font-family: 'Pretendard', sans-serif;
+  margin-top: -0.1rem;
+  opacity: 0.9;
+}
+
 /* Interaction States */
 .marker-overlay:hover {
   transform: translateY(-8px) scale(1.08);
@@ -165,6 +181,11 @@ onMounted(() => {
   color: var(--color-white);
 }
 
+.marker-overlay:hover .sub-price-text {
+  color: var(--color-white);
+  opacity: 1;
+}
+
 /* Selected State */
 .marker-overlay.selected .marker-body {
   background: var(--color-primary);
@@ -182,6 +203,10 @@ onMounted(() => {
 }
 
 .marker-overlay.selected .price-text {
+  color: var(--color-white);
+}
+
+.marker-overlay.selected .sub-price-text {
   color: var(--color-white);
 }
 </style>
