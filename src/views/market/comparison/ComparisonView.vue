@@ -12,6 +12,7 @@ import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
 import AptRoadview from '@/components/features/apt/AptRoadview.vue'
 import { useMapNavigation } from '@/composables/useMapNavigation'
 import { marked } from 'marked'
+import RadarChart from '@/components/features/ai/RadarChart.vue'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -206,6 +207,7 @@ const totalComparisonCount = computed(() => {
 })
 
 const aiSummary = ref<string | null>(null)
+const aiScores = ref<any[]>([])
 const isGeneratingSummary = ref(false)
 
 // 마크다운 렌더링을 위한 computed
@@ -220,12 +222,26 @@ const getAISummary = async () => {
   if (dataToCompare.length === 0 && !myHouse.value) return
   
   isGeneratingSummary.value = true
+  aiSummary.value = null
+  aiScores.value = []
+  
   try {
     const response = await http.post('/api/v1/ai/comparison-summary', {
       myHouse: myHouse.value,
       comparisonList: dataToCompare
     })
-    aiSummary.value = response.data.data
+    
+    const rawData = response.data.data
+    try {
+      // JSON 파싱 시도 (백엔드가 JSON 문자열로 감싸서 보낼 수 있으므로)
+      const parsed = JSON.parse(rawData.replace(/```json|```/g, '').trim())
+      aiSummary.value = parsed.summary
+      aiScores.value = parsed.scores
+    } catch (e) {
+      // JSON 파싱 실패 시 전체를 텍스트로 처리 (폴백)
+      aiSummary.value = rawData
+      aiScores.value = []
+    }
   } catch (error) {
     console.error('AI Summary Error:', error)
   } finally {
@@ -285,8 +301,16 @@ const getAISummary = async () => {
               </BaseButton>
             </div>
             
-            <div v-if="aiSummary" class="summary-content">
-              <div class="summary-text markdown-body" v-html="renderedAiSummary"></div>
+            <div v-if="aiSummary" class="summary-container">
+              <div class="summary-content">
+                <div class="summary-text markdown-body" v-html="renderedAiSummary"></div>
+              </div>
+              <div v-if="aiScores.length > 0" class="summary-visual">
+                <div class="visual-card">
+                  <h4>📊 부문별 능력치 비교</h4>
+                  <RadarChart :data="aiScores" />
+                </div>
+              </div>
             </div>
             <div v-else-if="!isGeneratingSummary" class="summary-placeholder">
               <p>선택하신 아파트들의 특징을 AI가 분석하여 최적의 선택을 도와드립니다.</p>
@@ -1083,6 +1107,45 @@ const getAISummary = async () => {
   padding: 1.25rem;
   border-radius: 0.75rem;
   border: 1px solid var(--color-primary-transparent-10);
+}
+
+.summary-container {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.summary-content {
+  flex: 1;
+}
+
+.summary-visual {
+  flex: 0 0 320px;
+}
+
+.visual-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid var(--color-gray-100);
+}
+
+.visual-card h4 {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--color-gray-700);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+@media (max-width: 1024px) {
+  .summary-container {
+    flex-direction: column;
+  }
+  .summary-visual {
+    flex: 1;
+    width: 100%;
+  }
 }
 
 .summary-text {
