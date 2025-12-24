@@ -212,3 +212,14 @@ export interface ApartmentDetailResponse {
   recentTransactions: RecentTransactionDto[]
   priceTrend: PriceTrendDto
 }
+
+export interface AIReportResponse {
+  id: number
+  userId?: number
+  title: string
+  query: string
+  markdownContent: string
+  resultCount?: number
+  createdAt: string
+  updatedAt?: string
+}
