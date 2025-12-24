@@ -23,7 +23,7 @@ const navigateToMap = () => {
       </div>
       <div class="badge">
         <CheckCircle :size="16" />
-        <span>전세사기 ZERO 프로젝트</span>
+        <span>실거래가를 알려드려요</span>
       </div>
       <h1 class="hero-title">
         나에게 딱 맞는 동네를 <br>

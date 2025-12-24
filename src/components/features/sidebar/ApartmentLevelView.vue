@@ -25,7 +25,6 @@ const { selectedProperty } = storeToRefs(store)
 const { selectedPyung } = storeToRefs(statsStore)
 const { isAuthenticated } = storeToRefs(authStore)
 const { addToComparison, removeFromComparison, isInComparison } = store
-const { goBack } = statsStore
 
 // 관심 아파트 클릭 핸들러 (로그인 확인 + API 호출)
 const handleFavoriteClick = async () => {
@@ -394,7 +393,7 @@ const formatDate = (dateNum: number) => {
       </div>
 
       <!-- Safety Check CTA -->
-      <div class="safety-cta">
+      <!-- <div class="safety-cta">
         <h3 class="cta-title">
           <ShieldCheck class="cta-icon" />
           이 매물, 안전할까요?
@@ -405,7 +404,7 @@ const formatDate = (dateNum: number) => {
         <BaseButton @click="goToAnalysis" full-width class="cta-btn">
           안전도 분석 시작하기
         </BaseButton>
-      </div>
+      </div> -->
     </div>
 
     <!-- AI 채팅 모달 -->

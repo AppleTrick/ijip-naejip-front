@@ -37,7 +37,7 @@ const handleLogout = () => {
           <div class="logo-icon-wrapper">
             <Home class="logo-icon" />
           </div>
-          <span class="logo-text">SafeHome</span>
+          <span class="logo-text">이집내집</span>
         </div>
         
         <!-- Desktop Menu -->
