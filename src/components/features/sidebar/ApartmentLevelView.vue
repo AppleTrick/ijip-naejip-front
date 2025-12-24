@@ -56,7 +56,12 @@ const handleFavoriteClick = async () => {
         latitude: Number(apt.latitude),
         longitude: Number(apt.longitude)
       })
-      addToComparison(apt)
+      
+      // 스토어에는 선택된 평수 정보를 담아서 추가
+      addToComparison({
+        ...apt,
+        excluUseAr: pyung ? `${pyung}평` : apt.excluUseAr
+      })
     }
   } catch (error: any) {
     alert(error.message || '관심 등록 중 오류가 발생했습니다.')

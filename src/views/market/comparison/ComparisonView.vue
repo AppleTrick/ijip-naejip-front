@@ -33,8 +33,13 @@ const loadFavorites = async () => {
     if (favorites && favorites.length > 0) {
       // 이미 스토어에 데이터가 있으면 중복 추가 방지
       favorites.forEach(fav => {
-        if (!store.isInComparison(fav.aptSeq)) {
-          // 필요한 필드 매핑 (Store의 Property 인터페이스에 맞춤)
+        const isInStore = store.isInComparison(fav.aptSeq)
+        const currentProp = store.comparisonList.find(p => p.aptSeq === fav.aptSeq)
+        
+        // 스토어에 데이터가 없거나, 데이터는 있지만 면적이 목록 형태(쉼표 포함)인 경우 업데이트
+        const needsUpdate = !isInStore || (currentProp && currentProp.excluUseAr.includes(','))
+        
+        if (needsUpdate) {
           store.addToComparison({
             aptSeq: fav.aptSeq,
             aptNm: fav.aptName,
@@ -44,8 +49,8 @@ const loadFavorites = async () => {
             latitude: Number(fav.latitude) || 0,
             longitude: Number(fav.longitude) || 0,
             description: '',
-            buildYear: 0, // 기본값
-            floor: ''      // 기본값
+            buildYear: fav.buildYear || 0,
+            floor: ''
           })
         }
       })
@@ -808,7 +813,7 @@ const getAISummary = async () => {
 
 @media (min-width: 640px) {
   .stats-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
