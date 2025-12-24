@@ -11,6 +11,7 @@ import KakaoMap from '@/components/features/map/KakaoMap.vue'
 import MarketFilter from './components/MarketFilter.vue'
 import MarketSidebar from './components/MarketSidebar.vue'
 import { useMarket } from '@/composables/useMarket'
+import { useMapNavigation } from '@/composables/useMapNavigation'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
 import { RotateCcw, Wand2, LayoutDashboard, Bot, SlidersHorizontal } from 'lucide-vue-next'
@@ -25,6 +26,7 @@ const store = useMainDataStore()
 const { filteredProperties, filters } = storeToRefs(store)
 const { selectProperty, setSearchQuery, setFilters } = store
 const { fetchProperties } = useMarket()
+const { moveToLocation } = useMapNavigation()
 const statsStore = useMarketStatsStore()
 const { currentRegion } = storeToRefs(statsStore)
 
@@ -68,6 +70,7 @@ const handleAISearchResult = (result: any) => {
 const handleMoveLocation = (location: { lat: number, lng: number, aptSeq?: string }) => {
   if (location.lat && location.lng) {
     // 지도 중심 이동 및 줌 레벨 조정
+    isMovingProgrammatically.value = true
     mapCenter.value = { lat: location.lat, lng: location.lng }
     mapLevel.value = 3 
     
@@ -77,13 +80,16 @@ const handleMoveLocation = (location: { lat: number, lng: number, aptSeq?: strin
 }
 
 // 지도의 현재 상태 관리 (URL 쿼리 파라미터 우선 적용)
-const currentQuery = router.currentRoute.value.query
-const initialLat = currentQuery.lat ? Number(currentQuery.lat) : DEFAULT_MAP_CENTER.lat
-const initialLng = currentQuery.lng ? Number(currentQuery.lng) : DEFAULT_MAP_CENTER.lng
-const initialLevel = currentQuery.level ? Number(currentQuery.level) : 9
+const currentQuery = computed(() => router.currentRoute.value.query)
+const initialLat = Number(currentQuery.value.lat) || DEFAULT_MAP_CENTER.lat
+const initialLng = Number(currentQuery.value.lng) || DEFAULT_MAP_CENTER.lng
+const initialLevel = Number(currentQuery.value.level) || 9
 
 const mapCenter = ref<{ lat: number, lng: number }>({ lat: initialLat, lng: initialLng })
 const mapLevel = ref<number>(initialLevel)
+
+// 프로그래밍적 이동 중임을 나타내는 플래그 (지도 드래그 이벤트에 의한 스냅백 방지)
+const isMovingProgrammatically = ref(false)
 
 // 1. 선택된 아파트나 지역이 변경될 때 지도를 이동시킴
 watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, oldRegion]) => {
@@ -96,7 +102,10 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
     const lat = Number(prop.latitude)
     const lng = Number(prop.longitude)
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      isMovingProgrammatically.value = true
       mapCenter.value = { lat, lng }
+      // 다음 틱에서 혹은 이동 완료 후 플래그 해제 (여기선 간단히 타임아웃 처리 가능하지만 
+      // handleBoundsUpdate에서 차차 해제됨)
     }
     return
   }
@@ -106,6 +115,7 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
     const lat = Number(region.lat)
     const lng = Number(region.lng)
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      isMovingProgrammatically.value = true
       mapCenter.value = { lat, lng }
       
       // 지역 레벨에 따른 줌 레벨 설정
@@ -120,14 +130,35 @@ watch([() => store.selectedProperty, currentRegion], ([prop, region], [oldProp, 
   }
 }, { immediate: false }) // 초기값에 의한 스냅백 방지를 위해 immediate: false로 설정
 
+// 2. URL 쿼리 파라미터 변경 감지 (검색 결과 등으로 이동 시)
+watch(() => router.currentRoute.value.query, (newQuery) => {
+  if (newQuery.lat && newQuery.lng) {
+    const nextLat = Number(newQuery.lat)
+    const nextLng = Number(newQuery.lng)
+    
+    // 현재 값과 다를 때만 업데이트하여 무한 루프 방지
+    if (Math.abs(mapCenter.value.lat - nextLat) > 0.00001 || 
+        Math.abs(mapCenter.value.lng - nextLng) > 0.00001) {
+      isMovingProgrammatically.value = true
+      mapCenter.value = { lat: nextLat, lng: nextLng }
+    }
+  }
+  if (newQuery.level) {
+    const nextLevel = Number(newQuery.level)
+    if (mapLevel.value !== nextLevel) {
+      mapLevel.value = nextLevel
+    }
+  }
+}, { deep: true })
+
 // 검색 시에는 mapCenter와 mapLevel을 직접 업데이트합니다.
 
 onMounted(async () => {
   // 초기 로딩 시 AI 결과 모드 해제 상태임을 보장
   isShowingAIResults.value = false
   
-  if (currentQuery.lat && currentQuery.lng) {
-    console.log(`MarketView 마운트: ${currentQuery.lat}, ${currentQuery.lng} 위치로 초기화 시도 (레벨: ${initialLevel})`)
+  if (currentQuery.value.lat && currentQuery.value.lng) {
+    console.log(`MarketView 마운트: ${currentQuery.value.lat}, ${currentQuery.value.lng} 위치로 초기화 시도 (레벨: ${initialLevel})`)
   }
 })
 
@@ -150,36 +181,34 @@ const handleSearch = (query: string) => {
     if (status === window.kakao.maps.services.Status.OK) {
       // 검색 결과 중 가장 첫 번째 장소의 정보를 기반으로 이동
       const firstResult = data[0]
-      const newPos = {
-        lat: Number(firstResult.y),
-        lng: Number(firstResult.x)
-      }
+      const lat = Number(firstResult.y)
+      const lng = Number(firstResult.x)
       
       // 장소 성격(카테고리)에 따른 스마트 줌 레벨 결정 (marketApi Scope 기준)
-      let targetLevel = 5 
+      let targetLevel = 3 // 기본 요구사항인 레벨 3으로 설정 (동/역세권 수준)
       const category = firstResult.category_name || ''
       const name = firstResult.place_name || ''
       
       if (category.includes('아파트') || name.includes('아파트')) {
-        targetLevel = 2 // APT 레벨
+        targetLevel = 3 // 요청대로 3으로 설정 (기존 2였으나 사용자 요구사항 준수)
       } else if (category.includes('지하철')) {
-        targetLevel = 3 // DONG/역세권 레벨
+        targetLevel = 3
       } else if (category.includes('동') || category.includes('읍') || category.includes('면')) {
-        targetLevel = 5 // DONG 레벨
+        targetLevel = 5 
       } else if (category.includes('구') || category.includes('군')) {
-        targetLevel = 7 // GUGUN 레벨
+        targetLevel = 7
       } else if (category.includes('시') || category.includes('도')) {
-        targetLevel = 10 // SIDO 레벨 (제주도, 서울시 등)
-      } else {
-        targetLevel = 5 // 기본값
+        targetLevel = 10
       }
       
-      // mapCenter와 mapLevel을 업데이트하여 지도를 이동시킵니다.
-      mapCenter.value = newPos
+      // 줌 레벨과 위치 업데이트 (URL 반영 전 즉시 이동하여 사용자 경험 개선)
+      isMovingProgrammatically.value = true
+      mapCenter.value = { lat, lng }
       mapLevel.value = targetLevel
-      
-      // 검색 시 선택된 특정 매물 정보는 해제합니다.
-      selectProperty(null)
+
+      // useMapNavigation을 사용하여 이동 (URL 반영 및 스토어 상태 정리)
+      moveToLocation(lat, lng, targetLevel)
+    } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
       uiStore.showAlert('검색 결과가 없습니다.', '검색 알림', 'info')
     } else {
       uiStore.showAlert('검색 중 오류가 발생했습니다.', '검색 오류', 'error')
@@ -235,18 +264,6 @@ const handleMarkerSelect = (property: Property) => {
     const pyung = property.primaryPyung ? String(property.primaryPyung) : 'all'
     statsStore.selectApartment(property.aptSeq, pyung)
   } 
-  // else {
-  //   const id = property.aptSeq
-  //   if (id.startsWith('city-')) {
-  //     statsStore.selectDistrict({ id: id, name: property.aptNm, avgPrice })
-  //   } else if (id.startsWith('gu-')) {
-  //     statsStore.selectNeighborhood({ id: id, name: property.aptNm, avgPrice })
-  //   } else if (id.startsWith('dong-')) {
-  //     statsStore.selectDong({ id: id, name: property.aptNm, avgPrice })
-  //   } else {
-  //     statsStore.selectApartment(property.aptSeq, 'all')
-  //   }
-  // }
 }
 
 // 지도 영역 변경 시 호출: 변경된 영역(bounds)에 해당하는 매물 데이터를 다시 가져옴
@@ -260,11 +277,19 @@ const handleBoundsUpdate = async (bounds: { minLat: number, maxLat: number, minL
   
   const latDiff = Math.abs(mapCenter.value.lat - bounds.centerLat)
   const lngDiff = Math.abs(mapCenter.value.lng - bounds.centerLng)
-  if (latDiff > 0.00001 || lngDiff > 0.00001) {
+  
+  // 프로그래밍적 이동 중일 때는 지도의 보고를 무시하여 스냅백을 방지합니다.
+  if (isMovingProgrammatically.value) {
+    // 이동하려던 목표 지점에 도달했거나 충분히 근접했다면 플래그 해제
+    if (latDiff < 0.0001 && lngDiff < 0.0001) {
+      isMovingProgrammatically.value = false
+    }
+    console.log('Programmatic move in progress - skipping center sync')
+  } else if (latDiff > 0.00001 || lngDiff > 0.00001) {
+    // 사용자의 드래그 등에 의한 이동인 경우에만 상태 동기화
     mapCenter.value = { lat: bounds.centerLat, lng: bounds.centerLng }
   }
   
-  console.log('Bounds Update:', bounds.level, bounds.centerLat)
   if (isShowingAIResults.value) {
     console.log('AI 추천 결과 유지 중 - 자동 새로고침 스킵')
     return
