@@ -1,4 +1,4 @@
-<script setup lang="ts">
+ㅁ<script setup lang="ts">
 import { ref, watch, nextTick } from 'vue'
 import { Map as MapIcon, Image as ImageIcon } from 'lucide-vue-next'
 import { searchApartmentImage } from '@/api/imageApi'

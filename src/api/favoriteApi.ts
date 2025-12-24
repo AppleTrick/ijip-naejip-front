@@ -9,6 +9,7 @@ export interface FavoriteApartment {
   dealAmount: string
   latitude?: number
   longitude?: number
+  buildYear?: number
   createdAt: string
 }
 

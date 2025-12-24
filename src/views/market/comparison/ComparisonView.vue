@@ -93,20 +93,41 @@ const goBack = () => {
 
 const parsePrice = (priceStr: string | undefined): number => {
   if (!priceStr) return 0
-  // 숫자만 있는 경우 (예: "34300" = 만원 단위)
   const numOnly = priceStr.replace(/[^\d]/g, '')
   if (numOnly && !priceStr.includes('억')) {
     return parseInt(numOnly)
   }
-  // 억/만원 형식인 경우
   let total = 0
   const ukMatch = priceStr.match(/(\d+)억/)
   const manMatch = priceStr.match(/(\d+)만원/)
-  
   if (ukMatch) total += parseInt(ukMatch[1]) * 10000
   if (manMatch) total += parseInt(manMatch[1])
   return total
 }
+
+const parseArea = (areaStr: string | number | undefined): number => {
+  if (!areaStr) return 0
+  if (typeof areaStr === 'number') return areaStr
+  const match = areaStr.match(/(\d+\.?\d*)/)
+  return match ? parseFloat(match[1]) : 0
+}
+
+// 평당가 계산 (만원 단위)
+const calculatePricePerPyeong = (priceStr: string | undefined, areaStr: string | number | undefined): string => {
+  const price = parsePrice(priceStr)
+  const area = parseArea(areaStr)
+  if (price <= 0 || area <= 0) return '0'
+  return Math.floor(price / area).toLocaleString()
+}
+
+// 건축 연차 계산
+const calculateBuildingAge = (buildYear: number | undefined): string => {
+  if (!buildYear) return ''
+  const currentYear = new Date().getFullYear()
+  const age = currentYear - buildYear
+  return age <= 0 ? '신축' : `${age}년차`
+}
+
 
 // 가격을 X.X억 형식으로 포맷
 const formatPriceDisplay = (priceStr: string | undefined): string => {
@@ -145,12 +166,7 @@ const formatPriceDiff = (targetPrice: string, basePrice: string): string => {
   return `${diff > 0 ? '+' : '-'}${result}`
 }
 
-const parseArea = (areaStr: string | undefined): number => {
-  if (!areaStr) return 0
-  return parseInt(areaStr.replace('평', ''))
-}
-
-const formatAreaDiff = (targetArea: string, baseArea: string): string => {
+const formatAreaDiff = (targetArea: string | number | undefined, baseArea: string | number | undefined): string => {
   const diff = parseArea(targetArea) - parseArea(baseArea)
   if (diff === 0) return '동일'
   return `${diff > 0 ? '+' : ''}${diff}평`
@@ -308,19 +324,19 @@ const getAISummary = async () => {
                   <div class="stats-grid">
                     <div class="stat-item">
                       <p class="stat-label">매매가</p>
-                      <p class="stat-value">{{ myHouse.dealAmount }}</p>
+                      <p class="stat-value text-primary">{{ myHouse.dealAmount }}</p>
                     </div>
                     <div class="stat-item">
                       <p class="stat-label">면적</p>
                       <p class="stat-value">{{ myHouse.excluUseAr }}</p>
                     </div>
                     <div class="stat-item">
-                      <p class="stat-label">층수</p>
-                      <p class="stat-value">{{ myHouse.floor }}</p>
+                      <p class="stat-label">평당가</p>
+                      <p class="stat-value">{{ calculatePricePerPyeong(myHouse.dealAmount, myHouse.excluUseAr) }}만</p>
                     </div>
                     <div class="stat-item" v-if="myHouse.buildYear">
                       <p class="stat-label">건축년도</p>
-                      <p class="stat-value">{{ myHouse.buildYear }}년</p>
+                      <p class="stat-value">{{ myHouse.buildYear }}년 <span class="age-text">({{ calculateBuildingAge(myHouse.buildYear) }})</span></p>
                     </div>
                   </div>
                 </div>
@@ -355,39 +371,38 @@ const getAISummary = async () => {
                       </div>
                     </div>
 
-                    <div class="stats-grid mb-4">
+                    <div class="stats-grid">
                       <!-- Price Comparison -->
-                      <div class="stat-item highlight-bg">
+                      <div class="stat-item premium-bg">
                         <p class="stat-label">매매가</p>
-                        <p class="stat-value">{{ formatPriceDisplay(property.dealAmount) }}</p>
-                        <div v-if="myHouse" class="diff-text" 
-                             :class="parsePrice(property.dealAmount) > parsePrice(myHouse.dealAmount) ? 'text-red' : parsePrice(property.dealAmount) < parsePrice(myHouse.dealAmount) ? 'text-blue' : 'text-gray'">
+                        <p class="stat-value text-primary">{{ formatPriceDisplay(property.dealAmount) }}</p>
+                        <div v-if="myHouse" class="comparison-badge" 
+                             :class="parsePrice(property.dealAmount) > parsePrice(myHouse.dealAmount) ? 'badge-red' : parsePrice(property.dealAmount) < parsePrice(myHouse.dealAmount) ? 'badge-blue' : 'badge-gray'">
                           {{ formatPriceDiff(property.dealAmount, myHouse.dealAmount) }}
                         </div>
                       </div>
 
                       <!-- Area Comparison -->
-                      <div class="stat-item highlight-bg">
+                      <div class="stat-item premium-bg">
                         <p class="stat-label">면적</p>
                         <p class="stat-value">{{ property.excluUseAr || '-' }}</p>
-                        <div v-if="myHouse" class="diff-text"
-                             :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'text-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'text-red' : 'text-gray'">
+                        <div v-if="myHouse" class="comparison-badge"
+                             :class="parseArea(property.excluUseAr) > parseArea(myHouse.excluUseAr) ? 'badge-blue' : parseArea(property.excluUseAr) < parseArea(myHouse.excluUseAr) ? 'badge-red' : 'badge-gray'">
                           {{ formatAreaDiff(property.excluUseAr, myHouse.excluUseAr) }}
                         </div>
                       </div>
 
-                      <div class="stat-item highlight-bg">
-                        <p class="stat-label">층수</p>
-                        <p class="stat-value">{{ property.floor }}</p>
+                      <!-- Pyeong Price -->
+                      <div class="stat-item premium-bg">
+                        <p class="stat-label">평당가</p>
+                        <p class="stat-value">{{ calculatePricePerPyeong(property.dealAmount, property.excluUseAr) }}만</p>
                       </div>
 
-                      <div class="stat-item highlight-bg" v-if="property.buildYear">
+                      <!-- Building Age -->
+                      <div class="stat-item premium-bg" v-if="property.buildYear">
                         <p class="stat-label">건축년도</p>
                         <p class="stat-value">{{ property.buildYear }}년</p>
-                        <div v-if="myHouse && myHouse.buildYear" class="diff-text"
-                             :class="property.buildYear > myHouse.buildYear ? 'text-blue' : property.buildYear < myHouse.buildYear ? 'text-red' : 'text-gray'">
-                          {{ property.buildYear - myHouse.buildYear === 0 ? '동일' : (property.buildYear - myHouse.buildYear > 0 ? '+' : '') + (property.buildYear - myHouse.buildYear) + '년' }}
-                        </div>
+                        <div class="age-badge">{{ calculateBuildingAge(property.buildYear) }}</div>
                       </div>
                     </div>
 
@@ -758,17 +773,17 @@ const getAISummary = async () => {
 }
 
 .card-details {
-  padding: 1.25rem;
+  padding: 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 1.25rem;
 }
 
 .details-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 1rem;
 }
 
 .property-name {
@@ -812,27 +827,109 @@ const getAISummary = async () => {
 .stat-label {
   font-size: 0.75rem;
   color: var(--color-gray-500);
+  margin-bottom: 0.25rem;
 }
 
 .stat-value {
   font-weight: 700;
   color: var(--color-text);
+  font-size: 0.9375rem;
 }
 
-.diff-text {
+.text-primary {
+  color: var(--color-primary);
+}
+
+/* Premium Styles */
+.premium-bg {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.property-card:hover .premium-bg {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.comparison-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.125rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  margin-top: 0.375rem;
+}
+
+.badge-red {
+  background-color: #fef2f2;
+  color: #ef4444;
+  border: 1px solid #fee2e2;
+}
+
+.badge-blue {
+  background-color: #eff6ff;
+  color: #3b82f6;
+  border: 1px solid #dbeafe;
+}
+
+.badge-gray {
+  background-color: #f9fafb;
+  color: #6b7280;
+  border: 1px solid #f3f4f6;
+}
+
+.age-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-soft);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
   margin-top: 0.25rem;
-  font-size: 0.75rem;
-  font-weight: 700;
 }
 
-.text-red { color: #ef4444; }
-.text-blue { color: #3b82f6; }
-.text-gray { color: var(--color-gray-400); }
+.age-text {
+  font-size: 0.75rem;
+  color: var(--color-gray-400);
+  font-weight: normal;
+}
+
+.property-card {
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+}
+
+.property-card:hover {
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
 
 .card-footer {
   margin-top: auto;
   display: flex;
   justify-content: flex-end;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.card-footer :deep(.base-button) {
+  white-space: nowrap;
+  min-width: 7rem;
+  height: 2.75rem;
+  justify-content: center;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-footer :deep(.base-button:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
 }
 
 .remove-btn {
@@ -1004,6 +1101,9 @@ const getAISummary = async () => {
 
 .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
 .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+.ml-2 { margin-left: 0.5rem; }
+.gap-2 { gap: 0.5rem; }
 
 @keyframes dots {
   0%, 100% { transform: translateY(0); opacity: 0.2; }
