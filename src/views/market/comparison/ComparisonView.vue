@@ -10,6 +10,7 @@ import { Trash2, AlertCircle, Loader2 } from 'lucide-vue-next'
 import http from '@/api/http'
 import { getFavorites, removeFavoriteByAptSeq } from '@/api/favoriteApi'
 import AptRoadview from '@/components/features/apt/AptRoadview.vue'
+import { useMapNavigation } from '@/composables/useMapNavigation'
 
 const router = useRouter()
 const store = useMainDataStore()
@@ -17,6 +18,7 @@ const authStore = useAuthStore()
 const { myHouse, comparisonList } = storeToRefs(store)
 const { isAuthenticated } = storeToRefs(authStore)
 const { removeFromComparison } = store
+const { moveToMap } = useMapNavigation()
 
 // DB 기반 관심 아파트 목록
 const favoritesFromDB = ref<any[]>([])
@@ -408,7 +410,7 @@ const getAISummary = async () => {
 
                     
                     <div class="card-footer">
-                      <BaseButton variant="outline" size="sm" @click="router.push('/map')">
+                      <BaseButton variant="outline" size="sm" @click="moveToMap(property)">
                         지도에서 보기
                       </BaseButton>
                       <BaseButton variant="primary" size="sm" @click="router.push(`/price/${property.aptSeq}`)">

@@ -169,8 +169,10 @@ const loadKakaoMap = (apiKey: string, onLoad: () => void) => {
 // --- 라이프사이클 및 감시 ---
 onMounted(() => {
   loadKakaoMap(import.meta.env.VITE_KAKAO_API_KEY, () => {
+    const targetCenter = props.center || DEFAULT_MAP_CENTER
+    console.log('KakaoMap 초기화 좌표:', targetCenter.lat, targetCenter.lng)
     initializeMap({
-      center: props.center || DEFAULT_MAP_CENTER,
+      center: targetCenter,
       level: props.level || 5
     })
     if (props.markers?.length) renderMarkers(props.markers)
