@@ -48,7 +48,7 @@ const handleAiAnalysisClick = async () => {
   if (!authStore.isAuthenticated) {
     const confirmed = await uiStore.showConfirm({
       title: '로그인 필요',
-      message: 'AI 부동산 분석은 로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?'
+      message: 'AI 부동산 분석 리포트 기능은 로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?'
     })
     if (confirmed) {
       router.push('/login')
@@ -355,8 +355,8 @@ const handleResetAIResults = () => {
         </AIFloatingButton>
 
         <AIFloatingButton 
-          label="AI 부동산 분석" 
-          title="AI 부동산 분석" 
+          label="AI 분석 리포트 생성" 
+          title="AI 분석 리포트 생성" 
           variant="stats" 
           @click="handleAiAnalysisClick"
         >

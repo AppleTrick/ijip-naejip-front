@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref, nextTick, onMounted } from 'vue'
-import { X, Loader2, MapPin, ArrowRight, LayoutDashboard, Send, FileText, Trash2, Clock } from 'lucide-vue-next'
+import { X, Loader2, MapPin, ArrowRight, LayoutDashboard, Send, FileText, Trash2, Clock, Download } from 'lucide-vue-next'
 import { marked } from 'marked'
+import html2pdf from 'html2pdf.js'
 import http from '@/api/http'
 import * as reportApi from '@/api/aiReportApi'
 import type { AIReportResponse } from '@/api/types'
@@ -25,7 +26,7 @@ interface Message {
 const messages = ref<Message[]>([
   {
     role: 'assistant',
-    content: '## 🏠 AI 부동산 통계 분석\n안녕하세요! 궁금하신 지역의 부동산 통계나 시장 동향에 대해 물어보세요.\n\n**예시 질문:**\n- 강남구와 서초구의 최근 거래가 비교해줘\n- 성수동의 10억 이하 아파트 추천해줘\n- 최근 서울 전체적인 거래 추세가 어때?'
+    content: '## 🏠 AI 부동산 리포트 생성\n안녕하세요! 궁금하신 지역의 부동산 통계나 시장 동향에 대해 물어보세요.\n\n**예시 질문:**\n- 강남구와 서초구의 최근 거래가 비교해줘\n- 성수동의 10억 이하 아파트 추천해줘\n- 최근 서울 전체적인 거래 추세가 어때?'
   }
 ])
 
@@ -169,6 +170,60 @@ const removeReport = async (id: number) => {
   }
 }
 
+const isDownloading = ref(false)
+
+const downloadPDF = async (content: string, title: string = 'AI_부동산_리포트') => {
+  if (isDownloading.value) return
+  isDownloading.value = true
+  
+  try {
+    const element = document.createElement('div')
+    element.className = 'pdf-export-container markdown-content'
+    element.innerHTML = `
+      <div style="padding: 40px;">
+        <h1 style="color: #111827; margin-bottom: 24px; border-bottom: 2px solid #6366f1; padding-bottom: 12px;">${title}</h1>
+        ${renderMarkdown(content)}
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #e5e7eb; font-size: 12px; color: #6b7280; text-align: center;">
+          본 리포트는 AI 분석을 통해 생성되었으며, 실제 데이터와 차이가 있을 수 있습니다.
+          <br/>생성일자: ${new Date().toLocaleString('ko-KR')}
+        </div>
+      </div>
+    `
+    
+    // PDF 생성을 위한 임시 스타일 적용 (전달된 마크다운 스타일과 일치시키기 위해 스타일 태그 삽입)
+    const style = document.createElement('style')
+    style.innerHTML = `
+      .pdf-export-container { font-family: 'Pretendard', sans-serif; color: #374151; line-height: 1.6; }
+      .pdf-export-container h2 { font-size: 1.5rem; color: #111827; margin-top: 24px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px; }
+      .pdf-export-container h3 { font-size: 1.25rem; color: #111827; margin-top: 20px; margin-bottom: 12px; }
+      .pdf-export-container p { margin-bottom: 12px; }
+      .pdf-export-container ul, .pdf-export-container ol { margin-bottom: 16px; padding-left: 24px; }
+      .pdf-export-container li { margin-bottom: 6px; }
+      .pdf-export-container table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+      .pdf-export-container th, .pdf-export-container td { padding: 10px; border: 1px solid #e5e7eb; text-align: left; }
+      .pdf-export-container th { background-color: #f9fafb; font-weight: 600; }
+      .pdf-export-container strong { color: #4f46e5; font-weight: 700; }
+      .pdf-export-container blockquote { border-left: 4px solid #6366f1; background-color: #f8faff; padding: 12px; margin: 20px 0; font-style: italic; }
+    `
+    element.appendChild(style)
+
+    const opt = {
+      margin: 10,
+      filename: `${title.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    }
+
+    await html2pdf().from(element).set(opt).save()
+  } catch (error) {
+    console.error('PDF Download Error:', error)
+    alert('PDF 다운로드 중 오류가 발생했습니다.')
+  } finally {
+    isDownloading.value = false
+  }
+}
+
 const closeModal = () => {
   emit('close')
 }
@@ -186,7 +241,7 @@ onMounted(() => {
           <div class="icon-wrapper">
             <LayoutDashboard class="icon-stats" />
           </div>
-          <h2>AI 부동산 통계 리포트</h2>
+          <h2>AI 부동산 분석 리포트</h2>
         </div>
         <button class="close-btn" @click="closeModal">
           <X />
@@ -206,8 +261,15 @@ onMounted(() => {
                 <div 
                   v-if="msg.role === 'assistant'" 
                   class="markdown-content" 
-                  v-html="renderMarkdown(msg.content)"
-                ></div>
+                >
+                  <div class="bubble-header" v-if="index > 0">
+                    <button class="download-mini-btn" @click="downloadPDF(msg.content)" :disabled="isDownloading" title="PDF로 다운로드">
+                      <Download v-if="!isDownloading" />
+                      <Loader2 v-else class="spin-icon" />
+                    </button>
+                  </div>
+                  <div v-html="renderMarkdown(msg.content)"></div>
+                </div>
                 <div v-else class="user-content">
                   {{ msg.content }}
                 </div>
@@ -271,9 +333,15 @@ onMounted(() => {
                   <span>{{ formatDate(report.createdAt) }}</span>
                 </div>
               </div>
-              <button class="delete-btn" @click.stop="removeReport(report.id)" title="삭제">
-                <Trash2 class="trash-icon" />
-              </button>
+              <div class="report-actions">
+                <button class="action-btn download" @click.stop="downloadPDF(report.markdownContent, report.title)" :disabled="isDownloading" title="다운로드">
+                  <Download v-if="!isDownloading" class="action-icon" />
+                  <Loader2 v-else class="spin-icon action-icon" />
+                </button>
+                <button class="action-btn delete" @click.stop="removeReport(report.id)" title="삭제">
+                  <Trash2 class="action-icon" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -502,29 +570,71 @@ onMounted(() => {
   height: 0.875rem;
 }
 
-.delete-btn {
-  background: none;
-  border: none;
-  padding: 0.25rem;
-  color: var(--color-gray-400);
-  cursor: pointer;
-  border-radius: 0.375rem;
-  opacity: 0; /* hover 시 노출 */
+.report-actions {
+  display: flex;
+  gap: 0.25rem;
+  opacity: 0;
   transition: all 0.2s;
 }
 
-.report-item:hover .delete-btn {
+.report-item:hover .report-actions {
   opacity: 1;
 }
 
-.delete-btn:hover {
+.action-btn {
+  background: none;
+  border: none;
+  padding: 0.375rem;
+  cursor: pointer;
+  border-radius: 0.375rem;
+  color: var(--color-gray-400);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.action-btn.download:hover {
+  background-color: #e0e7ff;
+  color: #4f46e5;
+}
+
+.action-btn.delete:hover {
   background-color: #fee2e2;
   color: #ef4444;
 }
 
-.trash-icon {
+.action-icon {
   width: 1rem;
   height: 1rem;
+}
+
+.bubble-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.5rem;
+}
+
+.download-mini-btn {
+  background-color: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.25rem 0.5rem;
+  color: var(--color-gray-600);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.download-mini-btn svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.download-mini-btn:hover {
+  background-color: #e2e8f0;
+  color: #4f46e5;
+  border-color: #6366f1;
 }
 
 .loading-state, .empty-state {
