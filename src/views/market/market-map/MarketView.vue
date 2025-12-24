@@ -14,7 +14,7 @@ import { useMarket } from '@/composables/useMarket'
 import { useMapNavigation } from '@/composables/useMapNavigation'
 import { DEFAULT_MAP_CENTER } from '@/constants/map'
 import { parseKoreanPrice } from '@/utils/formatters'
-import { RotateCcw, Wand2, LayoutDashboard, Bot, SlidersHorizontal } from 'lucide-vue-next'
+import { RotateCcw, Bot, SlidersHorizontal } from 'lucide-vue-next'
 import AISearchModal from '@/components/features/ai/AISearchModal.vue'
 import AIStatsModal from '@/components/features/ai/AIStatsModal.vue'
 import AIFloatingButton from '@/components/common/AIFloatingButton.vue'
@@ -189,17 +189,25 @@ const handleSearch = (query: string) => {
       const category = firstResult.category_name || ''
       const name = firstResult.place_name || ''
       
+      // 장소 성격(카테고리)에 따른 스마트 줌 레벨 결정
+      // 지명/행정구역 검색 시에만 넓은 범위를 보여주고, 그 외 역이나 아파트 등은 상세 레벨(3)로 이동
+      const isAdministrative = category.includes('지명') || category.includes('행정구역')
+      
       if (category.includes('아파트') || name.includes('아파트')) {
-        targetLevel = 3 // 요청대로 3으로 설정 (기존 2였으나 사용자 요구사항 준수)
-      } else if (category.includes('지하철')) {
         targetLevel = 3
-      } else if (category.includes('동') || category.includes('읍') || category.includes('면')) {
+      } else if (category.includes('지하철') || category.includes('역') || name.endsWith('역')) {
+        targetLevel = 3
+      } else if (isAdministrative && (category.includes('동') || category.includes('읍') || category.includes('면'))) {
         targetLevel = 5 
-      } else if (category.includes('구') || category.includes('군')) {
+      } else if (isAdministrative && (category.includes('구') || category.includes('군'))) {
         targetLevel = 7
-      } else if (category.includes('시') || category.includes('도')) {
+      } else if (isAdministrative && (category.includes('시') || category.includes('도'))) {
         targetLevel = 10
+      } else {
+        targetLevel = 3 // 일반 장소는 레벨 3으로 이동
       }
+      
+      console.log(`검색결과: ${name}, 카테고리: ${category}, 결정된 레벨: ${targetLevel}`)
       
       // 줌 레벨과 위치 업데이트 (URL 반영 전 즉시 이동하여 사용자 경험 개선)
       isMovingProgrammatically.value = true
