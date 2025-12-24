@@ -7,7 +7,7 @@ import { useUiStore } from '@/stores/ui'
 
 const props = defineProps<{
   isOpen: boolean
-  mode: 'semantic' | 'filter'
+  mode: 'filter'
 }>()
 
 const emit = defineEmits(['close', 'search', 'move-location'])
@@ -21,7 +21,6 @@ const uiStore = useUiStore()
 const handleMove = (item: any) => {
   console.log('handleMove Item:', item)
   
-  // 백엔드 응답 형식에 따라 lat/lng 또는 latitude/longitude 모두 지원
   const lat = Number(item.lat ?? item.latitude)
   const lng = Number(item.lng ?? item.longitude)
   
@@ -38,14 +37,13 @@ const handleMove = (item: any) => {
   }
 }
 
-
 const handleSearch = async () => {
   if (!query.value.trim()) return
   
   isSearching.value = true
-  searchResult.value = null // 이전 결과 초기화 (깜빡임 방지)
+  searchResult.value = null 
   try {
-    const endpoint = props.mode === 'semantic' ? '/api/v1/ai/search' : '/api/v1/ai/parse-filter'
+    const endpoint = '/api/v1/ai/parse-filter'
     const response = await http.post(endpoint, { query: query.value })
     searchResult.value = response.data.data
     emit('search', response.data.data)
@@ -64,13 +62,12 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div v-if="isOpen" class="modal-overlay"> <!-- 오버레이 클릭 닫기 제거 -->
+  <div v-if="isOpen" class="modal-overlay">
     <div class="modal-content">
       <div class="modal-header">
         <div class="header-title">
-          <Sparkles v-if="mode === 'semantic'" class="icon-primary" />
-          <Wand2 v-else class="icon-secondary" />
-          <h2>{{ mode === 'semantic' ? 'AI 의도 검색' : 'AI 자연어 필터' }}</h2>
+          <Wand2 class="icon-secondary" />
+          <h2>AI 자연어 필터</h2>
         </div>
         <button class="close-btn" @click="closeModal">
           <X />
@@ -79,17 +76,13 @@ const closeModal = () => {
 
       <div class="modal-body">
         <p class="description">
-          {{ mode === 'semantic' 
-            ? '원하시는 거주 환경을 설명해 주세요. AI가 가장 적합한 매물을 찾아드립니다.' 
-            : '원하는 매물 조건을 자연스럽게 말씀해 주세요. (예: 10억 이하 30평대 아파트)' }}
+          원하는 매물 조건을 자연스럽게 말씀해 주세요. (예: 10억 이하 30평대 아파트)
         </p>
 
         <div class="search-input-wrapper">
           <textarea 
             v-model="query" 
-            :placeholder="mode === 'semantic' 
-              ? '예: 직장이 강남역 근처이고 조용한 2인 가구용 아파트를 찾고 있어.' 
-              : '예: 가격은 15억 이하, 방 3개 이상인 역세권 매물 보여줘.'"
+            placeholder="예: 가격은 15억 이하, 방 3개 이상인 역세권 매물 보여줘."
             rows="3"
             class="search-textarea"
             @keyup.enter.ctrl="handleSearch"

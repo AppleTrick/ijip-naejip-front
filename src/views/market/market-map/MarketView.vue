@@ -30,16 +30,9 @@ const { currentRegion } = storeToRefs(statsStore)
 
 const isAIModalOpen = ref(false)
 const isStatsModalOpen = ref(false)
-const aiMode = ref<'semantic' | 'filter'>('semantic')
 const isShowingAIResults = ref(false) // AI 추천 결과가 지도에 표시 중인지 여부
 
-const openSemanticSearch = () => {
-  aiMode.value = 'semantic'
-  isAIModalOpen.value = true
-}
-
 const openNaturalFilter = () => {
-  aiMode.value = 'filter'
   isAIModalOpen.value = true
 }
 
@@ -346,10 +339,10 @@ const handleResetAIResults = () => {
         </AIFloatingButton>
       </div>
 
-      <!-- AI 검색 모달 -->
+      <!-- AI 검색 모달 (자연어 필터 전용) -->
       <AISearchModal 
         :is-open="isAIModalOpen" 
-        :mode="aiMode" 
+        mode="filter"
         @close="isAIModalOpen = false"
         @search="handleAISearchResult"
         @move-location="handleMoveLocation"
