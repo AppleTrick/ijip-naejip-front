@@ -8,6 +8,7 @@ import * as reportApi from '@/api/aiReportApi'
 import type { AIReportResponse } from '@/api/types'
 import { useMapNavigation } from '@/composables/useMapNavigation'
 import { useMarketStatsStore } from '@/stores/marketStats'
+import { useUiStore } from '@/stores/ui'
 
 const props = defineProps<{
   isOpen: boolean
@@ -17,6 +18,7 @@ const emit = defineEmits(['close', 'move-location'])
 
 const { moveToLocation } = useMapNavigation()
 const statsStore = useMarketStatsStore()
+const uiStore = useUiStore()
 
 const query = ref('')
 const isProcessing = ref(false)
@@ -168,14 +170,20 @@ const getPreviewContent = (markdown: string) => {
 }
 
 const removeReport = async (id: number) => {
-  if (!confirm('정말 이 보고서를 삭제하시겠습니까?')) return
+  const confirmed = await uiStore.showConfirm({
+    title: '보고서 삭제',
+    message: '정말 이 보고서를 삭제하시겠습니까?',
+    type: 'confirm'
+  })
+
+  if (!confirmed) return
   
   try {
     await reportApi.deleteReport(id)
     reports.value = reports.value.filter(r => r.id !== id)
   } catch (error) {
     console.error('Failed to delete report:', error)
-    alert('보고서 삭제에 실패했습니다.')
+    uiStore.showAlert('보고서 삭제에 실패했습니다.', '오류', 'error')
   }
 }
 
@@ -227,7 +235,7 @@ const downloadPDF = async (content: string, title: string = 'AI_부동산_리포
     await html2pdf().from(element).set(opt).save()
   } catch (error) {
     console.error('PDF Download Error:', error)
-    alert('PDF 다운로드 중 오류가 발생했습니다.')
+    uiStore.showAlert('PDF 다운로드 중 오류가 발생했습니다.', '오류', 'error')
   } finally {
     isDownloading.value = false
   }
