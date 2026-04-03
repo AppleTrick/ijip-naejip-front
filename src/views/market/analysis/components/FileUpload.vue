@@ -21,7 +21,7 @@ const handleFileUpload = async (event: Event) => {
     const formData = new FormData()
     formData.append('file', file)
 
-    const response = await http.post('/api/v1/ai/analyze-document', formData, {
+    const response = await http.post('/ai/analyze-document', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

@@ -28,7 +28,7 @@ export interface FavoriteAddRequest {
  */
 export const getFavorites = async (): Promise<FavoriteApartment[]> => {
   try {
-    const response = await http.get('/api/v1/favorites')
+    const response = await http.get('/favorites')
     return response.data.data || []
   } catch (error) {
     console.error('관심 아파트 목록 조회 실패:', error)
@@ -41,7 +41,7 @@ export const getFavorites = async (): Promise<FavoriteApartment[]> => {
  */
 export const addFavorite = async (data: FavoriteAddRequest): Promise<FavoriteApartment | null> => {
   try {
-    const response = await http.post('/api/v1/favorites', data)
+    const response = await http.post('/favorites', data)
     return response.data.data
   } catch (error: any) {
     const message = error.response?.data?.message || '관심 아파트 추가 실패'
@@ -55,7 +55,7 @@ export const addFavorite = async (data: FavoriteAddRequest): Promise<FavoriteApa
  */
 export const removeFavorite = async (id: number): Promise<void> => {
   try {
-    await http.delete(`/api/v1/favorites/${id}`)
+    await http.delete(`/favorites/${id}`)
   } catch (error) {
     console.error('관심 아파트 삭제 실패:', error)
     throw error
@@ -67,7 +67,7 @@ export const removeFavorite = async (id: number): Promise<void> => {
  */
 export const removeFavoriteByAptSeq = async (aptSeq: string): Promise<void> => {
   try {
-    await http.delete(`/api/v1/favorites/apt/${aptSeq}`)
+    await http.delete(`/favorites/apt/${aptSeq}`)
   } catch (error) {
     console.error('관심 아파트 삭제 실패:', error)
     throw error
@@ -80,7 +80,7 @@ export const removeFavoriteByAptSeq = async (aptSeq: string): Promise<void> => {
  */
 export const checkFavorite = async (aptSeq: string, pyung: number): Promise<boolean> => {
   try {
-    const response = await http.get('/api/v1/favorites/check', {
+    const response = await http.get('/favorites/check', {
       params: { aptSeq, pyung }
     })
     return response.data.data || false

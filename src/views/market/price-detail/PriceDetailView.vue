@@ -128,7 +128,7 @@ const analyzeAutomatedLocation = async (aptName: string, address: string) => {
   aiAnalysisResult.value = ''
   
   try {
-    const response = await http.get('/api/v1/ai/location-attraction', {
+    const response = await http.get('/ai/location-attraction', {
       params: { aptName, address },
       signal: currentAbortController.signal
     })

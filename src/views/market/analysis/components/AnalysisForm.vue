@@ -58,7 +58,7 @@ const onFileAnalyzed = (data: any) => {
 const analyze = async () => {
   loading.value = true
   try {
-    const response = await http.post('/api/v1/ai/fraud-check', form.value)
+    const response = await http.post('/ai/fraud-check', form.value)
     result.value = response.data.data
   } catch (e) {
     alert('분석 중 오류가 발생했습니다.')

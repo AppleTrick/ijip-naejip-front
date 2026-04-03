@@ -5,7 +5,7 @@ import type { DongCode, AddressResponse } from '@/api/types'
 // 동코드 API
 export const getSidoList = async (): Promise<DongCode[]> => {
   try {
-    const response = await http.get<CommonResponse<DongCode[]>>('/api/v1/dongcode/sido')
+    const response = await http.get<CommonResponse<DongCode[]>>('/dongcode/sido')
     return response.data.data
   } catch (error) {
     console.error('시도 목록 조회 실패:', error)
@@ -15,7 +15,7 @@ export const getSidoList = async (): Promise<DongCode[]> => {
 
 export const getGugunList = async (sidoName: string): Promise<DongCode[]> => {
   try {
-    const response = await http.get<CommonResponse<DongCode[]>>('/api/v1/dongcode/gugun', {
+    const response = await http.get<CommonResponse<DongCode[]>>('/dongcode/gugun', {
       params: { sido: sidoName }
     })
     return response.data.data
@@ -27,7 +27,7 @@ export const getGugunList = async (sidoName: string): Promise<DongCode[]> => {
 
 export const getDongList = async (sidoName: string, gugunName: string): Promise<DongCode[]> => {
   try {
-    const response = await http.get<CommonResponse<DongCode[]>>('/api/v1/dongcode/dong', {
+    const response = await http.get<CommonResponse<DongCode[]>>('/dongcode/dong', {
       params: { sido: sidoName, gugun: gugunName }
     })
     return response.data.data
@@ -39,7 +39,7 @@ export const getDongList = async (sidoName: string, gugunName: string): Promise<
 
 export const getDongDetail = async (code: string): Promise<DongCode | null> => {
   try {
-    const response = await http.get<CommonResponse<DongCode>>(`/api/v1/dongcode/${code}`)
+    const response = await http.get<CommonResponse<DongCode>>(`/dongcode/${code}`)
     return response.data.data
   } catch (error) {
     console.error('동 상세 정보 조회 실패:', error)
@@ -62,7 +62,7 @@ export interface AreaSearchParams {
 
 export const searchAreaAddress = async (params: AreaSearchParams): Promise<AddressResponse[]> => {
   try {
-    const response = await http.get<CommonResponse<AddressResponse[]>>('/api/v1/area', {
+    const response = await http.get<CommonResponse<AddressResponse[]>>('/area', {
       params
     })
     return response.data.data

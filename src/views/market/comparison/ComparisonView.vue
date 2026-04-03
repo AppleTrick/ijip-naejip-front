@@ -226,7 +226,7 @@ const getAISummary = async () => {
   aiScores.value = []
   
   try {
-    const response = await http.post('/api/v1/ai/comparison-summary', {
+    const response = await http.post('/ai/comparison-summary', {
       myHouse: myHouse.value,
       comparisonList: dataToCompare
     })

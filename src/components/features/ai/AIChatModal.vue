@@ -47,7 +47,7 @@ const handleSend = async () => {
   await scrollToBottom()
 
   try {
-    const response = await http.get('/api/v1/ai/analysis', {
+    const response = await http.get('/ai/analysis', {
       params: {
         areaCode: props.areaCode,
         aptName: props.apartmentName

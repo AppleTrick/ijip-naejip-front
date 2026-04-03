@@ -72,7 +72,7 @@ const handleSearch = async () => {
   await scrollToBottom()
 
   try {
-    const response = await http.post('/api/v1/ai/chat', { message: userMessage })
+    const response = await http.post('/ai/chat', { message: userMessage })
     const { analysis, results } = response.data.data
     
     messages.value.push({

@@ -43,7 +43,7 @@ const handleSearch = async () => {
   isSearching.value = true
   searchResult.value = null 
   try {
-    const endpoint = '/api/v1/ai/parse-filter'
+    const endpoint = '/ai/parse-filter'
     const response = await http.post(endpoint, { query: query.value })
     searchResult.value = response.data.data
     emit('search', response.data.data)

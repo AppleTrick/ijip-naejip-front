@@ -91,7 +91,7 @@ export const getProperties = async (filters?: MarketFilters, bounds?: { minLat: 
  */
 export const getPropertyDetail = async (id: string, pyung: string = 'all'): Promise<Property | undefined> => {
   try {
-    const response = await http.get<CommonResponse<ApartmentDetailResponse>>(`/api/v1/apartments/${id}`, {
+    const response = await http.get<CommonResponse<ApartmentDetailResponse>>(`/apartments/${id}`, {
       params: { pyung }
     })
     const data = response.data.data
