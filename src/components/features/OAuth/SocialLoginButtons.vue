@@ -6,11 +6,11 @@ defineProps<{
 const serverBase = new URL(import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080').origin
 
 const handleKakaoLogin = () => {
-  window.location.href = `${serverBase}/oauth2/authorization/kakao`
+  window.location.href = `${serverBase}/api/v1/oauth2/authorization/kakao`
 }
 
 const handleGoogleLogin = () => {
-  window.location.href = `${serverBase}/oauth2/authorization/google`
+  window.location.href = `${serverBase}/api/v1/oauth2/authorization/google`
 }
 </script>
 
