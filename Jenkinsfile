@@ -16,7 +16,7 @@ pipeline {
         }
         stage('Deploy') {
             steps {
-                sh 'cd /home/ubuntu/project && docker compose up -d --build ijip-front'
+                sh 'cd /home/ubuntu/project && docker compose up -d --build --no-deps ijip-front'
             }
         }
     }
