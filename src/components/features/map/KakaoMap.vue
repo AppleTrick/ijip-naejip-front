@@ -32,6 +32,7 @@ const emit = defineEmits<{
 const mapContainer = ref<HTMLElement | null>(null)
 const map = ref<any>(null)
 const mapMarkers = new Map<string, any>()
+let idleDebounceTimer: ReturnType<typeof setTimeout> | null = null
 
 // --- 마커 관리 ---
 const clearMarkers = () => {
@@ -84,7 +85,7 @@ const renderMarkers = (items: Property[] | undefined) => {
     return
   }
 
-  const getMarkerKey = (item: Property) => `${item.aptSeq}_${item.aptDong || ''}_${item.dealAmount}_${item.excluUseAr}`
+  const getMarkerKey = (item: Property) => `${item.aptSeq}_${item.aptDong || ''}`
   const currentIds = new Set(items.map(getMarkerKey))
 
   // 불필요한 마커 제거
@@ -143,7 +144,10 @@ const initializeMap = (options: { center: { lat: number, lng: number }, level: n
   const mapInstance = new window.kakao.maps.Map(mapContainer.value, mapOptions)
   map.value = markRaw(mapInstance)
   
-  window.kakao.maps.event.addListener(mapInstance, 'idle', emitBounds)
+  window.kakao.maps.event.addListener(mapInstance, 'idle', () => {
+    if (idleDebounceTimer) clearTimeout(idleDebounceTimer)
+    idleDebounceTimer = setTimeout(emitBounds, 300)
+  })
   
   // 초기 레이아웃 보정
   setTimeout(() => {
@@ -180,7 +184,7 @@ onMounted(() => {
   })
 })
 
-watch(() => props.markers, renderMarkers, { deep: true })
+watch(() => props.markers, renderMarkers)
 
 watch(() => props.center, (newCenter) => {
   if (!map.value || !newCenter) return
